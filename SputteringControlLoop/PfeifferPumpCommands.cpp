@@ -17,8 +17,8 @@
  * @brief Turns on the Pfeiffer vacuum pump
  * 
  * Sends a control request to the Pfeiffer pump to turn it off by sending
- * command code "010" with parameter "111111". If VERBOSE mode is enabled,
- * prints a debug message to Serial.
+ * command code PUMP_POWER_PARAM with PUMP_ON_VALUE. If VERBOSE mode is enabled,
+ * prints a debug message to Serial. See header file for param/data definitions.
  * 
  * @param pfeiffer_pump The ArduinoPfeiffer pump object to control
  */
@@ -27,7 +27,7 @@ void turnOnPump(ArduinoPfeiffer pfeiffer_pump)
     #ifdef VERBOSE
         Serial.println("Turning on vacuum pump");
     #endif
-    ASCII_char cmd = pfeiffer_pump.control_request("010", "111111");
+    ASCII_char cmd = pfeiffer_pump.control_request(PUMP_POWER_PARAM, PUMP_ON_VALUE);
     send_command(cmd, RS485Serial_PUMP, pfeiffer_pump);
 }
 
@@ -36,8 +36,8 @@ void turnOnPump(ArduinoPfeiffer pfeiffer_pump)
  * @brief Turns off the Pfeiffer vacuum pump
  * 
  * Sends a control request to the Pfeiffer pump to turn it off by sending
- * command code "010" with parameter "000000". If VERBOSE mode is enabled,
- * prints a debug message to Serial.
+ * command code PUMP_POWER_PARAM with PUMP_OFF_VALUE. If VERBOSE mode is enabled,
+ * prints a debug message to Serial. See header file for param/data definitions.
  * 
  * @param pfeiffer_pump The ArduinoPfeiffer pump object to control
  */
@@ -47,7 +47,7 @@ void turnOffPump(ArduinoPfeiffer pfeiffer_pump)
         Serial.println("Turning off vacuum pump");
     #endif
 
-    ASCII_char cmd = pfeiffer_pump.control_request("010", "000000");
+    ASCII_char cmd = pfeiffer_pump.control_request(PUMP_POWER_PARAM, PUMP_OFF_VALUE);
     send_command(cmd, RS485Serial_PUMP, pfeiffer_pump);
 }
 
@@ -55,7 +55,7 @@ void turnOffPump(ArduinoPfeiffer pfeiffer_pump)
 /**
  * @brief Reads the current pressure measurement from the Pfeiffer vacuum gauge via RS485 serial communication.
  * 
- * This function queries the pressure gauge using command "740", transmits the request,
+ * This function queries the pressure gauge using command PUMP_PRESSURE_PARAM, transmits the request,
  * and processes the response to obtain a pressure measurement. If the read fails
  * (indicated by zero values in both exponent and fraction), an error message is printed.
  * 
@@ -69,7 +69,7 @@ pressure_measurement readPressure(ArduinoPfeiffer pfeiffer_gauge)
         Serial.println("Querying pressure gauge");
     #endif
 
-    ASCII_char cmd = pfeiffer_gauge.data_request("740");
+    ASCII_char cmd = pfeiffer_gauge.data_request(PUMP_PRESSURE_PARAM);
 
     RS485Mode_GAUGE(WRITE);
     RS485Serial_GAUGE.print(cmd);
@@ -113,7 +113,7 @@ void setPumpSpeed(ArduinoPfeiffer pfeiffer_pump, float percent)
     #ifdef VERBOSE
         Serial.println("Setting pump to speed mode");
     #endif
-    ASCII_char cmd2 = pfeiffer_pump.control_request("026", "001");
+    ASCII_char cmd2 = pfeiffer_pump.control_request(PUMP_OPMODE_PARAM, SPEED_MODE_ENABLED_VALUE);
     send_and_process(cmd2, RS485Serial_PUMP, pfeiffer_pump);
 
 
@@ -126,7 +126,7 @@ void setPumpSpeed(ArduinoPfeiffer pfeiffer_pump, float percent)
         Serial.println(percent);
     #endif
 
-    ASCII_char cmd = pfeiffer_pump.control_request("707", data);
+    ASCII_char cmd = pfeiffer_pump.control_request(PUMP_SPEED_SET_PARAM, data);
     send_command(cmd, RS485Serial_PUMP, pfeiffer_pump);
 }
 
