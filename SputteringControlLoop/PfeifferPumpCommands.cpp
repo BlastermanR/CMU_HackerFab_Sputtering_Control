@@ -27,6 +27,7 @@ void turnOnPump(ArduinoPfeiffer pfeiffer_pump, RS485Device& pump_serial_wrapper)
     #ifdef VERBOSE
         Serial.println("Turning on vacuum pump");
     #endif
+    // TODO: set turbo pump to on (should default)
     ASCII_char cmd = pfeiffer_pump.control_request(PUMP_POWER_PARAM, PUMP_ON_VALUE);
     send_command(cmd, pump_serial_wrapper, pfeiffer_pump);
 }
@@ -128,6 +129,32 @@ void setPumpSpeed(ArduinoPfeiffer pfeiffer_pump, RS485Device& pump_serial_wrappe
 
     ASCII_char cmd = pfeiffer_pump.control_request(PUMP_SPEED_SET_PARAM, data);
     send_command(cmd, pump_serial_wrapper, pfeiffer_pump);
+}
+
+
+/**
+ * @brief Requests and prints the current pump speed from a Pfeiffer pump.
+ *
+ * Sends a data request command to retrieve the actual pump speed in Hz,
+ * transmits it via RS485, and reads the response to process the pump speed data.
+ *
+ * @param pfeiffer_pump Reference to the ArduinoPfeiffer pump object used to
+ *                      generate the speed request command.
+ * @param pump_serial_wrapper Reference to the RS485Device wrapper managing
+ *                            serial communication with the pump.
+ * @see readAndProcess()
+ */
+void printPumpSpeed(ArduinoPfeiffer& pfeiffer_pump, RS485Device& pump_serial_wrapper)
+{
+    ASCII_char cmd = pfeiffer_pump.data_request(PUMP_SPEED_HZ_ACT_PARAM);
+
+    pump_serial_wrapper.setWriteMode();
+    pump_serial_wrapper.port().print(cmd);
+    pump_serial_wrapper.setReadMode();
+    delay(100);
+    pfeiffer_pump.free_message(cmd);
+
+    readAndProcess(pump_serial_wrapper.port());
 }
 
 

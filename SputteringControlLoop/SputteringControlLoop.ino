@@ -62,10 +62,23 @@ void testVacuum()
     Serial.print("Current Pressure: ");
     printPressureReading(reading);
 
+    delay(1000);
+
     setPumpSpeed(pfeiffer_pump, pump_serial_wrapper, 21);
-    delay(10000);
+
+    for(int i = 0; i < 10; i++)
+    {
+        printPumpSpeed(pfeiffer_pump, pump_serial_wrapper);
+        delay(1000);
+    }
+
     setPumpSpeed(pfeiffer_pump, pump_serial_wrapper, 99);
-    delay(10000);
+
+    for(int i = 0; i < 10; i++)
+    {
+        printPumpSpeed(pfeiffer_pump, pump_serial_wrapper);
+        delay(1000);
+    }
 
     turnOffPump(pfeiffer_pump, pump_serial_wrapper);
     delay(5000);

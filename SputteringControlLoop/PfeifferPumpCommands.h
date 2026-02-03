@@ -13,6 +13,8 @@ pressure_measurement readPressure(ArduinoPfeiffer pfeiffer_gauge, RS485Device& g
 
 void setPumpSpeed(ArduinoPfeiffer pfeiffer_pump, RS485Device& pump_serial_wrapper, float percent);
 
+void printPumpSpeed(ArduinoPfeiffer& pfeiffer_pump, RS485Device& pump_serial_wrapper);
+
 void send_command(ASCII_char command, RS485Device& serial, ArduinoPfeiffer& device);
 
 void send_and_process(ASCII_char command, RS485Device& serial, ArduinoPfeiffer& device);
@@ -26,6 +28,7 @@ void send_and_process(ASCII_char command, RS485Device& serial, ArduinoPfeiffer& 
 // Core parameters
 // ----------------------------
 #define PUMP_POWER_PARAM          "010"  // Pumping station ON/OFF (backing + turbo)
+#define PUMP_TURBO_ENABLE         "023"  // Turbopump motor ON/OFF
 #define PUMP_OPMODE_PARAM         "026"  // Speed setting mode (enable % speed control)
 #define PUMP_SPEED_SET_PARAM      "707"  // Speed setpoint in % of nominal
 #define PUMP_SPEED_HZ_SET_PARAM   "308"  // Set rotation speed (Hz) readback
