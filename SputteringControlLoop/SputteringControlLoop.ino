@@ -9,6 +9,7 @@
 #include "SerialComms.h"
 #include "ArduinoPfeiffer.h"
 #include "PfeifferPumpCommands.h"
+#include "AlicatMfcCommands.h"
 
 // Instantiate two Pfeiffer device handlers: one for the pump, one for the gauge
 ArduinoPfeiffer pfeiffer_pump((ASCII_char)"001");
@@ -27,6 +28,7 @@ void setup()
     delay(100);  // Short delay to allow Serial to initialize
 
     testVacuum();
+    testAlicat();
 }
 
 
@@ -64,6 +66,39 @@ void testVacuum()
     Serial.println("Vacuum pump test complete!");
 }
 
+
+/**
+ * Run a basic procedure to test the Alicat MFC by setting the control to
+ * different values before reverting to 0.
+ */
+void testAlicat()
+{
+    Serial.println("Beginning alicat test");
+
+    float test_setting = 10;
+
+    Serial.print("Setting sccm to ");
+    Serial.println(test_setting);
+
+    setAlicatPressure(test_setting);
+    delay(5000);
+
+    test_setting = 5;
+
+    Serial.print("Setting sccm to ");
+    Serial.println(test_setting);
+
+    setAlicatPressure(test_setting);
+
+    test_setting = 0;
+
+    Serial.print("Setting sccm to ");
+    Serial.println(test_setting);
+
+    setAlicatPressure(test_setting);
+
+    Serial.println("Done testing alicat");
+}
 
 /**
  * @brief helper function to print a pressure reading
