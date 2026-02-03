@@ -1,63 +1,14 @@
 #include "SerialComms.h"
 #include "Pressure.h"
-#include <Arduino.h>
-
-// RS485 driver enable and receiver enable pins for pump and gauge
-#define SerialDEpin_PUMP 5
-#define SerialREpin_PUMP 4
-#define SerialDEpin_GAUGE 9
-#define SerialREpin_GAUGE 8
 
 // ASCII carriage return used as message delimiter
 const char endChar = '\r';
-
-// Define software serial ports for each device
-SoftwareSerial RS485Serial_PUMP(6, 7);     // Pump: RO, DI
-SoftwareSerial RS485Serial_GAUGE(10, 11);  // Gauge: RO, DI
-SoftwareSerial ALICATSerial_MFC(13, 12);   // MFC: RX, TX
-
-// RS485 mode flags
-#define READ 0
-#define WRITE 1
 
 // Buffer for incoming messages
 #define sentenceSize 128
 char sentence[sentenceSize];
 int sentenceIndex = 0;
 
-// Initializes all serial ports used in the system
-void initializeSerials() {
-  RS485Serial_PUMP.begin(9600);
-  delay(30);
-  RS485Serial_GAUGE.begin(9600);
-  delay(30);
-  ALICATSerial_MFC.begin(9600);
-  Serial.begin(9600);
-}
-
-// Configures the RS485 direction control pins
-void initializeRS485Pins() {
-  pinMode(SerialDEpin_PUMP, OUTPUT);
-  pinMode(SerialREpin_PUMP, OUTPUT);
-  pinMode(SerialDEpin_GAUGE, OUTPUT);
-  pinMode(SerialREpin_GAUGE, OUTPUT);
-
-  // Default mode is read
-  RS485Mode_PUMP(READ);
-  RS485Mode_GAUGE(READ);
-}
-
-// Set RS485 mode for the pump
-void RS485Mode_PUMP(bool mode) {
-  digitalWrite(SerialDEpin_PUMP, mode);
-  digitalWrite(SerialREpin_PUMP, mode);
-}
-
-// Set RS485 mode for the gauge
-void RS485Mode_GAUGE(bool mode) {
-  digitalWrite(SerialDEpin_GAUGE, mode);
-  digitalWrite(SerialREpin_GAUGE, mode);
-}
 
 // Reads a complete message from the serial port and processes it
 pressure_measurement readAndProcess(SoftwareSerial &ss) {

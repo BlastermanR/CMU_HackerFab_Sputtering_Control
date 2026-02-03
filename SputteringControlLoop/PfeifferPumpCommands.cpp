@@ -22,13 +22,13 @@
  * 
  * @param pfeiffer_pump The ArduinoPfeiffer pump object to control
  */
-void turnOnPump(ArduinoPfeiffer pfeiffer_pump)
+void turnOnPump(ArduinoPfeiffer pfeiffer_pump, RS485Device& pump_serial_wrapper)
 {
     #ifdef VERBOSE
         Serial.println("Turning on vacuum pump");
     #endif
     ASCII_char cmd = pfeiffer_pump.control_request(PUMP_POWER_PARAM, PUMP_ON_VALUE);
-    send_command(cmd, RS485Serial_PUMP, pfeiffer_pump);
+    send_command(cmd, pump_serial_wrapper, pfeiffer_pump);
 }
 
 
@@ -41,14 +41,14 @@ void turnOnPump(ArduinoPfeiffer pfeiffer_pump)
  * 
  * @param pfeiffer_pump The ArduinoPfeiffer pump object to control
  */
-void turnOffPump(ArduinoPfeiffer pfeiffer_pump)
+void turnOffPump(ArduinoPfeiffer pfeiffer_pump, RS485Device& pump_serial_wrapper)
 {
     #ifdef VERBOSE
         Serial.println("Turning off vacuum pump");
     #endif
 
     ASCII_char cmd = pfeiffer_pump.control_request(PUMP_POWER_PARAM, PUMP_OFF_VALUE);
-    send_command(cmd, RS485Serial_PUMP, pfeiffer_pump);
+    send_command(cmd, pump_serial_wrapper, pfeiffer_pump);
 }
 
 
@@ -62,22 +62,22 @@ void turnOffPump(ArduinoPfeiffer pfeiffer_pump)
  * @param pfeiffer_gauge An ArduinoPfeiffer object configured for gauge communication.
  * @return the pressure measurement as a pressure_measurement struct. Error is indicated by pressure being 0
  */
-pressure_measurement readPressure(ArduinoPfeiffer pfeiffer_gauge)
+pressure_measurement readPressure(ArduinoPfeiffer pfeiffer_gauge, RS485Device& gauge_serial_wrapper)
 {
-    RS485Serial_GAUGE.listen();
+    gauge_serial_wrapper.port().listen();
     #ifdef VERBOSE
         Serial.println("Querying pressure gauge");
     #endif
 
     ASCII_char cmd = pfeiffer_gauge.data_request(PUMP_PRESSURE_PARAM);
 
-    RS485Mode_GAUGE(WRITE);
-    RS485Serial_GAUGE.print(cmd);
-    RS485Mode_GAUGE(READ);
+    gauge_serial_wrapper.setWriteMode();
+    gauge_serial_wrapper.port().print(cmd);
+    gauge_serial_wrapper.setReadMode();
     delay(100);
     pfeiffer_gauge.free_message(cmd);
 
-    pressure_measurement measured_pressure = readAndProcess(RS485Serial_GAUGE);
+    pressure_measurement measured_pressure = readAndProcess(gauge_serial_wrapper.port());
 
     // Handle failed pressure reading
     if (measured_pressure.exp == 0.0 && measured_pressure.frac == 0.0) {
@@ -100,7 +100,7 @@ pressure_measurement readPressure(ArduinoPfeiffer pfeiffer_gauge)
  *                The value is converted to a 6-digit format with two decimal places
  *                (e.g., 50.5% becomes 005050).
  */
-void setPumpSpeed(ArduinoPfeiffer pfeiffer_pump, float percent)
+void setPumpSpeed(ArduinoPfeiffer pfeiffer_pump, RS485Device& pump_serial_wrapper, float percent)
 {
     // TODO: confirm pump may only be set betwee 20-100
     // check value is in valid range
@@ -114,7 +114,7 @@ void setPumpSpeed(ArduinoPfeiffer pfeiffer_pump, float percent)
         Serial.println("Setting pump to speed mode");
     #endif
     ASCII_char cmd2 = pfeiffer_pump.control_request(PUMP_OPMODE_PARAM, SPEED_MODE_ENABLED_VALUE);
-    send_and_process(cmd2, RS485Serial_PUMP, pfeiffer_pump);
+    send_and_process(cmd2, pump_serial_wrapper, pfeiffer_pump);
 
 
     // now set the speed parameter 707
@@ -127,7 +127,7 @@ void setPumpSpeed(ArduinoPfeiffer pfeiffer_pump, float percent)
     #endif
 
     ASCII_char cmd = pfeiffer_pump.control_request(PUMP_SPEED_SET_PARAM, data);
-    send_command(cmd, RS485Serial_PUMP, pfeiffer_pump);
+    send_command(cmd, pump_serial_wrapper, pfeiffer_pump);
 }
 
 
@@ -139,15 +139,15 @@ void setPumpSpeed(ArduinoPfeiffer pfeiffer_pump, float percent)
  * cleans up the associated message buffer.
  * 
  * @param command The ASCII character command to send to the pump.
- * @param serial Reference to the SoftwareSerial object for communication.
+ * @param serial Reference to the RS485Device object for communication.
  * @param device Reference to the ArduinoPfeiffer device object for memory management.
  */
-void send_command(ASCII_char command, SoftwareSerial& serial, ArduinoPfeiffer& device)
+void send_command(ASCII_char command, RS485Device& serial_wrapper, ArduinoPfeiffer& device)
 {
-    serial.listen();
-    RS485Mode_PUMP(WRITE); // FIXME:
-    serial.print(command);
-    RS485Mode_PUMP(READ); // FIXME:
+    serial_wrapper.port().listen();
+    serial_wrapper.setWriteMode();
+    serial_wrapper.port().print(command);
+    serial_wrapper.setReadMode();
     delay(100); // Allow time for device to respond
     device.free_message(command); // Free memory for command
 }
@@ -164,14 +164,13 @@ void send_command(ASCII_char command, SoftwareSerial& serial, ArduinoPfeiffer& d
  * @param serial Reference to the SoftwareSerial object for communication.
  * @param device Reference to the ArduinoPfeiffer device object for memory management.
  */
-
-void send_and_process(ASCII_char command, SoftwareSerial& serial, ArduinoPfeiffer& device)
+void send_and_process(ASCII_char command, RS485Device& serial_wrapper, ArduinoPfeiffer& device)
 {
-  serial.listen();
-  RS485Mode_PUMP(WRITE); // FIXME:
-  serial.print(command);
-  RS485Mode_PUMP(READ); // FIXME:
+  serial_wrapper.port().listen();
+  serial_wrapper.setWriteMode();
+  serial_wrapper.port().print(command);
+  serial_wrapper.setReadMode();
   delay(100); // Allow time for device to respond
-  readAndProcess(serial);
+  readAndProcess(serial_wrapper.port());
   device.free_message(command); // Free memory for command
 }

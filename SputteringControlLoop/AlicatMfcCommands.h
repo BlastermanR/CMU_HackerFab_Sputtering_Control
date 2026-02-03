@@ -2,4 +2,4 @@
 #include "SerialComms.h"
 #include <Arduino.h>
 
-void setAlicatPressure(float desired_pressure);
+void setAlicatPressure(SoftwareSerial& serialPort, float sccm);

@@ -5,17 +5,17 @@
 #include "ArduinoPfeiffer.h"
 #include <Arduino.h>
 
-void turnOnPump(ArduinoPfeiffer pfeiffer_pump);
+void turnOnPump(ArduinoPfeiffer pfeiffer_pump, RS485Device& pump_serial_wrapper);
 
-void turnOffPump(ArduinoPfeiffer pfeiffer_pump);
+void turnOffPump(ArduinoPfeiffer pfeiffer_pump, RS485Device& pump_serial_wrapper);
 
-pressure_measurement readPressure(ArduinoPfeiffer pfeiffer_gauge);
+pressure_measurement readPressure(ArduinoPfeiffer pfeiffer_gauge, RS485Device& gauge_serial_wrapper);
 
-void setPumpSpeed(ArduinoPfeiffer pfeiffer_pump, float percent);
+void setPumpSpeed(ArduinoPfeiffer pfeiffer_pump, RS485Device& pump_serial_wrapper, float percent);
 
-void send_command(ASCII_char command, SoftwareSerial& serial, ArduinoPfeiffer& device);
+void send_command(ASCII_char command, RS485Device& serial, ArduinoPfeiffer& device);
 
-void send_and_process(ASCII_char command, SoftwareSerial& serial, ArduinoPfeiffer& device);
+void send_and_process(ASCII_char command, RS485Device& serial, ArduinoPfeiffer& device);
 
 // --------------------------------------------------------
 // WARNING - THE FOLLOWING PARAMETERS WERE UNAPOLOGETICALLY

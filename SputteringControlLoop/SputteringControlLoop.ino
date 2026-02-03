@@ -2,7 +2,6 @@
  * This module provides a testing framework for communicating with and controlling
  * Alicat Mass Flow Controllers (MFCs) and Pfeiffer Vacuum pump/gauge device.
  * 
- * TODO: Make SerialComms.h/cpp modular
  * TODO: 
  */
 #include "config.h"
@@ -10,6 +9,14 @@
 #include "ArduinoPfeiffer.h"
 #include "PfeifferPumpCommands.h"
 #include "AlicatMfcCommands.h"
+
+// Create serial devices for pump/gauge
+RS485Device pump_serial_wrapper(/*rx=*/6, /*tx=*/7,     // Pump: RO, DI
+                                /*de=*/5, /*re=*/4);    // Driver/Receiver enable
+RS485Device gauge_serial_wrapper(/*rx=*/10, /*tx=*/11,  // Gauge: RO, DI
+                                 /*de=*/9,  /*re=*/8);  // Driver/Receiver enable
+SoftwareSerial argon_mfc_serial(13, 12);                // MFC: RX, TX
+// TODO: add oxygen mfc
 
 // Instantiate two Pfeiffer device handlers: one for the pump, one for the gauge
 ArduinoPfeiffer pfeiffer_pump((ASCII_char)"001");
@@ -22,7 +29,6 @@ ArduinoPfeiffer pfeiffer_gauge((ASCII_char)"002");
 void setup()
 {
     initializeSerials();         // Set up hardware serial ports
-    initializeRS485Pins();       // Configure RS485 direction control pins
     // TODO: attach interrupt
 
     delay(100);  // Short delay to allow Serial to initialize
@@ -49,19 +55,19 @@ void testVacuum()
 {
     Serial.println("Beginning vacuum pump test");
 
-    turnOnPump(pfeiffer_pump);
+    turnOnPump(pfeiffer_pump, pump_serial_wrapper);
     delay(10000); // 10s delay
 
-    pressure_measurement reading = readPressure(pfeiffer_gauge);
+    pressure_measurement reading = readPressure(pfeiffer_gauge, gauge_serial_wrapper);
     Serial.print("Current Pressure: ");
     printPressureReading(reading);
 
-    setPumpSpeed(pfeiffer_pump, 21);
+    setPumpSpeed(pfeiffer_pump, pump_serial_wrapper, 21);
     delay(10000);
-    setPumpSpeed(pfeiffer_pump, 99);
+    setPumpSpeed(pfeiffer_pump, pump_serial_wrapper, 99);
     delay(10000);
 
-    turnOffPump(pfeiffer_pump);
+    turnOffPump(pfeiffer_pump, pump_serial_wrapper);
     delay(5000);
     Serial.println("Vacuum pump test complete!");
 }
@@ -80,7 +86,7 @@ void testAlicat()
     Serial.print("Setting sccm to ");
     Serial.println(test_setting);
 
-    setAlicatPressure(test_setting);
+    setAlicatPressure(argon_mfc_serial, test_setting);
     delay(5000);
 
     test_setting = 5;
@@ -88,14 +94,14 @@ void testAlicat()
     Serial.print("Setting sccm to ");
     Serial.println(test_setting);
 
-    setAlicatPressure(test_setting);
+    setAlicatPressure(argon_mfc_serial, test_setting);
 
     test_setting = 0;
 
     Serial.print("Setting sccm to ");
     Serial.println(test_setting);
 
-    setAlicatPressure(test_setting);
+    setAlicatPressure(argon_mfc_serial, test_setting);
 
     Serial.println("Done testing alicat");
 }
@@ -115,4 +121,24 @@ void printPressureReading(pressure_measurement reading)
     Serial.print(reading.frac);
     Serial.print("e");
     Serial.println(reading.exp);
+}
+
+
+/**
+ * @brief Initializes all serial communications for the sputtering control system.
+ * 
+ * Sets up serial connections for the pump controller, pressure gauge, argon mass flow controller,
+ * and the main Serial interface. Each serial connection is initialized at 9600 baud.
+ * 
+ * The Pfeiffer vacuum pump and gauge use a RS485Device wrapper, which combines the SoftwareSerial
+ * port with the RS485 mode pins. The MFCs use SoftwareSerial directly.
+ */
+void initializeSerials() {
+  pump_serial_wrapper.begin(9600);
+  delay(30);
+  gauge_serial_wrapper.begin(9600);
+  delay(30);
+  argon_mfc_serial.begin(9600);
+  // TODO: add oxygen mfc
+  Serial.begin(9600);
 }

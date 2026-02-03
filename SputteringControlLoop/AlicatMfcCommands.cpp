@@ -14,7 +14,7 @@
  * 
  * @param sccm The desired setpoint value in Standard Cubic Centimeters per Minute (SCCM).
  */
-void setAlicatPressure(float sccm)
+void setAlicatPressure(SoftwareSerial& serialPort, float sccm)
 {
     #ifdef VERBOSE
         Serial.print("Setting Alicat to ");
@@ -22,8 +22,8 @@ void setAlicatPressure(float sccm)
     #endif
         
     String command = "AS " + String(sccm) + "\r";
-    ALICATSerial_MFC.listen();
-    ALICATSerial_MFC.print(command);
+    serialPort.listen();
+    serialPort.print(command);
     delay(100);
-    readAndProcess(ALICATSerial_MFC);
+    readAndProcess(serialPort);
 }
