@@ -1,0 +1,177 @@
+/**
+ * This file implements command functions for controlling a Pfeiffer vacuum pump
+ * via RS485 serial communication. It provides high-level functions to turn the
+ * pump on/off and send commands to the pump while managing communication modes
+ * and device responses.
+ * 
+ * @note Requires RS485Serial_PUMP to be initialized for communication
+ * 
+ * @author HackerFab Supttering Control Automation Team
+ * @date Spring 2026
+ */
+
+#include "PfeifferPumpCommands.h"
+
+
+/**
+ * @brief Turns on the Pfeiffer vacuum pump
+ * 
+ * Sends a control request to the Pfeiffer pump to turn it off by sending
+ * command code "010" with parameter "111111". If VERBOSE mode is enabled,
+ * prints a debug message to Serial.
+ * 
+ * @param pfeiffer_pump The ArduinoPfeiffer pump object to control
+ */
+void turnOnPump(ArduinoPfeiffer pfeiffer_pump)
+{
+    #ifdef VERBOSE
+        Serial.println("Turning on vacuum pump");
+    #endif
+    ASCII_char cmd = pfeiffer_pump.control_request("010", "111111");
+    send_command(cmd, RS485Serial_PUMP, pfeiffer_pump);
+}
+
+
+/**
+ * @brief Turns off the Pfeiffer vacuum pump
+ * 
+ * Sends a control request to the Pfeiffer pump to turn it off by sending
+ * command code "010" with parameter "000000". If VERBOSE mode is enabled,
+ * prints a debug message to Serial.
+ * 
+ * @param pfeiffer_pump The ArduinoPfeiffer pump object to control
+ */
+void turnOffPump(ArduinoPfeiffer pfeiffer_pump)
+{
+    #ifdef VERBOSE
+        Serial.println("Turning off vacuum pump");
+    #endif
+
+    ASCII_char cmd = pfeiffer_pump.control_request("010", "000000");
+    send_command(cmd, RS485Serial_PUMP, pfeiffer_pump);
+}
+
+
+/**
+ * @brief Reads the current pressure measurement from the Pfeiffer vacuum gauge via RS485 serial communication.
+ * 
+ * This function queries the pressure gauge using command "740", transmits the request,
+ * and processes the response to obtain a pressure measurement. If the read fails
+ * (indicated by zero values in both exponent and fraction), an error message is printed.
+ * 
+ * @param pfeiffer_gauge An ArduinoPfeiffer object configured for gauge communication.
+ * @return the pressure measurement as a pressure_measurement struct. Error is indicated by pressure being 0
+ */
+pressure_measurement readPressure(ArduinoPfeiffer pfeiffer_gauge)
+{
+    RS485Serial_GAUGE.listen();
+    #ifdef VERBOSE
+        Serial.println("Querying pressure gauge");
+    #endif
+
+    ASCII_char cmd = pfeiffer_gauge.data_request("740");
+
+    RS485Mode_GAUGE(WRITE);
+    RS485Serial_GAUGE.print(cmd);
+    RS485Mode_GAUGE(READ);
+    delay(100);
+    pfeiffer_gauge.free_message(cmd);
+
+    pressure_measurement measured_pressure = readAndProcess(RS485Serial_GAUGE);
+
+    // Handle failed pressure reading
+    if (measured_pressure.exp == 0.0 && measured_pressure.frac == 0.0) {
+        Serial.println("ERROR - Failed Pressure Read");
+    }
+
+    return measured_pressure;
+}
+
+
+/**
+ * @brief Sets the pump speed to a specified percentage.
+ * 
+ * This function configures the Pfeiffer pump to operate in speed control mode
+ * and then sets the pump speed to the desired percentage. Ensure the pump is properly
+ * initialized and RS485 communication is active before calling this function.
+ * 
+ * @param pfeiffer_pump The ArduinoPfeiffer pump object to control.
+ * @param percent The desired pump speed as a percentage (20-100).
+ *                The value is converted to a 6-digit format with two decimal places
+ *                (e.g., 50.5% becomes 005050).
+ */
+void setPumpSpeed(ArduinoPfeiffer pfeiffer_pump, float percent)
+{
+    // TODO: confirm pump may only be set betwee 20-100
+    // check value is in valid range
+    if ((percent < 20) || (percent > 100))
+    {
+        Serial.println("ERROR - pump speed may only be set between 20% and 100%");
+        return;
+    }
+    // first we set the pump to speed control mode with param 026
+    #ifdef VERBOSE
+        Serial.println("Setting pump to speed mode");
+    #endif
+    ASCII_char cmd2 = pfeiffer_pump.control_request("026", "001");
+    send_and_process(cmd2, RS485Serial_PUMP, pfeiffer_pump);
+
+
+    // now set the speed parameter 707
+    char data[7];
+    sprintf(data, "%06d", (int)(percent * 100));
+
+    #ifdef VERBOSE
+        Serial.print("Setting pump speed to ");
+        Serial.println(percent);
+    #endif
+
+    ASCII_char cmd = pfeiffer_pump.control_request("707", data);
+    send_command(cmd, RS485Serial_PUMP, pfeiffer_pump);
+}
+
+
+/**
+ * @brief Sends a command to the Pfeiffer pump via RS485 serial communication.
+ * 
+ * This function configures the RS485 transceiver for write mode, transmits an ASCII
+ * command character to the pump, switches to read mode to listen for responses, and
+ * cleans up the associated message buffer.
+ * 
+ * @param command The ASCII character command to send to the pump.
+ * @param serial Reference to the SoftwareSerial object for communication.
+ * @param device Reference to the ArduinoPfeiffer device object for memory management.
+ */
+void send_command(ASCII_char command, SoftwareSerial& serial, ArduinoPfeiffer& device)
+{
+    serial.listen();
+    RS485Mode_PUMP(WRITE); // FIXME:
+    serial.print(command);
+    RS485Mode_PUMP(READ); // FIXME:
+    delay(100); // Allow time for device to respond
+    device.free_message(command); // Free memory for command
+}
+
+/**
+ * @brief Sends a command to the Pfeiffer pump and processes the response
+ * 
+ * This function configures the RS485 transceiver for write mode, transmits an ASCII
+ * command character to the pump, switches to read mode to listen for responses, 
+ * processes the response with SerialComms::readAndProcess, and cleans up the associated
+ * message buffer.
+ * 
+ * @param command The ASCII character command to send to the pump.
+ * @param serial Reference to the SoftwareSerial object for communication.
+ * @param device Reference to the ArduinoPfeiffer device object for memory management.
+ */
+
+void send_and_process(ASCII_char command, SoftwareSerial& serial, ArduinoPfeiffer& device)
+{
+  serial.listen();
+  RS485Mode_PUMP(WRITE); // FIXME:
+  serial.print(command);
+  RS485Mode_PUMP(READ); // FIXME:
+  delay(100); // Allow time for device to respond
+  readAndProcess(serial);
+  device.free_message(command); // Free memory for command
+}
