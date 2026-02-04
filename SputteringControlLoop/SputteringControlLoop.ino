@@ -108,6 +108,7 @@ void testAlicat()
     Serial.println(test_setting);
 
     setAlicatPressure(argon_mfc_serial, test_setting);
+    delay(5000);
 
     test_setting = 0;
 
