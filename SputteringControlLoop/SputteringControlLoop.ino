@@ -10,6 +10,8 @@
 #include "PfeifferPumpCommands.h"
 #include "AlicatMfcCommands.h"
 
+#define interruptPin 2
+
 // Create serial devices for pump/gauge
 RS485Device pump_serial_wrapper(/*rx=*/6, /*tx=*/7,     // Pump: RO, DI
                                 /*de=*/5, /*re=*/4);    // Driver/Receiver enable
@@ -22,6 +24,8 @@ SoftwareSerial argon_mfc_serial(13, 12);                // MFC: RX, TX
 ArduinoPfeiffer pfeiffer_pump((ASCII_char)"001");
 ArduinoPfeiffer pfeiffer_gauge((ASCII_char)"002");
 
+unsigned long last_interrupt_time = 0; // global to debounce interrupt
+
 /**
  * One-time setup function initializes the serial communication and runs basic
  * tests for the vacuum pump and alicat MFC
@@ -29,7 +33,7 @@ ArduinoPfeiffer pfeiffer_gauge((ASCII_char)"002");
 void setup()
 {
     initializeSerials();         // Set up hardware serial ports
-    // TODO: attach interrupt
+    setupInterrupt();
 
     delay(100);  // Short delay to allow Serial to initialize
 
@@ -155,4 +159,66 @@ void initializeSerials() {
   argon_mfc_serial.begin(9600);
   // TODO: add oxygen mfc
   Serial.begin(9600);
+}
+
+
+/*
+ * =============================================
+ *              EMERGENCY SHUTOFF
+ * =============================================
+ */
+
+
+/**
+ * @brief shut off all equipment
+ * 
+ * this function shuts off vacuum pump and sets MFCs to zero
+ */
+void shutoffAll()
+{
+    turnOffPump(pfeiffer_pump, pump_serial_wrapper);
+
+    setAlicatPressure(argon_mfc_serial, 0);
+    // TODO: oxygen mfc
+    // TODO: set state to IDLE
+
+    Serial.println("Shutoff complete");
+}
+
+
+/**
+ * @brief interrupt to trigger emergency shutoff
+ * 
+ * Interrupt triggers the shutoffAll function. This can only be triggered every 200ms
+ * to help debounce.
+ */
+void emergencyInterrupt()
+{
+    unsigned long interrupt_time = millis();
+
+    // Debounce: only trigger if 200ms has passed since last trigger
+    if (interrupt_time - last_interrupt_time > 200) {
+        Serial.println("EMERGENCY STOP TRIGGERED");
+        shutoffAll();
+    }
+
+    last_interrupt_time = interrupt_time;
+}
+
+
+/**
+ * @brief set up pin and attach interrupt for emergency stop
+ * 
+ * sets interruptPin to INPUT_PULLUP so that an interrupt is triggered by
+ * tying interruptPin to GND
+ */
+void setupInterrupt()
+{
+    // Attach interrupt for manual shutdown button
+    pinMode(interruptPin, INPUT_PULLUP);
+    attachInterrupt(
+        digitalPinToInterrupt(interruptPin),
+        emergencyInterrupt,
+        FALLING
+    );
 }
