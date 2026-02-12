@@ -22,7 +22,8 @@ The system enables programmatic control of vacuum pressure, pump speed, and proc
   - MVP 030-3 DC diaphragm backing pump
   - TC 110 electronic drive unit (RS485 control)
 
-- **Pressure Gauge**: [Pfeiffer MPT 200 Pirani/Cold Cathode Combination Gauge](https://www.idealvac.com/en-us/Pfeiffer-PiraniCold-Cathode-Combination-MPT-200-Gauge-RS-485-analog-0-10V-KF25-PN:-PT-R40-141/pp/P107321?srsltid=AfmBOooRa2jCMva1dUtlUuyUUF6zqvpxA4Uad86e-j1NAPchPNNiyPaS)
+- **Pressure Gauge**: [Pfeiffer MPT 200 Pirani/Cold Cathode Combination Gauge](https://www.idealvac.com/en-us/Pfeiffer-PiraniCold-Cathode-Combination-MPT-200-Gauge-RS-485-analog-0-10V-KF25-PN:-PT-R40-141/pp/P107321?srsltid=AfmBOooRa2jCMva1dUtlUuyUUF6zqvpxA4Uad86e-j1NAPchPNNiyPaS), 
+[Supplement for AR (Analog Relay) model](https://www.ajvs.com/library/Operating_instructions_DigiLine_Gauges_Analog_Relay_Supplementary_Information.pdf)
   - RS485 digital interface
   - KF25 flange
   - Range: 5×10⁻⁹ to 1500 mbar
@@ -158,6 +159,13 @@ The current sketch runs basic tests on startup:
 
 Monitor via Serial at **9600 baud** to observe test output.
 
+## Note About Vacuum Gauge
+
+The vacuum gauge requires a 24V (15-30V) power supply. In the standard setup (without our Arduino controller) this is provided by the DCU 002 display unit on the pumping station through the Analog/Relay (AR) connector. When the TC110 pump controller is disconnected from the DCU and connected to the Arduino instead, the DCU stops supplying power to the vacuum gauge. 
+
+To address this, the current setup uses an independent 24V DC power supply through the RS485 connector, which is the same connector delivering data to/from the Arduino controller. See [here](https://www.idealvac.com/files/manuals/PfeifferGauge_MPT200_1.pdf?srsltid=AfmBOoqIABgjTc9pMBhfkzEYb7rgEli5OjxEf-cCKo-E0ecm6vuvaReq#G6927329) for the RS485 connector pinout.
+
+
 ## Documentation
 
 ### Pfeiffer Vacuum Protocol
@@ -168,6 +176,7 @@ Consult the following manuals (available from [Pfeiffer Vacuum download center](
 - **TC 110 Electronic Drive Unit Manual** - [RS485 parameter reference](https://www.idealvac.com/files/brochures/Pfeiffer_TC_110_Operating_Instructions.pdf)
 - **HiPace 300 Operating Instructions** - [Turbo pump specifications](https://www.idealvac.com/files/manuals/Pfeiffer_HiPace300_Manaul.pdf)
 - **MPT 200 Operating Instructions** - [Vacuum gauge specifications](https://www.idealvac.com/files/manuals/Pfeiffer_DigiLine_MPT_200_Digital_Pirani_and_Cold_Cathode_Gauge_Operating_Instructions.pdf)
+\- [Supplement for AR (Analog Relay) model](https://www.ajvs.com/library/Operating_instructions_DigiLine_Gauges_Analog_Relay_Supplementary_Information.pdf)
 - **Pfeiffer Vacuum RS485 Protocol Specification** - [Telegram format details](https://www.idealvac.com/files/brochures/Pfeiffer_TC_110_Operating_Instructions.pdf#G6923033)
 
 
