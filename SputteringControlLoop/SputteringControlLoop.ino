@@ -2,7 +2,6 @@
  * This module provides a testing framework for communicating with and controlling
  * Alicat Mass Flow Controllers (MFCs) and Pfeiffer Vacuum pump/gauge device.
  * 
- * TODO: 
  */
 #include "config.h"
 #include "SerialComms.h"

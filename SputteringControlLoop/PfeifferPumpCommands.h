@@ -39,7 +39,7 @@ void send_and_process(ASCII_char command, RS485Device& serial, ArduinoPfeiffer& 
 #define PUMP_SPEED_HZ_ACT_PARAM   "309"  // Actual rotation speed (Hz)
 #define PUMP_SPEED_RPM_SET_PARAM  "397"  // Set rotation speed (rpm) readback
 #define PUMP_SPEED_RPM_ACT_PARAM  "398"  // Actual rotation speed (rpm)
-#define PUMP_PRESSURE_PARAM       "740"  // Pressure value (ActiveLine) // TODO: check
+#define PUMP_PRESSURE_PARAM       "740"  // Pressure value (ActiveLine)
 #define PUMP_GAUGETYPE_PARAM      "738"  // Type of pressure gauge
 #define PUMP_ERROR_CODE_PARAM     "303"  // Error / status code string
 #define PUMP_STATUS_PARAM         "302"  // Speed switchpoint reached / status bits
@@ -56,7 +56,7 @@ void send_and_process(ASCII_char command, RS485Device& serial, ArduinoPfeiffer& 
 
 // Speed setting mode (P:026, u_short_int 0/1, but often used like bool)
 #define SPEED_MODE_DISABLED_VALUE "000"  // treat as 0
-#define SPEED_MODE_ENABLED_VALUE  "001"  // treat as 1 (enable speed control) // TODO: check
+#define SPEED_MODE_ENABLED_VALUE  "001"  // treat as 1 (enable speed control)
 
 // ----------------------------
 // Integer / percent helpers (6-char fixed format as strings)

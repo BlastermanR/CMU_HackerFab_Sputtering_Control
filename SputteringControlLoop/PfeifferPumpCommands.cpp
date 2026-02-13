@@ -27,7 +27,6 @@ void turnOnPump(ArduinoPfeiffer pfeiffer_pump, RS485Device& pump_serial_wrapper)
     #ifdef VERBOSE
         Serial.println("Turning on vacuum pump");
     #endif
-    // TODO: set turbo pump to on (should default)
     ASCII_char cmd = pfeiffer_pump.control_request(PUMP_POWER_PARAM, PUMP_ON_VALUE);
     pump_serial_wrapper.sendRS485Command(cmd);
     pfeiffer_pump.free_message(cmd);

@@ -8,8 +8,6 @@
  * The function constructs an "AS" (Analog Setpoint) command, transmits it via serial,
  * waits briefly for the device to process, and then reads the response.
  * 
- * TODO: confirm units of SCCM
- *
  * @note Requires ALICATSerial_MFC to be initialized.
  * 
  * @param sccm The desired setpoint value in Standard Cubic Centimeters per Minute (SCCM).
@@ -26,3 +24,5 @@ void setAlicatPressure(SoftwareSerial& serialPort, float sccm)
     serialPort.print(command);
     delay(100);
 }
+
+// TODO: do we need to be able to read SCCM?
