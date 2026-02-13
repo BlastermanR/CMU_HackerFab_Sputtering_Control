@@ -1,14 +1,14 @@
 #pragma once
 #include <SoftwareSerial.h>
-#include "Pressure.h"
+#include "ArduinoPfeiffer.h"
 #include <Arduino.h>
 
-// Reads a message from a device and processes it
-// Returns a pressure_measurement if the message is pressure data
-pressure_measurement readAndProcess(SoftwareSerial &ss);
 
-// Parses a complete message string and extracts pressure if applicable
-pressure_measurement processSentence(char* msg);
+typedef struct rs485_response
+{
+    char param[4] = {0};
+    char value[7] = {0};
+};
 
 
 /**
@@ -60,8 +60,18 @@ public:
     /** @brief Provides access to the underlying SoftwareSerial port. */
     SoftwareSerial& port() { return _ss; }
 
+    rs485_response readRS485Reply();
+    void sendRS485Command (ASCII_char cmd);
+
 private:
     SoftwareSerial _ss;
     uint8_t _dePin;
     uint8_t _rePin;
+
+    #define SENTENCE_SIZE 128
+    char sentence[SENTENCE_SIZE];
+    int sentenceIndex = 0;
+    const char endChar = '\r';
+
+    rs485_response parseRS485Response (char* msg);
 };

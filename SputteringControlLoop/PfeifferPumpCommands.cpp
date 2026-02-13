@@ -188,7 +188,6 @@ int getPumpSpeed(ArduinoPfeiffer& pfeiffer_pump, RS485Device& pump_serial_wrappe
     
     if (strncmp(response.param, PUMP_SPEED_HZ_ACT_PARAM, 3) != 0)
     {
-        Serial.println(response.param);
         Serial.println("ERROR reading fan speed");
         return -1;
     }
