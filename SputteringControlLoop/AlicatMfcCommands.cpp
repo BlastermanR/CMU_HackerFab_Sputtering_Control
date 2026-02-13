@@ -25,5 +25,4 @@ void setAlicatPressure(SoftwareSerial& serialPort, float sccm)
     serialPort.listen();
     serialPort.print(command);
     delay(100);
-    readAndProcess(serialPort);
 }

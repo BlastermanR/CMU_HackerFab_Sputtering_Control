@@ -9,9 +9,13 @@ void turnOnPump(ArduinoPfeiffer pfeiffer_pump, RS485Device& pump_serial_wrapper)
 
 void turnOffPump(ArduinoPfeiffer pfeiffer_pump, RS485Device& pump_serial_wrapper);
 
-pressure_measurement readPressure(ArduinoPfeiffer pfeiffer_gauge, RS485Device& gauge_serial_wrapper);
+float parsePressureValue(char* rs485ReplyValue);
+
+float readPressure(ArduinoPfeiffer& pfeiffer_gauge, RS485Device& gauge_serial_wrapper);
 
 void setPumpSpeed(ArduinoPfeiffer pfeiffer_pump, RS485Device& pump_serial_wrapper, float percent);
+
+int getPumpSpeed(ArduinoPfeiffer& pfeiffer_pump, RS485Device& pump_serial_wrapper);
 
 void printPumpSpeed(ArduinoPfeiffer& pfeiffer_pump, RS485Device& pump_serial_wrapper);
 

@@ -29,7 +29,8 @@ void turnOnPump(ArduinoPfeiffer pfeiffer_pump, RS485Device& pump_serial_wrapper)
     #endif
     // TODO: set turbo pump to on (should default)
     ASCII_char cmd = pfeiffer_pump.control_request(PUMP_POWER_PARAM, PUMP_ON_VALUE);
-    send_command(cmd, pump_serial_wrapper, pfeiffer_pump);
+    pump_serial_wrapper.sendRS485Command(cmd);
+    pfeiffer_pump.free_message(cmd);
 }
 
 
@@ -49,7 +50,40 @@ void turnOffPump(ArduinoPfeiffer pfeiffer_pump, RS485Device& pump_serial_wrapper
     #endif
 
     ASCII_char cmd = pfeiffer_pump.control_request(PUMP_POWER_PARAM, PUMP_OFF_VALUE);
-    send_command(cmd, pump_serial_wrapper, pfeiffer_pump);
+    pump_serial_wrapper.sendRS485Command(cmd);
+    pfeiffer_pump.free_message(cmd);
+}
+
+
+/**
+ * @brief helper to convert a pressure reading into a float
+ * 
+ * This helper converts the value field of an RS485 reply telegram
+ * to a pressure value. The argument should be the value field
+ * (starting at offset 10) of the data response message. Use with
+ * the `rs485_response.value` field of the struct returned by
+ * SerialComms.h/cpp `parseRS485Response`.
+ * 
+ * @param rs485ReplyValue c-string message with the value field
+ * @return float value of pressure reading
+ */
+float parsePressureValue(char* rs485ReplyValue)
+{
+  if (strlen(rs485ReplyValue) < 6) return {};
+
+  // Parse mantissa and exponent substrings
+  char mantissa[5] = {0};
+  char exp[3] = {0};
+  strncpy(mantissa, rs485ReplyValue, 4);
+  strncpy(exp, rs485ReplyValue + 4, 2);
+
+  // Convert to float and exponent
+  int frac = atoi(mantissa);
+  int real_exp = atoi(exp) - 20;
+  float frac_float = frac / 1000.0;
+
+  // Construct final pressure_measurement
+  return frac_float * pow(10, real_exp);
 }
 
 
@@ -63,7 +97,7 @@ void turnOffPump(ArduinoPfeiffer pfeiffer_pump, RS485Device& pump_serial_wrapper
  * @param pfeiffer_gauge An ArduinoPfeiffer object configured for gauge communication.
  * @return the pressure measurement as a pressure_measurement struct. Error is indicated by pressure being 0
  */
-pressure_measurement readPressure(ArduinoPfeiffer pfeiffer_gauge, RS485Device& gauge_serial_wrapper)
+float readPressure(ArduinoPfeiffer& pfeiffer_gauge, RS485Device& gauge_serial_wrapper)
 {
     gauge_serial_wrapper.port().listen();
     #ifdef VERBOSE
@@ -71,21 +105,19 @@ pressure_measurement readPressure(ArduinoPfeiffer pfeiffer_gauge, RS485Device& g
     #endif
 
     ASCII_char cmd = pfeiffer_gauge.data_request(PUMP_PRESSURE_PARAM);
-
-    gauge_serial_wrapper.setWriteMode();
-    gauge_serial_wrapper.port().print(cmd);
-    gauge_serial_wrapper.setReadMode();
+    gauge_serial_wrapper.sendRS485Command(cmd);
     delay(100);
+
+    rs485_response response = gauge_serial_wrapper.readRS485Reply();
     pfeiffer_gauge.free_message(cmd);
 
-    pressure_measurement measured_pressure = readAndProcess(gauge_serial_wrapper.port());
-
-    // Handle failed pressure reading
-    if (measured_pressure.exp == 0.0 && measured_pressure.frac == 0.0) {
-        Serial.println("ERROR - Failed Pressure Read");
+    if (strncmp(response.param, PUMP_PRESSURE_PARAM, 3) != 0)
+    {
+        Serial.println("ERROR - Failed pressure read");
+        return -1.0f;
     }
 
-    return measured_pressure;
+    return parsePressureValue(response.value);
 }
 
 
@@ -115,7 +147,8 @@ void setPumpSpeed(ArduinoPfeiffer pfeiffer_pump, RS485Device& pump_serial_wrappe
         Serial.println("Setting pump to speed mode");
     #endif
     ASCII_char cmd2 = pfeiffer_pump.control_request(PUMP_OPMODE_PARAM, SPEED_MODE_ENABLED_VALUE);
-    send_and_process(cmd2, pump_serial_wrapper, pfeiffer_pump);
+    pump_serial_wrapper.sendRS485Command(cmd2);
+    pfeiffer_pump.free_message(cmd2);
 
 
     // now set the speed parameter 707
@@ -128,12 +161,12 @@ void setPumpSpeed(ArduinoPfeiffer pfeiffer_pump, RS485Device& pump_serial_wrappe
     #endif
 
     ASCII_char cmd = pfeiffer_pump.control_request(PUMP_SPEED_SET_PARAM, data);
-    send_command(cmd, pump_serial_wrapper, pfeiffer_pump);
+    pump_serial_wrapper.sendRS485Command(cmd);
+    pfeiffer_pump.free_message(cmd);
 }
 
-
 /**
- * @brief Requests and prints the current pump speed from a Pfeiffer pump.
+ * @brief Requests the current pump speed from a Pfeiffer pump.
  *
  * Sends a data request command to retrieve the actual pump speed in Hz,
  * transmits it via RS485, and reads the response to process the pump speed data.
@@ -142,62 +175,41 @@ void setPumpSpeed(ArduinoPfeiffer pfeiffer_pump, RS485Device& pump_serial_wrappe
  *                      generate the speed request command.
  * @param pump_serial_wrapper Reference to the RS485Device wrapper managing
  *                            serial communication with the pump.
- * @see readAndProcess()
+ * @return turbo pump fan speed in Hz
  */
-void printPumpSpeed(ArduinoPfeiffer& pfeiffer_pump, RS485Device& pump_serial_wrapper)
+int getPumpSpeed(ArduinoPfeiffer& pfeiffer_pump, RS485Device& pump_serial_wrapper)
 {
     ASCII_char cmd = pfeiffer_pump.data_request(PUMP_SPEED_HZ_ACT_PARAM);
 
-    pump_serial_wrapper.setWriteMode();
-    pump_serial_wrapper.port().print(cmd);
-    pump_serial_wrapper.setReadMode();
+    pump_serial_wrapper.sendRS485Command(cmd);
     delay(100);
+
+    rs485_response response = pump_serial_wrapper.readRS485Reply();
     pfeiffer_pump.free_message(cmd);
+    
+    if (strncmp(response.param, PUMP_SPEED_HZ_ACT_PARAM, 3) != 0)
+    {
+        Serial.println(response.param);
+        Serial.println("ERROR reading fan speed");
+        return -1;
+    }
 
-    readAndProcess(pump_serial_wrapper.port());
+    return atoi(response.value);
 }
 
 
 /**
- * @brief Sends a command to the Pfeiffer pump via RS485 serial communication.
+ * @brief Requests and prints the current pump speed from a Pfeiffer pump.
+ *
+ * Gets the pump speed with getPumpSpeed() and prints it to the Serial port.
  * 
- * This function configures the RS485 transceiver for write mode, transmits an ASCII
- * command character to the pump, switches to read mode to listen for responses, and
- * cleans up the associated message buffer.
- * 
- * @param command The ASCII character command to send to the pump.
- * @param serial Reference to the RS485Device object for communication.
- * @param device Reference to the ArduinoPfeiffer device object for memory management.
+ * @param pfeiffer_pump Reference to the ArduinoPfeiffer pump object used to
+ *                      generate the speed request command.
+ * @param pump_serial_wrapper Reference to the RS485Device wrapper managing
+ *                            serial communication with the pump.
  */
-void send_command(ASCII_char command, RS485Device& serial_wrapper, ArduinoPfeiffer& device)
+void printPumpSpeed(ArduinoPfeiffer& pfeiffer_pump, RS485Device& pump_serial_wrapper)
 {
-    serial_wrapper.port().listen();
-    serial_wrapper.setWriteMode();
-    serial_wrapper.port().print(command);
-    serial_wrapper.setReadMode();
-    delay(100); // Allow time for device to respond
-    device.free_message(command); // Free memory for command
-}
-
-/**
- * @brief Sends a command to the Pfeiffer pump and processes the response
- * 
- * This function configures the RS485 transceiver for write mode, transmits an ASCII
- * command character to the pump, switches to read mode to listen for responses, 
- * processes the response with SerialComms::readAndProcess, and cleans up the associated
- * message buffer.
- * 
- * @param command The ASCII character command to send to the pump.
- * @param serial Reference to the SoftwareSerial object for communication.
- * @param device Reference to the ArduinoPfeiffer device object for memory management.
- */
-void send_and_process(ASCII_char command, RS485Device& serial_wrapper, ArduinoPfeiffer& device)
-{
-  serial_wrapper.port().listen();
-  serial_wrapper.setWriteMode();
-  serial_wrapper.port().print(command);
-  serial_wrapper.setReadMode();
-  delay(100); // Allow time for device to respond
-  readAndProcess(serial_wrapper.port());
-  device.free_message(command); // Free memory for command
+    Serial.print("Pump fan speed: ");
+    Serial.println(getPumpSpeed(pfeiffer_pump, pump_serial_wrapper));
 }

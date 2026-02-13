@@ -70,15 +70,15 @@ Alicat devices use the [RS-232](https://www.alicat.com/support/rs-232-communicat
 
 ## Project Status
 
-**Current Phase**: Module Testing & Integration
+**Current Phase**: Control Loop Implementation
 
 The main project code is located in the [**`SputteringControlLoop`**](SputteringControlLoop) directory. We are currently:
 
 1. ✅ Testing individual module communication (pump, gauge, MFCs)
 2. ✅ Validating RS485 protocol implementation
 3. ✅ Verifying parameter read/write functionality
-4. 🔄 Developing control routines for vacuum evacuation and speed management
-5. ⏳ Planning automated sputtering deposition control loop
+4. ✅ Developing control routines for vacuum evacuation and speed management
+5. 🔄 Implementing automated sputtering deposition control loop
 
 ## Project Structure
 
@@ -90,20 +90,11 @@ The main project code is located in the [**`SputteringControlLoop`**](Sputtering
 │ ├── ArduinoPfeiffer.h/.cpp # Pfeiffer protocol command formatter
 │ ├── SerialComms.h/.cpp # RS485/serial communication layer
 │ ├── PfeifferPumpCommands.h/.cpp # Pump control parameter definitions
-│ ├── AlicatMfcCommands.h/.cpp # MFC control functions
-│ └── Pressure.h/.cpp # Pressure data structures and conversion
+│ └── AlicatMfcCommands.h/.cpp # MFC control functions
 │
 ├── README.md # This file
-|
-|   # Everything below is legacy
-├───Alicat_tests
-├───brendanSweeney_tutorial
-├───Control_loops_Tests
-├───DisplayPressureTest
-├───PfiefferLib
-├───PfiefferWorking
-├───PressureControl
-└── SetPoint_Alicat
+├── DisplayPressure.py # Unkown - python script for plotting pressure
+└── CRC.py # Unknown - python script for calculating CRC
 ```
 
 ## Key Features
@@ -149,7 +140,7 @@ The main project code is located in the [**`SputteringControlLoop`**](Sputtering
 
 ### Testing
 
-The current sketch runs basic tests on startup:
+The current sketch contains basic tests:
 
 - Turns pump ON and ramps to operational speed
 - Reads pressure from gauge
@@ -158,6 +149,11 @@ The current sketch runs basic tests on startup:
 - Tests MFC setpoint control
 
 Monitor via Serial at **9600 baud** to observe test output.
+
+### General Notes
+- Ensure the baud rate is set to 9600 when using the serial monitor.
+- Serial commands to the controller must have a newline (\r or \n).
+- Only the first characters of each command are checked, i.e. the command "evac;lkajsdfa\r" will trigger the "evac" stage.
 
 ## Note About Vacuum Gauge
 
@@ -196,9 +192,8 @@ Planned features for automated sputtering control:
 
 ### 2. Ignition
 - Reduce pump speed to **25%** (250Hz)
-- Ramp argon flow up to **~1 SCCM**, later maybe as high as **~10 SCCM**
 - Wait until pump speed reaches **250 Hz**
-- Spike argon flow to **~90 SCCM** (or set target pressure)
+- Ramp argon flow up to **~10 SCCM**
 - **Wait for user input** - Reminder: Power on plasma source and do impedance match
 
 ### 3. Sputtering
@@ -206,7 +201,7 @@ Planned features for automated sputtering control:
 - **Wait for user input** - Reminder: Wait for target cleaning, then open shutter
 - Run deposition for desired time
 
-### 4. Completion
+### 4. Depressurization
 - Shut off RF power
 - Cut off argon flow
 - Turn off pumping station
