@@ -173,6 +173,7 @@ Consult the following manuals (available from [Pfeiffer Vacuum download center](
 - **HiPace 300 Operating Instructions** - [Turbo pump specifications](https://www.idealvac.com/files/manuals/Pfeiffer_HiPace300_Manaul.pdf)
 - **MPT 200 Operating Instructions** - [Vacuum gauge specifications](https://www.idealvac.com/files/manuals/Pfeiffer_DigiLine_MPT_200_Digital_Pirani_and_Cold_Cathode_Gauge_Operating_Instructions.pdf)
 \- [Supplement for AR (Analog Relay) model](https://www.ajvs.com/library/Operating_instructions_DigiLine_Gauges_Analog_Relay_Supplementary_Information.pdf)
+- **DC 002 Display Operating Instructions** - [Display/operating unit specifications](https://mmrc.caltech.edu/Optical%20Furnace/Manuals/Pfeiffer%20DCU%20Turbo%20Controller.pdf)
 - **Pfeiffer Vacuum RS485 Protocol Specification** - [Telegram format details](https://www.idealvac.com/files/brochures/Pfeiffer_TC_110_Operating_Instructions.pdf#G6923033)
 
 
