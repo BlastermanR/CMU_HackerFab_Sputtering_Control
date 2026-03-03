@@ -35,7 +35,7 @@ pico_sdk_init()
 
 # Add executable. Default name is the project name, version 0.1
 
-add_executable(CMUHackerFab CMUHackerFab.cpp )
+add_executable(CMUHackerFab src/CMUHackerFab.cpp )
 
 pico_set_program_name(CMUHackerFab "CMUHackerFab")
 pico_set_program_version(CMUHackerFab "0.1")
