@@ -33,9 +33,11 @@ project(CMUHackerFab C CXX ASM)
 # Initialise the Raspberry Pi Pico SDK
 pico_sdk_init()
 
-# Add executable. Default name is the project name, version 0.1
+# Use GLOB to gather files
+file(GLOB SOURCES "src/*.cpp")
 
-add_executable(CMUHackerFab src/CMUHackerFab.cpp )
+# Add executable.
+add_executable(CMUHackerFab ${SOURCES})
 
 pico_set_program_name(CMUHackerFab "CMUHackerFab")
 pico_set_program_version(CMUHackerFab "0.1")
@@ -50,7 +52,7 @@ target_link_libraries(CMUHackerFab
 
 # Add the standard include files to the build
 target_include_directories(CMUHackerFab PRIVATE
-        ${CMAKE_CURRENT_LIST_DIR}
+        ${CMAKE_CURRENT_LIST_DIR}/include
 )
 
 pico_add_extra_outputs(CMUHackerFab)
