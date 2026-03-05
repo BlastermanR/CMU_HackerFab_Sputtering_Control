@@ -16,9 +16,17 @@ class AlicatMFC
     // Define the serial port
     IUart* serialPort;
 
-    void onDataReceived(char c) {
-        printf("MessageRecieved: %c\n", c);
-    }
+    // Define recieve buffer
+    static constexpr int BUFFER_SIZE = 100;
+
+    // Recieve Buffer
+    char recieveBuffer[BUFFER_SIZE + 1];
+
+    // Read buffer
+    int bufferIndex;
+
+    // Handler for chars recieved by device
+    void onDataReceived(char c);
 
     public:
     // Constructor
