@@ -3,18 +3,24 @@
 #include "pico/stdlib.h"
 #include "picoDefinitions.h"
 
-AlicatMFC::AlicatMFC()
+AlicatMFC::AlicatMFC(IUart* uart) : serialPort(uart)
 {
-    return;
+    // Intentionally Empty
 }
 
 AlicatMFC::~AlicatMFC()
 {
-    // Memory Cleanup
-    return;
+    // Intentionally Empty
 }
 
 void AlicatMFC::init()
 {
+    serialPort->setCallback(std::bind(&AlicatMFC::onDataReceived, this, std::placeholders::_1));
+    serialPort->begin();
     return;
+}
+
+void AlicatMFC::sendMessage(const char* message)
+{
+    serialPort->print(message);
 }

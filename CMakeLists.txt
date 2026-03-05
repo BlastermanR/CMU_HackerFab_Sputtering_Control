@@ -46,9 +46,17 @@ pico_set_program_version(CMUHackerFab "0.1")
 pico_enable_stdio_uart(CMUHackerFab 0)
 pico_enable_stdio_usb(CMUHackerFab 0)
 
+# Tell CMake to compile the PIO files into headers
+pico_generate_pio_header(CMUHackerFab ${CMAKE_CURRENT_LIST_DIR}/pio/uart_tx.pio)
+pico_generate_pio_header(CMUHackerFab ${CMAKE_CURRENT_LIST_DIR}/pio/uart_rx.pio)
+
 # Add the standard library to the build
 target_link_libraries(CMUHackerFab
-        pico_stdlib)
+        pico_stdlib
+        hardware_uart
+        hardware_pio
+        hardware_irq
+    )
 
 # Add the standard include files to the build
 target_include_directories(CMUHackerFab PRIVATE
