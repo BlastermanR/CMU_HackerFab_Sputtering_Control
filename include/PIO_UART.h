@@ -13,7 +13,7 @@
 #include "hardware/irq.h"
 #include "uart_tx.pio.h"
 #include "uart_rx.pio.h"
-#include "IUart.h"
+#include "UARTInterface.h"
 
 class PioUart : public IUart {
 private:

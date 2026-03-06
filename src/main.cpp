@@ -2,6 +2,8 @@
 #include "pico/stdlib.h"
 
 #include "picoDefinitions.h"
+#include "HardwareUART.h"
+#include "PIO_UART.h"
 #include "AlicatMFC.h"
 #include "USBSerial.h"
 
@@ -39,10 +41,16 @@ int main()
 {
     //blinkTest();
 
+    // Setup the serial communication
     pcTerminal.begin();
     pcTerminal.setCallback(onPcCommand);
-    
     pcTerminal.println("Enter a setpoint to send to the mass flow controller:");
+
+    // The Hardware UART (Using uart0, TX on GPIO 0, RX on GPIO 1, 9600 baud)
+    HardUart hardwarePort(uart0, ALICAT_1_TX, ALICAT_1_RX, 9600);
+
+    // Define the Alicat Device
+    AlicatMFC massFlowController(&hardwarePort);
 
     while (true) 
     {

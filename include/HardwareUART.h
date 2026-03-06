@@ -11,7 +11,7 @@
 #include "pico/stdlib.h"
 #include "hardware/uart.h"
 #include "hardware/irq.h"
-#include "IUart.h"
+#include "UARTInterface.h"
 
 class HardUart : public IUart {
 private:

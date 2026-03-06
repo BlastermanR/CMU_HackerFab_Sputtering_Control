@@ -1,6 +1,14 @@
 #ifndef USB_SERIAL
 #define USB_SERIAL
 
+/**
+ * Implements a Serial interface for recieving input from a host PC.
+ * To be used for simple tests, not final serial implementation
+ * 
+ * @author Ryan Massie (rmassie)
+ * @date 3/4/26
+ */
+
 #include <string>
 #include <functional>
 
