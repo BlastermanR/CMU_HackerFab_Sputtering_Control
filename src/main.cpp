@@ -27,18 +27,15 @@ void blinkTest()
     }
 }
 
-void onPcCommand(const std::string& command) {
+void onPcCommand(const std::string& command) 
+{
     pcTerminal.println(command.c_str());
-
-    // Convert string to int and send to the physical device
-    int setpoint = std::stoi(command);
-    
-    // TODO
-    // Pass to Alicat
 }
 
 int main()
 {
+    stdio_init_all();
+
     //blinkTest();
 
     // Setup the serial communication
@@ -52,8 +49,26 @@ int main()
     // Define the Alicat Device
     AlicatMFC massFlowController(&hardwarePort);
 
+    // Alicat Test message
+    const char* s = "A\r"; 
+    
+    // Store the time we last sent a message
+    uint32_t last_send_time = to_ms_since_boot(get_absolute_time());
+
     while (true) 
     {
         pcTerminal.update();
+        
+        // Get the current time
+        uint32_t current_time = to_ms_since_boot(get_absolute_time());
+
+        // Check if 5 seconds have passed since the last send
+        if (current_time - last_send_time >= 5000) 
+        {
+            massFlowController.sendMessage(s);
+            
+            // Reset the timer
+            last_send_time = current_time;
+        }
     }
 }
