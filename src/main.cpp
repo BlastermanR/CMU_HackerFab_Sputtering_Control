@@ -2,6 +2,11 @@
 #include "pico/stdlib.h"
 
 #include "picoDefinitions.h"
+#include "AlicatMFC.h"
+#include "USBSerial.h"
+
+// Define USB Serial
+USBSerial pcTerminal;
 
 void blinkTest()
 {
@@ -20,12 +25,27 @@ void blinkTest()
     }
 }
 
+void onPcCommand(const std::string& command) {
+    pcTerminal.println(command.c_str());
+
+    // Convert string to int and send to the physical device
+    int setpoint = std::stoi(command);
+    
+    // TODO
+    // Pass to Alicat
+}
+
 int main()
 {
     //blinkTest();
+
+    pcTerminal.begin();
+    pcTerminal.setCallback(onPcCommand);
     
+    pcTerminal.println("Enter a setpoint to send to the mass flow controller:");
+
     while (true) 
     {
-        // Code Here
+        pcTerminal.update();
     }
 }

@@ -1,3 +1,11 @@
+/**
+ * Implements the Alicat Mass Flow Controller (MFC).
+ * - Utilizes UART --> RS232 converter (MAX3232)
+ * - Interrupt driven reciever handler
+ * 
+ * @author Ryan Massie (rmassie)
+ * @date 3/4/26
+ */
 
 #include "AlicatMFC.h"
 #include "pico/stdlib.h"
@@ -52,5 +60,6 @@ void AlicatMFC::onDataReceived(char c)
 
 void AlicatMFC::sendMessage(const char* message)
 {
+    printf("Alicat: Sending Message: %c\n", message);
     serialPort->print(message);
 }

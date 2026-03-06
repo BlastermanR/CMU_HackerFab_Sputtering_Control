@@ -2,9 +2,12 @@
 #define ALICAT_MFC
 
 /**
- * Implements the Alicat Mass Flow Controller (MFC).
+ * Defines the Alicat Mass Flow Controller (MFC).
  * - Utilizes UART --> RS232 converter (MAX3232)
  * - Interrupt driven reciever handler
+ * 
+ * @author Ryan Massie (rmassie)
+ * @date 3/4/26
  */
 
 #include <stdio.h>
