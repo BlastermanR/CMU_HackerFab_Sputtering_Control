@@ -1,6 +1,6 @@
+#include <stdio.h>
 #include "USBSerial.h"
 #include "pico/stdlib.h"
-#include <stdio.h>
 
 USBSerial::USBSerial() : inputBuffer("") {}
 

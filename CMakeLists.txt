@@ -1,9 +1,11 @@
 # Generated Cmake Pico project file
-
 cmake_minimum_required(VERSION 3.13)
 
+# Set c++ version
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
+
+# Set comiple Commands
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Initialise pico_sdk from installed location
@@ -28,30 +30,40 @@ set(PICO_BOARD pico2 CACHE STRING "Board type")
 # Pull in Raspberry Pi Pico SDK (must be before project)
 include(pico_sdk_import.cmake)
 
-project(CMUHackerFab C CXX ASM)
+# Define project name
+set(PROJECT SputteringACS)
+project(${PROJECT} C CXX ASM)
 
 # Initialise the Raspberry Pi Pico SDK
 pico_sdk_init()
+
+# Include Libraries
+include(${CMAKE_SOURCE_DIR}/UARTLibrary/UARTLibrary.cmake)
+include(${CMAKE_SOURCE_DIR}/USBSerialLibrary/USBSerialLibrary.cmake)
 
 # Use GLOB to gather files
 file(GLOB SOURCES "src/*.cpp")
 
 # Add executable.
-add_executable(CMUHackerFab ${SOURCES})
+add_executable(${PROJECT} ${SOURCES})
 
-pico_set_program_name(CMUHackerFab "CMUHackerFab")
-pico_set_program_version(CMUHackerFab "0.1")
+# Set name (Change if desired)
+pico_set_program_name(${PROJECT} "${PROJECT}")
+
+# Set version
+pico_set_program_version(${PROJECT} "0.1")
 
 # Modify the below lines to enable/disable output over UART/USB
-pico_enable_stdio_uart(CMUHackerFab 0)
-pico_enable_stdio_usb(CMUHackerFab 0)
+pico_enable_stdio_uart(${PROJECT} 0)
+pico_enable_stdio_usb(${PROJECT} 1)
 
-# Tell CMake to compile the PIO files into headers
-pico_generate_pio_header(CMUHackerFab ${CMAKE_CURRENT_LIST_DIR}/pio/uart_tx.pio)
-pico_generate_pio_header(CMUHackerFab ${CMAKE_CURRENT_LIST_DIR}/pio/uart_rx.pio)
+# Add the link libraries to the executable
+target_link_libraries(${PROJECT} PRIVATE
+        # Custom Libs
+        USBSerial
+        UARTInterface
 
-# Add the standard library to the build
-target_link_libraries(CMUHackerFab
+        # Pico Libs
         pico_stdlib
         hardware_uart
         hardware_pio
@@ -59,9 +71,9 @@ target_link_libraries(CMUHackerFab
     )
 
 # Add the standard include files to the build
-target_include_directories(CMUHackerFab PRIVATE
-        ${CMAKE_CURRENT_LIST_DIR}/include
+target_include_directories(${PROJECT} PRIVATE
+        ${CMAKE_SOURCE_DIR}/include
 )
 
-pico_add_extra_outputs(CMUHackerFab)
+pico_add_extra_outputs(${PROJECT})
 
