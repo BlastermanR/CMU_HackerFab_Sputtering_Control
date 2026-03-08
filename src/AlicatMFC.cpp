@@ -54,6 +54,11 @@ void AlicatMFC::onDataReceived(char c)
     }
 }
 
+void AlicatMFC::update()
+{
+    // Routine checks or background tasks can go here
+}
+
 void AlicatMFC::sendMessage(const char* message)
 {
     printf("Alicat: Sending Message: %s\n", message);

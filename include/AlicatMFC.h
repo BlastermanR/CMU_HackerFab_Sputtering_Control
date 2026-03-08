@@ -12,8 +12,9 @@
 
 #include <stdio.h>
 #include "UARTInterface.h"
+#include "IDevice.h"
 
-class AlicatMFC
+class AlicatMFC : public IDevice
 {
     private:
     // Define the serial port
@@ -32,17 +33,33 @@ class AlicatMFC
     void onDataReceived(char c);
 
     public:
-    // Constructor
+    /**
+     * @brief Constructor
+     * @param uart Uart instance to use.
+     */
     AlicatMFC(IUart* uart);
 
-    // Destructor
+    /**
+     * @brief Destructor
+     */
     ~AlicatMFC();
 
-    // Initialization Function
-    void init();
+    /**
+     * @brief Initialize the device (e.g., configuring hardware peripherals, setting up ports)
+     */
+    void init() override;
 
-    // Function to send a message to the device
-    void sendMessage(const char* message);
+    /**
+     * @brief logic update function
+     */
+    void update() override;
+
+    /**
+     * @brief Utilizes UART port to send message to device
+     * @param message Null terminating message to send to device.
+     * \0 is not sent
+     */
+    void sendMessage(const char* message) override;
 };
 
 
