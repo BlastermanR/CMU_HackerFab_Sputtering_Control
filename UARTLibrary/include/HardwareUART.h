@@ -51,6 +51,18 @@ public:
         instances[index] = this;
     }
 
+    ~HardUart() {
+        int index = (uartInstance == uart0) ? 0 : 1;
+        if (instances[index] == this) {
+            instances[index] = nullptr;
+        }
+
+        // Optional: disable IRQ and de-init UART hardware to leave cleanly
+        uint irqNumber = (uartInstance == uart0) ? UART0_IRQ : UART1_IRQ;
+        irq_set_enabled(irqNumber, false);
+        uart_deinit(uartInstance);
+    }
+
     void setCallback(UartCallback cb) override {
         rxCallback = cb;
     }

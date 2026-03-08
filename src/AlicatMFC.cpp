@@ -26,7 +26,6 @@ void AlicatMFC::init()
 {
     serialPort->setCallback(std::bind(&IDevice::onDataReceived, this, std::placeholders::_1));
     serialPort->begin();
-    return;
 }
 
 void AlicatMFC::printRecieved()
@@ -41,6 +40,8 @@ void AlicatMFC::update()
 
 void AlicatMFC::sendMessage(const char* message)
 {
+#ifdef DEBUG
     printf("Alicat: Sending Message: %s\n", message);
+#endif
     serialPort->print(message);
 }

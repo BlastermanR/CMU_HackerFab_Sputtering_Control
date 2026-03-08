@@ -26,8 +26,33 @@ private:
     // Static map for Pico 2: 3 PIO blocks, 4 State Machines each
     static PioUart* instances[3][4];
 
-    // (Static handlers and routing logic go here, identical to our previous discussion 
-    // but expanded to check pio0, pio1, and pio2)
+    // Static IRQ Handlers
+    static void pio0_irq_handler() {
+        for (int i = 0; i < 4; i++) {
+            if (pio0->irq & (1 << i) && instances[0][i]) {
+                instances[0][i]->handleRxIrq();
+                pio_interrupt_clear(pio0, i);
+            }
+        }
+    }
+
+    static void pio1_irq_handler() {
+        for (int i = 0; i < 4; i++) {
+            if (pio1->irq & (1 << i) && instances[1][i]) {
+                instances[1][i]->handleRxIrq();
+                pio_interrupt_clear(pio1, i);
+            }
+        }
+    }
+
+    static void pio2_irq_handler() {
+        for (int i = 0; i < 4; i++) {
+            if (pio2->irq & (1 << i) && instances[2][i]) {
+                instances[2][i]->handleRxIrq();
+                pio_interrupt_clear(pio2, i);
+            }
+        }
+    }
     
     void handleRxIrq() {
         while (!pio_sm_is_rx_fifo_empty(pioInstance, rxSm)) {
@@ -44,12 +69,51 @@ public:
         instances[pioIndex][rxSm] = this;
     }
 
+    ~PioUart() {
+        int pioIndex = (pioInstance == pio0) ? 0 : (pioInstance == pio1) ? 1 : 2;
+        if (instances[pioIndex][rxSm] == this) {
+            instances[pioIndex][rxSm] = nullptr;
+        }
+
+        // Optional: disable IRQs and remove PIO programs if completely cleaning up hardware
+        pio_set_irq0_source_enabled(pioInstance, (enum pio_interrupt_source)(pis_sm0_rx_fifo_not_empty + rxSm), false);
+        pio_sm_set_enabled(pioInstance, txSm, false);
+        pio_sm_set_enabled(pioInstance, rxSm, false);
+    }
+
     void setCallback(UartCallback cb) override {
         rxCallback = cb;
     }
 
     void begin() override {
-        // (Initialization, pio_add_program, and IRQ setup go here)
+        // Load the compiled PIO programs for TX and RX into the chosen PIO block's instruction memory
+        uint txOffset = pio_add_program(pioInstance, &uart_tx_program);
+        uint rxOffset = pio_add_program(pioInstance, &uart_rx_program);
+
+        // Initialize both State Machines
+        uart_tx_program_init(pioInstance, txSm, txOffset, txPin, baudRate);
+        uart_rx_program_init(pioInstance, rxSm, rxOffset, rxPin, baudRate);
+
+        // Enable interrupt whenever data enters the RX FIFO on the RX state machine
+        pio_set_irq0_source_enabled(pioInstance, (enum pio_interrupt_source)(pis_sm0_rx_fifo_not_empty + rxSm), true);
+
+        // Map PIO instance to the correct Pico architecture IRQ handler
+        uint irqNumber;
+        void (*handler)();
+        if (pioInstance == pio0) {
+            irqNumber = PIO0_IRQ_0;
+            handler = pio0_irq_handler;
+        } else if (pioInstance == pio1) {
+            irqNumber = PIO1_IRQ_0;
+            handler = pio1_irq_handler;
+        } else {
+            irqNumber = PIO2_IRQ_0;
+            handler = pio2_irq_handler;
+        }
+
+        // Apply IRQ settings to the processor logic
+        irq_set_exclusive_handler(irqNumber, handler);
+        irq_set_enabled(irqNumber, true);
     }
 
     void write(char c) override {
@@ -62,6 +126,6 @@ public:
 };
 
 // Initialize static array for 3 PIO blocks
-PioUart* PioUart::instances[3][4] = { {nullptr}, {nullptr}, {nullptr} };
+inline PioUart* PioUart::instances[3][4] = { {nullptr}, {nullptr}, {nullptr} };
 
 #endif //PIO_UART

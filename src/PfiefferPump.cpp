@@ -24,7 +24,6 @@ void PfiefferPump::init()
 {
     serialPort->setCallback(std::bind(&IDevice::onDataReceived, this, std::placeholders::_1));
     serialPort->begin();
-    return;
 }
 
 void PfiefferPump::printRecieved()
@@ -39,6 +38,8 @@ void PfiefferPump::update()
 
 void PfiefferPump::sendMessage(const char* message)
 {
+#ifdef DEBUG
     printf("Vacuum Pump: Sending Message: %s\n", message);
+#endif
     serialPort->print(message);
 }

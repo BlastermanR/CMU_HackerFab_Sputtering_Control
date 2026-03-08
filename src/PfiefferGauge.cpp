@@ -24,7 +24,6 @@ void PfiefferGauge::init()
 {
     serialPort->setCallback(std::bind(&IDevice::onDataReceived, this, std::placeholders::_1));
     serialPort->begin();
-    return;
 }
 
 void PfiefferGauge::printRecieved()
@@ -39,6 +38,8 @@ void PfiefferGauge::update()
 
 void PfiefferGauge::sendMessage(const char* message)
 {
+#ifdef DEBUG
     printf("Pressure Gauge: Sending Message: %s\n", message);
+#endif
     serialPort->print(message);
 }
