@@ -13,7 +13,7 @@
 
 AlicatMFC::AlicatMFC(IUart* uart) : serialPort(uart)
 {
-    bufferIndex = 0; // Set recieve buffer index to zero
+    // bufferIndex initialized by IDevice base class
 }
 
 AlicatMFC::~AlicatMFC()
@@ -23,35 +23,14 @@ AlicatMFC::~AlicatMFC()
 
 void AlicatMFC::init()
 {
-    serialPort->setCallback(std::bind(&AlicatMFC::onDataReceived, this, std::placeholders::_1));
+    serialPort->setCallback(std::bind(&IDevice::onDataReceived, this, std::placeholders::_1));
     serialPort->begin();
     return;
 }
 
-void AlicatMFC::onDataReceived(char c) 
+void AlicatMFC::printRecieved()
 {
-    if (bufferIndex < BUFFER_SIZE)
-    {
-        recieveBuffer[bufferIndex] = c;
-
-        // Check if the character just added is a line terminator
-        if (c == '\r' || c == '\n') 
-        {
-            recieveBuffer[bufferIndex] = '\0';
-            printf("Alicat Message Received: %s\n", recieveBuffer);
-            bufferIndex = 0;
-        } else 
-        {
-            bufferIndex++; // Move to next slot
-        }
-    }
-    else
-    {
-        // Handle overflow: buffer is full without finding a newline
-        recieveBuffer[BUFFER_SIZE] = '\0'; 
-        printf("Buffer Full: %s\n", recieveBuffer);
-        bufferIndex = 0;
-    }
+    printf("Alicat Message Received: %s\n", recieveBuffer);
 }
 
 void AlicatMFC::update()

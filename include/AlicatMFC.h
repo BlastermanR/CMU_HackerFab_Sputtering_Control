@@ -20,17 +20,8 @@ class AlicatMFC : public IDevice
     // Define the serial port
     IUart* serialPort;
 
-    // Define recieve buffer
-    static constexpr int BUFFER_SIZE = 100;
-
-    // Recieve Buffer
-    char recieveBuffer[BUFFER_SIZE + 1];
-
-    // Read buffer
-    int bufferIndex;
-
-    // Handler for chars recieved by device
-    void onDataReceived(char c);
+    // Override the debug print for specifically this device
+    void printRecieved() override;
 
     public:
     /**
