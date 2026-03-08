@@ -1,7 +1,6 @@
 #ifndef ALICAT_MFC
 #define ALICAT_MFC
 
-#include <stdio.h>
 #include "UARTInterface.h"
 #include "IDevice.h"
 

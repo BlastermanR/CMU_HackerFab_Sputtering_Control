@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include "pico/stdlib.h"
-
 #include "picoDefinitions.h"
 #include "SputteringManager.h"
 #include "USBSerial.h"

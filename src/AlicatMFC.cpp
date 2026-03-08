@@ -7,6 +7,7 @@
  * @date 3/4/26
  */
 
+#include <stdio.h>
 #include "AlicatMFC.h"
 #include "pico/stdlib.h"
 #include "picoDefinitions.h"

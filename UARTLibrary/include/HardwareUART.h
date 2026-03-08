@@ -1,5 +1,5 @@
-#ifndef HARDWARE_UART
-#define HARDWARE_UART
+#ifndef HARD_UART_CLASS_H
+#define HARD_UART_CLASS_H
 
 /**
  * Implements the UART interface for native hardware implementation.
@@ -80,6 +80,6 @@ public:
 };
 
 // Initialize static array
-HardUart* HardUart::instances[2] = {nullptr, nullptr};
+inline HardUart* HardUart::instances[2] = {nullptr, nullptr};
 
-#endif
+#endif // HARDWARE_UART_CLASS_H
