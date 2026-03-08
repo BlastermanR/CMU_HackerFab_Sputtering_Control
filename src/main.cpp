@@ -41,19 +41,25 @@ int main()
     // Setup the serial communication
     pcTerminal.begin();
     pcTerminal.setCallback(onPcCommand);
-    pcTerminal.println("Enter a setpoint to send to the mass flow controller:");
+    //pcTerminal.println("Enter a setpoint to send to the mass flow controller:");
 
     // The Hardware UART (Using uart0, TX on GPIO 0, RX on GPIO 1, 9600 baud)
     HardUart hardwarePort(uart0, ALICAT_1_TX, ALICAT_1_RX, 9600);
 
     // Define the Alicat Device
     AlicatMFC massFlowController(&hardwarePort);
+    
+    // Initialize the Alicat Device (this starts the UART and sets up the RX callback)
+    massFlowController.init();
 
     // Alicat Test message
     const char* s = "A\r"; 
     
     // Store the time we last sent a message
     uint32_t last_send_time = to_ms_since_boot(get_absolute_time());
+
+    // Dummy Return to valideate the Alicat is clear of courrupt data.
+    massFlowController.sendMessage("\r");
 
     while (true) 
     {
@@ -63,7 +69,7 @@ int main()
         uint32_t current_time = to_ms_since_boot(get_absolute_time());
 
         // Check if 5 seconds have passed since the last send
-        if (current_time - last_send_time >= 5000) 
+        if (current_time - last_send_time >= 10000) 
         {
             massFlowController.sendMessage(s);
             

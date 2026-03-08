@@ -38,7 +38,7 @@ void AlicatMFC::onDataReceived(char c)
         if (c == '\r' || c == '\n') 
         {
             recieveBuffer[bufferIndex] = '\0';
-            printf("MessageReceived: %s\n", recieveBuffer);
+            printf("Alicat Message Received: %s\n", recieveBuffer);
             bufferIndex = 0;
         } else 
         {
@@ -52,14 +52,10 @@ void AlicatMFC::onDataReceived(char c)
         printf("Buffer Full: %s\n", recieveBuffer);
         bufferIndex = 0;
     }
-    
-    // For debug, Print every character
-    // TODO Remove
-    printf("CharRecieved: %c\n", c);
 }
 
 void AlicatMFC::sendMessage(const char* message)
 {
-    printf("Alicat: Sending Message: %c\n", message);
+    printf("Alicat: Sending Message: %s\n", message);
     serialPort->print(message);
 }

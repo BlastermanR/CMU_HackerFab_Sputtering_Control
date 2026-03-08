@@ -31,8 +31,7 @@ set(PICO_BOARD pico2 CACHE STRING "Board type")
 include(pico_sdk_import.cmake)
 
 # Define project name
-set(PROJECT SputteringACS)
-project(${PROJECT} C CXX ASM)
+project(SputteringACS C CXX ASM)
 
 # Initialise the Raspberry Pi Pico SDK
 pico_sdk_init()
@@ -45,20 +44,20 @@ include(${CMAKE_SOURCE_DIR}/USBSerialLibrary/USBSerialLibrary.cmake)
 file(GLOB SOURCES "src/*.cpp")
 
 # Add executable.
-add_executable(${PROJECT} ${SOURCES})
+add_executable(SputteringACS ${SOURCES})
 
 # Set name (Change if desired)
-pico_set_program_name(${PROJECT} "${PROJECT}")
+pico_set_program_name(SputteringACS "SputteringACS")
 
 # Set version
-pico_set_program_version(${PROJECT} "0.1")
+pico_set_program_version(SputteringACS "0.1")
 
 # Modify the below lines to enable/disable output over UART/USB
-pico_enable_stdio_uart(${PROJECT} 0)
-pico_enable_stdio_usb(${PROJECT} 1)
+pico_enable_stdio_uart(SputteringACS 0)
+pico_enable_stdio_usb(SputteringACS 1)
 
 # Add the link libraries to the executable
-target_link_libraries(${PROJECT} PRIVATE
+target_link_libraries(SputteringACS PRIVATE
         # Custom Libs
         USBSerial
         UARTInterface
@@ -71,9 +70,9 @@ target_link_libraries(${PROJECT} PRIVATE
     )
 
 # Add the standard include files to the build
-target_include_directories(${PROJECT} PRIVATE
+target_include_directories(SputteringACS PRIVATE
         ${CMAKE_SOURCE_DIR}/include
 )
 
-pico_add_extra_outputs(${PROJECT})
+pico_add_extra_outputs(SputteringACS)
 

@@ -41,6 +41,7 @@ class AlicatMFC
     // Initialization Function
     void init();
 
+    // Function to send a message to the device
     void sendMessage(const char* message);
 };
 
