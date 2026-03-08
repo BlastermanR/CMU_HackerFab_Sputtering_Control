@@ -56,7 +56,9 @@ public:
             if (c == '\r' || c == '\n') 
             {
                 recieveBuffer[bufferIndex] = '\0';
+#ifdef DEBUG
                 printRecieved();
+#endif
                 bufferIndex = 0;
             } 
             else 
@@ -68,7 +70,7 @@ public:
         {
             // Handle overflow: buffer is full without finding a newline
             recieveBuffer[BUFFER_SIZE] = '\0'; 
-            printf("Buffer Full: %s\n", recieveBuffer);
+            printf("FULL BUFFER ERROR: %s\n", recieveBuffer);
             bufferIndex = 0;
         }
     }

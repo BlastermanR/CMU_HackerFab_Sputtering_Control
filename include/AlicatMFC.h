@@ -1,6 +1,10 @@
 #ifndef ALICAT_MFC
 #define ALICAT_MFC
 
+#include <stdio.h>
+#include "UARTInterface.h"
+#include "IDevice.h"
+
 /**
  * Defines the Alicat Mass Flow Controller (MFC).
  * - Utilizes UART --> RS232 converter (MAX3232)
@@ -9,11 +13,6 @@
  * @author Ryan Massie (rmassie)
  * @date 3/4/26
  */
-
-#include <stdio.h>
-#include "UARTInterface.h"
-#include "IDevice.h"
-
 class AlicatMFC : public IDevice
 {
     private:

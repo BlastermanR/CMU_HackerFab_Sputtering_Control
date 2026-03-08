@@ -2,30 +2,13 @@
 #include "pico/stdlib.h"
 
 #include "picoDefinitions.h"
-#include "HardwareUART.h"
-#include "PIO_UART.h"
-#include "AlicatMFC.h"
+#include "SputteringManager.h"
 #include "USBSerial.h"
+
+#define DEBUG // Enables debug functionality
 
 // Define USB Serial
 USBSerial pcTerminal;
-
-void blinkTest()
-{
-    // PICO_DEFAULT_LED_PIN is automatically set to 25 for the Pico 2
-    const uint LED_PIN = PICO_DEFAULT_LED_PIN;
-    
-    gpio_init(LED_PIN);
-    gpio_set_dir(LED_PIN, GPIO_OUT);
-
-    while (true) 
-    {
-        gpio_put(LED_PIN, 1);
-        sleep_ms(250); // Faster blink for the faster chip!
-        gpio_put(LED_PIN, 0);
-        sleep_ms(250);
-    }
-}
 
 void onPcCommand(const std::string& command) 
 {
@@ -36,45 +19,35 @@ int main()
 {
     stdio_init_all();
 
-    //blinkTest();
-
     // Setup the serial communication
     pcTerminal.begin();
     pcTerminal.setCallback(onPcCommand);
-    //pcTerminal.println("Enter a setpoint to send to the mass flow controller:");
-
-    // The Hardware UART (Using uart0, TX on GPIO 0, RX on GPIO 1, 9600 baud)
-    HardUart hardwarePort(uart0, ALICAT_1_TX, ALICAT_1_RX, 9600);
-
-    // Define the Alicat Device
-    AlicatMFC massFlowController(&hardwarePort);
-    
-    // Initialize the Alicat Device (this starts the UART and sets up the RX callback)
-    massFlowController.init();
+\
+    // Initialize the Sputtering Manager
+    SputteringManager manager;
+    manager.init();
 
     // Alicat Test message
     const char* s = "A\r"; 
     
     // Store the time we last sent a message
-    uint32_t last_send_time = to_ms_since_boot(get_absolute_time());
-
-    // Dummy Return to valideate the Alicat is clear of courrupt data.
-    massFlowController.sendMessage("\r");
+    uint32_t lastSendTime = to_ms_since_boot(get_absolute_time());
 
     while (true) 
     {
         pcTerminal.update();
+        manager.update();
         
         // Get the current time
-        uint32_t current_time = to_ms_since_boot(get_absolute_time());
+        uint32_t currentTime = to_ms_since_boot(get_absolute_time());
 
         // Check if 5 seconds have passed since the last send
-        if (current_time - last_send_time >= 10000) 
+        if (currentTime - lastSendTime >= 10000) 
         {
-            massFlowController.sendMessage(s);
+            // manager.sendMessage(s); // Example if manager had a wrapper
             
             // Reset the timer
-            last_send_time = current_time;
+            lastSendTime = currentTime;
         }
     }
 }
