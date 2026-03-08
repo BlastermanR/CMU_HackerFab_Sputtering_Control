@@ -15,8 +15,8 @@
  */
 class SputteringManager {
 private:
-    HardUart alicatUart;
-    AlicatMFC mfc;
+    HardUart* alicatUart;
+    AlicatMFC* mfc;
 
 public:
     /**
