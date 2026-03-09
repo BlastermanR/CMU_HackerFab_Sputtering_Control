@@ -39,6 +39,12 @@ public:
      * Updates states of all managed devices.
      */
     void update();
+
+
+    /**
+     * @brief Debug function to send a test message to the Alicat MFC.
+     */
+    void sendTestMessage();
 };
 
 #endif // SPUTTERING_MANAGER_H

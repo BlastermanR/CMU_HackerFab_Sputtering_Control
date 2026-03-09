@@ -1,5 +1,6 @@
 #include "UARTInterface.h"
 #include "IDevice.h"
+#include "picoDefinitions.h"
 
 /**
  * TODO

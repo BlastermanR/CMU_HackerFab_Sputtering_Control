@@ -4,8 +4,6 @@
 #include "SputteringManager.h"
 #include "USBSerial.h"
 
-#define DEBUG // Enables debug functionality
-
 // Define Global Systems
 USBSerial pcTerminal;
 SputteringManager manager;
@@ -42,10 +40,11 @@ int main()
         uint32_t currentTime = to_ms_since_boot(get_absolute_time());
 
         // Check if 5 seconds have passed since the last send
-        if (currentTime - lastSendTime >= 10000) 
+        if (currentTime - lastSendTime >= 3000) 
         {
-            // manager.sendMessage(s); // Example if manager had a wrapper
-            
+#ifdef DEBUG
+            manager.sendTestMessage();
+#endif
             // Reset the timer
             lastSendTime = currentTime;
         }

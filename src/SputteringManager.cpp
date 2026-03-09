@@ -41,3 +41,15 @@ void SputteringManager::update()
     }
     // Add logic here to manage other devices and control system states
 }
+
+void SputteringManager::sendTestMessage()
+{
+    if (mfc) 
+    {
+        mfc->sendMessage("A\r");
+    }
+    else
+    {
+        printf("Error: MFC is null\n");
+    }
+}

@@ -3,6 +3,7 @@
 
 #include "UARTInterface.h"
 #include "IDevice.h"
+#include "picoDefinitions.h"
 
 /**
  * Defines the Alicat Mass Flow Controller (MFC).

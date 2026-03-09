@@ -9,6 +9,9 @@
  * @date 3/3/26
  */
 
+// Debug Status
+#define DEBUG // Enables debug functionality
+
 // Port Definitions
 #define UART0_TX 16
 #define UART0_RX 17

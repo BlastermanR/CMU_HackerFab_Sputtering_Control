@@ -24,8 +24,21 @@ AlicatMFC::~AlicatMFC()
 
 void AlicatMFC::init()
 {
+    // Set the callback
     serialPort->setCallback(std::bind(&IDevice::onDataReceived, this, std::placeholders::_1));
+
+    // Start the UART communication
     serialPort->begin();
+
+   /** 
+    * Clear buffer to ensure no garbage data from hardware startup
+    * is poluting the Alicat Message Space. this is a common issue with 
+    * the MAX3232 where it can send random bytes on powerup. Sending a 
+    * carriage return is a simple way to trigger the buffer to clear 
+    * if any garbage data is present. The callback will handle clearing 
+    * the buffer and printing any garbage data if DEBUG is enabled.
+   */
+   serialPort->print("\r");
 }
 
 void AlicatMFC::printRecieved()

@@ -2,6 +2,7 @@
 #define I_DEVICE_H
 
 #include <stdio.h>
+#include "picoDefinitions.h"
 
 /**
  * Interface definition for generic devices on the Sputtering automation system.
