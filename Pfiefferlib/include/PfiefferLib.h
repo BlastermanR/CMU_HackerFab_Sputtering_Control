@@ -32,6 +32,12 @@ struct PfiefferCommand
 };
 
 class PfieifferLib {
+    /**
+     * @brief Calculate the checksum for a given command based on its fields.
+     * The checksum is the sum of the ASCII values of all characters in the command fields modulo 256.
+     * @param command Pointer to the PfiefferCommand struct to calculate the checksum for.
+     * @return The calculated checksum as an unsigned integer.
+     */
     static unsigned int calculateChecksum(PfiefferCommand* command)
     {
         if(command == nullptr) 
@@ -65,11 +71,20 @@ class PfieifferLib {
         return sum % (UINT8_MAX + 1); // Modulo 256 to fit in 2 characters
     }
 
-    static std::string formatCommand(PfiefferCommand* command)
+    public:
+    /**
+     * @brief Format a PfiefferCommand struct into a properly structured command string to send to the device.
+     * This function calculates the checksum and data length fields automatically based on the command contents.
+     * @param command Pointer to the PfiefferCommand struct to format.
+     * @param valid Optional pointer to a boolean that will be set to true if the command is valid, false otherwise.
+     * @return The formatted command string.
+     */
+    static std::string formatCommand(PfiefferCommand* command, bool* valid = nullptr)
     {
         if(command == nullptr) 
         {
             printf("Error: Null command pointer passed to formatCommand.\n");
+            if (valid) *valid = false;
             return "";
         }
 
@@ -85,11 +100,19 @@ class PfieifferLib {
         return formattedCommand;
     }
 
-    static void decryptResponse(std::string response, PfiefferCommand* command)
+    /**
+     * @brief Parse a response string received from the device and populate a PfiefferCommand struct with the extracted fields.
+     * This function also performs validation checks on the response format and checksum.
+     * @param response The raw response string received from the device.
+     * @param command Pointer to the PfiefferCommand struct to populate with the parsed data
+     * @param valid Optional pointer to a boolean that will be set to true if the response is valid and parsed successfully, false otherwise.
+     */
+    static void decryptResponse(std::string response, PfiefferCommand* command, bool* valid = nullptr)
     {
         if(command == nullptr) 
         {
             printf("Error: Null command pointer passed to decryptResponse.\n");
+            if (valid) *valid = false;
             return;
         }
 
@@ -97,6 +120,7 @@ class PfieifferLib {
         {
             printf("Error: Response string too short to parse.\n");
             printf("Received response: %s\n", response.c_str());
+            if (valid) *valid = false;
             return;
         }
 
@@ -109,6 +133,7 @@ class PfieifferLib {
             {
                 printf("Error: Invalid character in address field of response.\n");
                 printf("Received response: %s\n", response.c_str());
+                if (valid) *valid = false;
                 return;
             }
             command->address += response[i];
@@ -122,6 +147,7 @@ class PfieifferLib {
             {
                 printf("Error: Invalid character in address field of response.\n");
                 printf("Received response: %s\n", response.c_str());
+                if (valid) *valid = false;
                 return;
             } 
             command->action += response[offset + i];
@@ -135,6 +161,7 @@ class PfieifferLib {
             {
                 printf("Error: Invalid character in address field of response.\n");
                 printf("Received response: %s\n", response.c_str());
+                if (valid) *valid = false;
                 return;
             }
             command->paramNum += response[offset + i];
@@ -148,6 +175,7 @@ class PfieifferLib {
             {
                 printf("Error: Invalid character in address field of response.\n");
                 printf("Received response: %s\n", response.c_str());
+                if (valid) *valid = false;
                 return;
             }
             command->dataLen += response[offset + i];
@@ -162,6 +190,7 @@ class PfieifferLib {
             {
                 printf("Error: Invalid character in address field of response.\n");
                 printf("Received response: %s\n", response.c_str());
+                if (valid) *valid = false;
                 return;
             }
             command->data += response[offset + i];
@@ -175,6 +204,7 @@ class PfieifferLib {
             {
                 printf("Error: Invalid character in address field of response.\n");
                 printf("Received response: %s\n", response.c_str());
+                if (valid) *valid = false;
                 return;
             }
 
@@ -184,6 +214,7 @@ class PfieifferLib {
             {
                 printf("Error: Checksum mismatch in response.\n");
                 printf("Received response: %s\n", response.c_str());
+                if (valid) *valid = false;
                 return;
             }
         }
@@ -193,26 +224,40 @@ class PfieifferLib {
         {
             printf("Error: Missing carriage return at end of response.\n");
             printf("Received response: %s\n", response.c_str());
+            if (valid) *valid = false;
             return;
         }
     }
 
-    static bool isRead(PfiefferCommand* command)
+    /**
+     * @brief Utility function to check if a given command is a read command based on its action field.
+     * @param command Pointer to the PfiefferCommand struct to check.
+     * @param valid Optional pointer to a boolean that will be set to true if the command is valid, false otherwise.
+     * @return True if the command is a read command, false otherwise.
+     */
+    static bool isRead(PfiefferCommand* command, bool* valid = nullptr)
     {
         if(command == nullptr) 
         {
             printf("Error: Null command pointer passed to isRead.\n");
+            if (valid) *valid = false;
             return false;
         }
 
         return (command->action == READ_PARAMETER) ? true : false;
     }
 
-    static void printCommand(PfiefferCommand* command)
+    /**
+     * @brief Utility function to print the contents of a PfiefferCommand struct for debugging purposes.
+     * @param command Pointer to the PfiefferCommand struct to print.
+     * @param valid Optional pointer to a boolean that will be set to true if the command is valid, false otherwise.
+     */
+    static void printCommand(PfiefferCommand* command, bool* valid = nullptr)
     {
         if(command == nullptr) 
         {
             printf("Error: Null command pointer passed to printCommand.\n");
+            if (valid) *valid = false;
             return;
         }
 

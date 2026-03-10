@@ -15,10 +15,33 @@ class PfiefferGauge : public IDevice
     // Define the serial port
     IUart* serialPort;
 
-    // Override the debug print for specifically this device
+    // Flag to indicate a new response has been received for state logic
+    bool newResponse = false;
+
+    // Variable to store the latest chamber pressure reading
+    double chamberPressure_hPa = 0.0;
+
+    /**
+     * @brief Override the default data received handler to parse pressure readings from the Pfieffer Gauge.
+     */
+    void onDataReceived(char c) override;
+
+    /**
+     * @brief Override the debug print function to prefix messages with "Pressure Gauge"
+     */
     void printRecieved() override;
 
     public:
+
+    /**
+     * @brief Utilizes UART port to send message to device
+     * @param message Null terminating message to send to device.
+     * \0 is not sent
+     * 
+     * TODO: MARK PRIVATE AFTER TESTING
+     */
+    void sendMessage(const char* message) override;
+
     /**
      * @brief Constructor
      * @param uart Uart instance to use.
@@ -37,13 +60,18 @@ class PfiefferGauge : public IDevice
 
     /**
      * @brief logic update function
+     * Used to parse incoming buffers, run logic, etc.
+     * Updates Values:
+     * - Chamber Pressure
      */
     void update() override;
 
     /**
-     * @brief Utilizes UART port to send message to device
-     * @param message Null terminating message to send to device.
-     * \0 is not sent
+     * @brief Retrieve the latest chamber pressure reading
+     * @return The latest chamber pressure value
      */
-    void sendMessage(const char* message) override;
+    double readPressure()
+    {
+        return chamberPressure_hPa;
+    }
 };

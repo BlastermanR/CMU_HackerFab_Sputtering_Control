@@ -19,6 +19,8 @@ protected:
     static constexpr int BUFFER_SIZE = 100;
     char recieveBuffer[BUFFER_SIZE + 1];
     int bufferIndex = 0;
+    bool messageComplete = false;
+    bool bufferOverflowed = false; // Unrecoverable error state if true
 
 public:
 
@@ -50,7 +52,8 @@ public:
      */
     virtual void onDataReceived(char c) 
     {
-        if (bufferIndex < BUFFER_SIZE) {
+        if (bufferIndex < BUFFER_SIZE) 
+        {
             recieveBuffer[bufferIndex] = c;
 
             // Check if the character just added is a line terminator
@@ -58,12 +61,14 @@ public:
             {
                 recieveBuffer[bufferIndex] = '\0';
 #ifdef DEBUG
-                printRecieved();
+                printRecieved(); // Debug print the received message
 #endif
+                messageComplete = true; // Mark the message as complete
                 bufferIndex = 0;
             } 
             else 
             {
+                messageComplete = false; // Still building the message
                 bufferIndex++; // Move to next slot
             }
         } 
@@ -72,6 +77,8 @@ public:
             // Handle overflow: buffer is full without finding a newline
             recieveBuffer[BUFFER_SIZE] = '\0'; 
             printf("FULL BUFFER ERROR: %s\n", recieveBuffer);
+            messageComplete = true; // Mark the message as complete even on overflow
+            bufferOverflowed = true; // Indicate that a buffer overflow occurred
             bufferIndex = 0;
         }
     }
