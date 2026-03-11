@@ -2,6 +2,7 @@
 #define SPUTTERING_MANAGER_H
 
 #include "AlicatMFC.h"
+#include "PfiefferGauge.h"
 #include "HardwareUART.h"
 
 /**
@@ -17,6 +18,9 @@ class SputteringManager {
 private:
     HardUart* alicatUart;
     AlicatMFC* mfc;
+    
+    HardUart* gaugeUart;
+    PfiefferGauge* gauge;
 
 public:
     /**
@@ -45,6 +49,7 @@ public:
      * @brief Debug function to send a test message to the Alicat MFC.
      */
     void sendTestMessage();
+
 };
 
 #endif // SPUTTERING_MANAGER_H
