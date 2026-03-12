@@ -74,7 +74,7 @@ void SputteringManager::sendTestMessage()
 
     if (gauge) 
     {
-        // TODO: format your message here
+        // Send a basic read pressure command to the gauge for testing
         gauge->sendMessage("0010074002=?106\r"); 
     }
     else
