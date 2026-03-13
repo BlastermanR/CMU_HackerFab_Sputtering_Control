@@ -1,6 +1,8 @@
 #include "SputteringManager.h"
 #include "picoDefinitions.h"
+#include "PIO_UART.h"
 #include <stdio.h>
+#include "pico/stdlib.h"
 
 SputteringManager::SputteringManager() 
     : alicatUart(nullptr), 
@@ -36,15 +38,16 @@ void SputteringManager::init()
     printf("Sputtering Manager: Initializing...\n");
     
     // Dynamically define the UART first
-    alicatUart = new HardUart(uart0, ALICAT_1_TX, ALICAT_1_RX, 9600);
+    alicatUart = new PioUart(pio0, 0, 1, ALICAT_1_TX, ALICAT_1_RX, 9600);
     
     // Then define the device implementation mapped to that UART
     mfc = new AlicatMFC(alicatUart);
     mfc->init();
 
     // Initialize Gauge UART and Device
-    gaugeUart = new HardUart(uart1, P1_DI_PIN, P1_RO_PIN, 9600);
-    gauge = new PfiefferGauge(gaugeUart);
+    gaugeUart = new HardUart(uart0, P2_DI_PIN, P2_RO_PIN, 9600);
+    // Use P2_TR_RE for the RTs pin
+    gauge = new PfiefferGauge(gaugeUart, P2_TR_RE);
     gauge->init();
 }
 
@@ -63,19 +66,9 @@ void SputteringManager::update()
 
 void SputteringManager::sendTestMessage()
 {
-    if (mfc) 
-    {
-        mfc->sendMessage("A\r");
-    }
-    else
-    {
-        printf("Error: MFC is null\n");
-    }
-
     if (gauge) 
     {
-        // Send a basic read pressure command to the gauge for testing
-        gauge->sendMessage("0010074002=?106\r"); 
+        gauge->sendMessage("0020074002=?107\r");
     }
     else
     {

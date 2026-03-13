@@ -16,10 +16,10 @@
  */
 class SputteringManager {
 private:
-    HardUart* alicatUart;
+    IUart* alicatUart;
     AlicatMFC* mfc;
     
-    HardUart* gaugeUart;
+    IUart* gaugeUart;
     PfiefferGauge* gauge;
 
 public:

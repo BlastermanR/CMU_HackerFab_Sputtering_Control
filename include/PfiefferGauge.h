@@ -2,6 +2,7 @@
 #include "IDevice.h"
 #include "picoDefinitions.h"
 #include "PfiefferLib.h"
+#include "pico/types.h"
 
 /**
  * TODO
@@ -14,6 +15,9 @@ class PfiefferGauge : public IDevice
     private:
     // Define the serial port
     IUart* serialPort;
+
+    // Transmit/Receive GPIO pin for RS485 chip
+    unsigned int rtsPin;
 
     // Flag to indicate a new response has been received for state logic
     bool newResponse = false;
@@ -45,8 +49,9 @@ class PfiefferGauge : public IDevice
     /**
      * @brief Constructor
      * @param uart Uart instance to use.
+     * @param rtsPin GPIO pin number for transmit/receive control.
      */
-    PfiefferGauge(IUart* uart);
+    PfiefferGauge(IUart* uart, unsigned int rtsPin);
 
     /**
      * @brief Destructor

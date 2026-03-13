@@ -8,10 +8,11 @@
 #include <stdio.h>
 #include "PfiefferGauge.h"
 #include "pico/stdlib.h"
+#include "hardware/gpio.h"
 #include "picoDefinitions.h"
 #include "math.h"
 
-PfiefferGauge::PfiefferGauge(IUart* uart) : serialPort(uart)
+PfiefferGauge::PfiefferGauge(IUart* uart, uint rtsPin) : serialPort(uart), rtsPin(rtsPin)
 {
     // bufferIndex initialized by IDevice base class
 }
@@ -23,6 +24,10 @@ PfiefferGauge::~PfiefferGauge()
 
 void PfiefferGauge::init()
 {
+    gpio_init(rtsPin);
+    gpio_set_dir(rtsPin, GPIO_OUT);
+    gpio_put(rtsPin, 0); // Default to receive
+
     serialPort->setCallback(std::bind(&IDevice::onDataReceived, this, std::placeholders::_1));
     serialPort->begin();
 }
@@ -42,6 +47,7 @@ void PfiefferGauge::onDataReceived(char c)
             return;
         }
         
+        /*
         // Decrypt the response using the PfieifferLib to extract the command fields
         PfiefferCommand command;
         PfieifferLib::decryptResponse(response, &command);
@@ -60,6 +66,7 @@ void PfiefferGauge::onDataReceived(char c)
         printf("PfiefferGauge: Parsed Pressure Reading: %f hPa\n", chamberPressure_hPa);
         
         // State machine logic vars will be set on command type
+        */
     }
 }
 
@@ -76,7 +83,11 @@ void PfiefferGauge::update()
 void PfiefferGauge::sendMessage(const char* message)
 {
 #ifdef DEBUG
-    printf("Pressure Gauge: Sending Message: %s\n", message);
+    printf("PfiefferGauge: Sending Message: %s\n", message);
 #endif
+    gpio_put(rtsPin, 1); // Set high for transmitting
     serialPort->print(message);
+    uart_tx_wait_blocking(uart0);
+    sleep_ms(2); // Short delay to ensure message is sent before switching back to receive
+    gpio_put(rtsPin, 0); // Set back to receive
 }

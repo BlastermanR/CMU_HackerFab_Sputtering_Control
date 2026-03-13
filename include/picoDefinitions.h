@@ -28,8 +28,7 @@
 // Vacuum Pump
 #define P2_DI_PIN 12
 #define P2_RO_PIN 13
-#define P2_RE_PIN 14
-#define P2_DE_PIN 15
+#define P2_TR_RE 14
 
 // AlicatMFC 1
 #define ALICAT_1_TX 16
