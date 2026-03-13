@@ -88,6 +88,6 @@ void PfiefferGauge::sendMessage(const char* message)
     gpio_put(rtsPin, 1); // Set high for transmitting
     serialPort->print(message);
     uart_tx_wait_blocking(uart0);
-    sleep_ms(2); // Short delay to ensure message is sent before switching back to receive
+    sleep_ms(3); // Short delay to ensure message is sent before switching back to receive
     gpio_put(rtsPin, 0); // Set back to receive
 }
