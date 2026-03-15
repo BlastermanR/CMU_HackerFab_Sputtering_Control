@@ -4,6 +4,8 @@
 #include "AlicatMFC.h"
 #include "PfiefferGauge.h"
 #include "HardwareUART.h"
+#include "RS232Device.h"
+#include "RS485Device.h"
 
 /**
  * @brief Manages the operation of the Sputtering automation system.
@@ -17,9 +19,11 @@
 class SputteringManager {
 private:
     IUart* alicatUart;
+    RS232Device* alicatDevice;
     AlicatMFC* mfc;
     
     IUart* gaugeUart;
+    RS485Device* gaugeDevice;
     PfiefferGauge* gauge;
 
 public:

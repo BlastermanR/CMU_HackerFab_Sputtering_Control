@@ -123,6 +123,14 @@ public:
     void print(const char* str) override {
         while (*str) write(*str++);
     }
+
+    void waitTxComplete() override {
+        while (!pio_sm_is_tx_fifo_empty(pioInstance, txSm)) {
+            tight_loop_contents();
+        }
+        uint32_t delay_us = (10000000 + baudRate - 1) / baudRate;
+        sleep_us(delay_us);
+    }
 };
 
 // Initialize static array for 3 PIO blocks

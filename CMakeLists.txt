@@ -40,6 +40,7 @@ pico_sdk_init()
 include(${CMAKE_SOURCE_DIR}/UARTLibrary/UARTLibrary.cmake)
 include(${CMAKE_SOURCE_DIR}/USBSerialLibrary/USBSerialLibrary.cmake)
 include(${CMAKE_SOURCE_DIR}/Pfiefferlib/PfiefferLibrary.cmake)
+include(${CMAKE_SOURCE_DIR}/SerialDeviceLibrary/SerialDeviceLibrary.cmake)
 
 # Use GLOB to gather files
 file(GLOB SOURCES "src/*.cpp")
@@ -63,6 +64,7 @@ target_link_libraries(SputteringACS PRIVATE
         USBSerial
         UARTInterface
         Pfiefferlib
+        SerialDeviceLibrary
 
         # Pico Libs
         pico_stdlib

@@ -10,30 +10,28 @@
 #include "pico/stdlib.h"
 #include "picoDefinitions.h"
 
-PfiefferPump::PfiefferPump(IUart* uart) : serialPort(uart)
+PfiefferPump::PfiefferPump(ISerialDevice* dev) : serialPort(dev)
 {
-    // bufferIndex initialized by IDevice base class
 }
 
 PfiefferPump::~PfiefferPump()
 {
-    // Intentionally Empty
 }
 
 void PfiefferPump::init()
 {
-    serialPort->setCallback(std::bind(&IDevice::onDataReceived, this, std::placeholders::_1));
     serialPort->begin();
-}
-
-void PfiefferPump::printRecieved()
-{
-    printf("Vacuum Pump: Message Received: %s\n", recieveBuffer);
 }
 
 void PfiefferPump::update()
 {
-    // Routine checks or background tasks can go here
+    while (serialPort->hasMessage()) {
+        std::string msg = serialPort->popMessage();
+        #ifdef DEBUG
+        printf("Vacuum Pump: Message Received: %s\n", msg.c_str());
+        #endif
+        // Handle message here
+    }
 }
 
 void PfiefferPump::sendMessage(const char* message)
@@ -41,5 +39,5 @@ void PfiefferPump::sendMessage(const char* message)
 #ifdef DEBUG
     printf("Vacuum Pump: Sending Message: %s\n", message);
 #endif
-    serialPort->print(message);
+    serialPort->send(message);
 }

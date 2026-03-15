@@ -1,7 +1,7 @@
 #ifndef ALICAT_MFC
 #define ALICAT_MFC
 
-#include "UARTInterface.h"
+#include "ISerialDevice.h"
 #include "IDevice.h"
 #include "picoDefinitions.h"
 
@@ -17,17 +17,14 @@ class AlicatMFC : public IDevice
 {
     private:
     // Define the serial port
-    IUart* serialPort;
-
-    // Override the debug print for specifically this device
-    void printRecieved() override;
+    ISerialDevice* serialPort;
 
     public:
     /**
      * @brief Constructor
-     * @param uart Uart instance to use.
+     * @param dev ISerialDevice instance to use.
      */
-    AlicatMFC(IUart* uart);
+    AlicatMFC(ISerialDevice* dev);
 
     /**
      * @brief Destructor

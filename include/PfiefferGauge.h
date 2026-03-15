@@ -1,4 +1,4 @@
-#include "UARTInterface.h"
+#include "ISerialDevice.h"
 #include "IDevice.h"
 #include "picoDefinitions.h"
 #include "PfiefferLib.h"
@@ -14,26 +14,13 @@ class PfiefferGauge : public IDevice
 {
     private:
     // Define the serial port
-    IUart* serialPort;
-
-    // Transmit/Receive GPIO pin for RS485 chip
-    unsigned int rtsPin;
+    ISerialDevice* serialPort;
 
     // Flag to indicate a new response has been received for state logic
     bool newResponse = false;
 
     // Variable to store the latest chamber pressure reading
     double chamberPressure_hPa = 0.0;
-
-    /**
-     * @brief Override the default data received handler to parse pressure readings from the Pfieffer Gauge.
-     */
-    void onDataReceived(char c) override;
-
-    /**
-     * @brief Override the debug print function to prefix messages with "Pressure Gauge"
-     */
-    void printRecieved() override;
 
     public:
 
@@ -48,10 +35,9 @@ class PfiefferGauge : public IDevice
 
     /**
      * @brief Constructor
-     * @param uart Uart instance to use.
-     * @param rtsPin GPIO pin number for transmit/receive control.
+     * @param dev ISerialDevice instance to use.
      */
-    PfiefferGauge(IUart* uart, unsigned int rtsPin);
+    PfiefferGauge(ISerialDevice* dev);
 
     /**
      * @brief Destructor

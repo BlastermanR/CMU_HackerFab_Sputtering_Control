@@ -6,8 +6,10 @@
 
 SputteringManager::SputteringManager() 
     : alicatUart(nullptr), 
+      alicatDevice(nullptr),
       mfc(nullptr),
       gaugeUart(nullptr),
+      gaugeDevice(nullptr),
       gauge(nullptr)
 {
     // Constructor
@@ -19,6 +21,10 @@ SputteringManager::~SputteringManager()
     {
         delete mfc;
     }
+    if (alicatDevice)
+    {
+        delete alicatDevice;
+    }
     if (alicatUart) 
     {
         delete alicatUart;
@@ -26,6 +32,10 @@ SputteringManager::~SputteringManager()
     if (gauge)
     {
         delete gauge;
+    }
+    if (gaugeDevice)
+    {
+        delete gaugeDevice;
     }
     if (gaugeUart)
     {
@@ -39,15 +49,17 @@ void SputteringManager::init()
     
     // Dynamically define the UART first
     alicatUart = new PioUart(pio0, 0, 1, ALICAT_1_TX, ALICAT_1_RX, 9600);
+    alicatDevice = new RS232Device(alicatUart);
     
     // Then define the device implementation mapped to that UART
-    mfc = new AlicatMFC(alicatUart);
+    mfc = new AlicatMFC(alicatDevice);
     mfc->init();
 
     // Initialize Gauge UART and Device
     gaugeUart = new HardUart(uart0, P2_DI_PIN, P2_RO_PIN, 9600);
+    gaugeDevice = new RS485Device(gaugeUart, P2_TR_RE);
     // Use P2_TR_RE for the RTs pin
-    gauge = new PfiefferGauge(gaugeUart, P2_TR_RE);
+    gauge = new PfiefferGauge(gaugeDevice);
     gauge->init();
 }
 

@@ -89,6 +89,10 @@ public:
     void print(const char* str) override {
         uart_puts(uartInstance, str);
     }
+
+    void waitTxComplete() override {
+        uart_tx_wait_blocking(uartInstance);
+    }
 };
 
 // Initialize static array

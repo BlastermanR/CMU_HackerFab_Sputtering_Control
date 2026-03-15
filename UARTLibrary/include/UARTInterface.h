@@ -22,6 +22,7 @@ public:
     virtual void begin() = 0;
     virtual void write(char c) = 0;
     virtual void print(const char* str) = 0;
+    virtual void waitTxComplete() = 0;
     virtual void setCallback(UartCallback cb) = 0;
 };
 

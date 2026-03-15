@@ -12,21 +12,16 @@
 #include "pico/stdlib.h"
 #include "picoDefinitions.h"
 
-AlicatMFC::AlicatMFC(IUart* uart) : serialPort(uart)
+AlicatMFC::AlicatMFC(ISerialDevice* dev) : serialPort(dev)
 {
-    // bufferIndex initialized by IDevice base class
 }
 
 AlicatMFC::~AlicatMFC()
 {
-    // Intentionally Empty
 }
 
 void AlicatMFC::init()
 {
-    // Set the callback
-    serialPort->setCallback(std::bind(&IDevice::onDataReceived, this, std::placeholders::_1));
-
     // Start the UART communication
     serialPort->begin();
 
@@ -38,17 +33,18 @@ void AlicatMFC::init()
     * if any garbage data is present. The callback will handle clearing 
     * the buffer and printing any garbage data if DEBUG is enabled.
    */
-   serialPort->print("\r");
-}
-
-void AlicatMFC::printRecieved()
-{
-    printf("Alicat Message Received: %s\n", recieveBuffer);
+   serialPort->send("\r");
 }
 
 void AlicatMFC::update()
 {
-    // Routine checks or background tasks can go here
+    while (serialPort->hasMessage()) {
+        std::string msg = serialPort->popMessage();
+        #ifdef DEBUG
+        printf("Alicat Message Received: %s\n", msg.c_str());
+        #endif
+        // Handle message here
+    }
 }
 
 void AlicatMFC::sendMessage(const char* message)
@@ -56,5 +52,5 @@ void AlicatMFC::sendMessage(const char* message)
 #ifdef DEBUG
     printf("Alicat: Sending Message: %s\n", message);
 #endif
-    serialPort->print(message);
+    serialPort->send(message);
 }

@@ -1,7 +1,7 @@
 #ifndef PFIEFFER_PUMP_H
 #define PFIEFFER_PUMP_H
 
-#include "UARTInterface.h"
+#include "ISerialDevice.h"
 #include "IDevice.h"
 
 /**
@@ -14,17 +14,14 @@ class PfiefferPump : public IDevice
 {
     private:
     // Define the serial port
-    IUart* serialPort;
-
-    // Override the debug print for specifically this device
-    void printRecieved() override;
+    ISerialDevice* serialPort;
 
     public:
     /**
      * @brief Constructor
-     * @param uart Uart instance to use.
+     * @param dev ISerialDevice instance to use.
      */
-    PfiefferPump(IUart* uart);
+    PfiefferPump(ISerialDevice* dev);
 
     /**
      * @brief Destructor
