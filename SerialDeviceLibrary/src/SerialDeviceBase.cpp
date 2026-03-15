@@ -1,9 +1,9 @@
 #include "SerialDeviceBase.h"
 #include <algorithm>
 
-SerialDeviceBase::SerialDeviceBase(IUart* uartInstance) : uart(uartInstance) {
-    // Initialize the queue to hold 10 elements of type SerialMessage
-    queue_init(&msgQueue, sizeof(SerialMessage), 10);
+SerialDeviceBase::SerialDeviceBase(IUart* uartInstance) : uart(uartInstance), receiveIndex(0) {
+    // Initialize the queue to hold elements of type SerialMessage
+    queue_init(&msgQueue, sizeof(SerialMessage), SERIAL_QUEUE_SIZE);
     // Bind the callback
     uart->setCallback([this](char c) {
         this->onDataReceived(c);
@@ -32,17 +32,19 @@ std::string SerialDeviceBase::popMessage() {
 
 void SerialDeviceBase::onDataReceived(char c) {
     if (c == '\n' || c == '\r') {
-        if (!receiveBuffer.empty()) {
+        if (receiveIndex > 0) {
             SerialMessage msg;
             // Ensure null termination and avoid buffer overflow
-            size_t copyLen = std::min(receiveBuffer.length(), sizeof(msg.data) - 1);
-            std::memcpy(msg.data, receiveBuffer.c_str(), copyLen);
+            size_t copyLen = std::min((size_t)receiveIndex, sizeof(msg.data) - 1);
+            std::memcpy(msg.data, receiveBuffer, copyLen);
             msg.data[copyLen] = '\0';
             
             queue_try_add(&msgQueue, &msg);
-            receiveBuffer.clear();
+            receiveIndex = 0;
         }
     } else {
-        receiveBuffer.push_back(c);
+        if (receiveIndex < sizeof(receiveBuffer) - 1) {
+            receiveBuffer[receiveIndex++] = c;
+        }
     }
 }

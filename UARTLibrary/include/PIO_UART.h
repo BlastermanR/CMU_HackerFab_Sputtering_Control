@@ -29,27 +29,24 @@ private:
     // Static IRQ Handlers
     static void pio0_irq_handler() {
         for (int i = 0; i < 4; i++) {
-            if (pio0->irq & (1 << i) && instances[0][i]) {
+            if (instances[0][i] && !pio_sm_is_rx_fifo_empty(pio0, i)) {
                 instances[0][i]->handleRxIrq();
-                pio_interrupt_clear(pio0, i);
             }
         }
     }
 
     static void pio1_irq_handler() {
         for (int i = 0; i < 4; i++) {
-            if (pio1->irq & (1 << i) && instances[1][i]) {
+            if (instances[1][i] && !pio_sm_is_rx_fifo_empty(pio1, i)) {
                 instances[1][i]->handleRxIrq();
-                pio_interrupt_clear(pio1, i);
             }
         }
     }
 
     static void pio2_irq_handler() {
         for (int i = 0; i < 4; i++) {
-            if (pio2->irq & (1 << i) && instances[2][i]) {
+            if (instances[2][i] && !pio_sm_is_rx_fifo_empty(pio2, i)) {
                 instances[2][i]->handleRxIrq();
-                pio_interrupt_clear(pio2, i);
             }
         }
     }

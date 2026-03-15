@@ -7,15 +7,19 @@
 #include <string>
 #include <cstring>
 
+#define RECEIVE_BUFFER_SIZE 256
+#define SERIAL_QUEUE_SIZE 10
+
 struct SerialMessage {
-    char data[256];
+    char data[RECEIVE_BUFFER_SIZE];
 };
 
 class SerialDeviceBase : public ISerialDevice {
 protected:
     IUart* uart;
     queue_t msgQueue;
-    std::string receiveBuffer;
+    char receiveBuffer[RECEIVE_BUFFER_SIZE];
+    uint16_t receiveIndex;
 
     /**
      * @brief Internal callback for handling raw data characters from UART.

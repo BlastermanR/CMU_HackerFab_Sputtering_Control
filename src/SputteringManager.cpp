@@ -83,6 +83,11 @@ void SputteringManager::update()
 
 void SputteringManager::sendTestMessage()
 {
+    if (mfc)
+    {
+        mfc->sendMessage("A\r");
+    }
+    /*
     if (gauge) 
     {
         gauge->sendMessage("0020074002=?107\r");
@@ -91,4 +96,5 @@ void SputteringManager::sendTestMessage()
     {
         printf("Error: Gauge is null\n");
     }
+    */
 }
