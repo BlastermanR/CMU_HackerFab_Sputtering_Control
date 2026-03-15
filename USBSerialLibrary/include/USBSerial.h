@@ -21,18 +21,39 @@ private:
     UsbCommandCallback commandCallback;
 
 public:
-    // Constructor
+    /**
+     * @brief Constructs a new USBSerial object.
+     */
     USBSerial();
 
-    // Setup and main loop functions
+    /**
+     * @brief Initializes the USB serial interface.
+     */
     void begin();
+
+    /**
+     * @brief Main loop function to process USB serial input.
+     * 
+     * This should be called frequently to check for new data and trigger callbacks.
+     */
     void update(); 
     
-    // Assign the callback function
+    /**
+     * @brief Sets the callback function for received commands.
+     * @param cb The callback function taking a const std::string reference.
+     */
     void setCallback(UsbCommandCallback cb);
 
-    // Output functions
+    /**
+     * @brief Prints a null-terminated string to the USB serial output.
+     * @param str The string to print.
+     */
     void print(const char* str);
+
+    /**
+     * @brief Prints a null-terminated string followed by a newline to the USB serial output.
+     * @param str The string to print.
+     */
     void println(const char* str);
 };
 

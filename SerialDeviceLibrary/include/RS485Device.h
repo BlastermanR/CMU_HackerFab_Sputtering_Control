@@ -10,6 +10,11 @@ private:
     uint rtsPin;
 
 public:
+    /**
+     * @brief Constructs an RS485Device.
+     * @param uartInstance Pointer to an IUart implementation.
+     * @param rts The GPIO pin number used for Request-to-Send (RTS) flow control.
+     */
     RS485Device(IUart* uartInstance, uint rts)
         : SerialDeviceBase(uartInstance), rtsPin(rts) {
         
@@ -18,6 +23,10 @@ public:
         gpio_put(rtsPin, 0); // Default to listening
     }
 
+    /**
+     * @brief Sends a message over RS485, handling the RTS pin for half-duplex communication.
+     * @param msg The string message to send.
+     */
     void send(const std::string& msg) override {
         // Toggle RTS high for transmit
         gpio_put(rtsPin, 1);
