@@ -55,12 +55,15 @@ void SputteringManager::init()
     mfc = new AlicatMFC(alicatDevice);
     mfc->init();
 
+    // Commented out Gauge for testing Alicat
+    /*
     // Initialize Gauge UART and Device
     gaugeUart = new HardUart(uart0, P2_DI_PIN, P2_RO_PIN, 9600);
     gaugeDevice = new RS485Device(gaugeUart, P2_TR_RE);
     // Use P2_TR_RE for the RTs pin
     gauge = new PfiefferGauge(gaugeDevice);
     gauge->init();
+    */
 }
 
 void SputteringManager::update() 
@@ -69,10 +72,12 @@ void SputteringManager::update()
     {
         mfc->update();
     }
+    /*
     if (gauge)
     {
         gauge->update();
     }
+    */
     // Add logic here to manage other devices and control system states
 }
 
