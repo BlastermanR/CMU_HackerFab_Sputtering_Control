@@ -13,7 +13,7 @@ public:
 
     virtual void begin() = 0;
     virtual void send(const std::string& msg) = 0;
-    virtual bool hasMessage() const = 0;
+    virtual bool hasMessage() = 0;
     virtual std::string popMessage() = 0;
 };
 

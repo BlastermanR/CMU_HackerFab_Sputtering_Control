@@ -18,7 +18,7 @@ void SerialDeviceBase::begin() {
     uart->begin();
 }
 
-bool SerialDeviceBase::hasMessage() const {
+bool SerialDeviceBase::hasMessage() {
     return !queue_is_empty(&msgQueue);
 }
 

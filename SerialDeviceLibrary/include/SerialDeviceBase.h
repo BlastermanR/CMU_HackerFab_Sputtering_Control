@@ -24,7 +24,7 @@ public:
     virtual ~SerialDeviceBase();
 
     void begin() override;
-    bool hasMessage() const override;
+    bool hasMessage() override;
     std::string popMessage() override;
 };
 
