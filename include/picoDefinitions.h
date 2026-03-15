@@ -19,13 +19,12 @@
 #define PIO_UART_RX 19
 
 // DEVICE PORTS
-// Pressure Gauge
+// Vacuum Pump
 #define P1_DI_PIN 8
 #define P1_RO_PIN 9
-#define P1_RE_PIN 10
-#define P1_DE_PIN 11
+#define P1_TR_RE 10
 
-// Vacuum Pump
+// Pressure Gauge
 #define P2_DI_PIN 12
 #define P2_RO_PIN 13
 #define P2_TR_RE 14

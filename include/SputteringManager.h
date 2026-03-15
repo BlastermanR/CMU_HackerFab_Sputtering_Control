@@ -3,6 +3,7 @@
 
 #include "AlicatMFC.h"
 #include "PfiefferGauge.h"
+#include "PfiefferPump.h"
 #include "HardwareUART.h"
 #include "RS232Device.h"
 #include "RS485Device.h"
@@ -25,6 +26,10 @@ private:
     IUart* gaugeUart;
     RS485Device* gaugeDevice;
     PfiefferGauge* gauge;
+
+    IUart* pumpUart;
+    RS485Device* pumpDevice;
+    PfiefferPump* pump;
 
 public:
     /**

@@ -10,7 +10,10 @@ SputteringManager::SputteringManager()
       mfc(nullptr),
       gaugeUart(nullptr),
       gaugeDevice(nullptr),
-      gauge(nullptr)
+      gauge(nullptr),
+      pumpUart(nullptr),
+      pumpDevice(nullptr),
+      pump(nullptr)
 {
     // Constructor
 }
@@ -41,6 +44,18 @@ SputteringManager::~SputteringManager()
     {
         delete gaugeUart;
     }
+    if (pump)
+    {
+        delete pump;
+    }
+    if (pumpDevice)
+    {
+        delete pumpDevice;
+    }
+    if (pumpUart)
+    {
+        delete pumpUart;
+    }
 }
 
 void SputteringManager::init() 
@@ -55,15 +70,17 @@ void SputteringManager::init()
     mfc = new AlicatMFC(alicatDevice);
     mfc->init();
 
-    // Commented out Gauge for testing Alicat
-    /*
-    // Initialize Gauge UART and Device
+    // Initialize Gauge UART and Device on uart0 (P2 Pins)
     gaugeUart = new HardUart(uart0, P2_DI_PIN, P2_RO_PIN, 9600);
     gaugeDevice = new RS485Device(gaugeUart, P2_TR_RE);
-    // Use P2_TR_RE for the RTs pin
     gauge = new PfiefferGauge(gaugeDevice);
     gauge->init();
-    */
+
+    // Initialize Pump UART and Device on uart1 (P1 Pins)
+    pumpUart = new HardUart(uart1, P1_DI_PIN, P1_RO_PIN, 9600);
+    pumpDevice = new RS485Device(pumpUart, P1_TR_RE);
+    pump = new PfiefferPump(pumpDevice);
+    pump->init();
 }
 
 void SputteringManager::update() 
@@ -72,12 +89,14 @@ void SputteringManager::update()
     {
         mfc->update();
     }
-    /*
     if (gauge)
     {
         gauge->update();
     }
-    */
+    if (pump)
+    {
+        pump->update();
+    }
     // Add logic here to manage other devices and control system states
 }
 
@@ -87,7 +106,11 @@ void SputteringManager::sendTestMessage()
     {
         mfc->sendMessage("A\r");
     }
-    /*
+    else
+    {
+        printf("Error: MFC is null\n");
+    }
+    
     if (gauge) 
     {
         gauge->sendMessage("0020074002=?107\r");
@@ -96,5 +119,13 @@ void SputteringManager::sendTestMessage()
     {
         printf("Error: Gauge is null\n");
     }
-    */
+
+    if (pump)
+    {
+        
+    }
+    else
+    {
+        printf("Error: Pump is null\n");
+    }
 }
