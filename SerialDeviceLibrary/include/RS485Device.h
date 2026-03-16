@@ -40,8 +40,11 @@ public:
         // Wait until transmission actually finishes before dropping the RTS pin
         uart->waitTxComplete();
         
+        sleep_us(100000);
+
         // Return to receiving mode
         gpio_put(rtsPin, 0);
+
     }
 };
 

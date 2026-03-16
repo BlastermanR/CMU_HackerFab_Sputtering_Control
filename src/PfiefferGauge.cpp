@@ -37,6 +37,10 @@ void PfiefferGauge::update()
             printf("Error: Received empty response from Pfieffer Gauge.\n");
             continue;
         }
+
+        #ifdef DEBUG
+        printf("PfiefferGauge received message: %s\n", response.c_str());
+        #endif
         
         /*
         // Decrypt the response using the PfieifferLib to extract the command fields

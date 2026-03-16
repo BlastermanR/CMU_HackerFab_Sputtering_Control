@@ -26,10 +26,19 @@ void PfiefferPump::init()
 void PfiefferPump::update()
 {
     while (serialPort->hasMessage()) {
-        std::string msg = serialPort->popMessage();
+        std::string response = serialPort->popMessage();
+
+        // Convert the received buffer to a response reading if we have a complete line
+        if (response.empty()) 
+        {
+            printf("Error: Received empty response from Pfieffer Pump.\n");
+            continue;
+        }
+
         #ifdef DEBUG
-        printf("Vacuum Pump: Message Received: %s\n", msg.c_str());
+        printf("PfiefferPump received message: %s\n", response.c_str());
         #endif
+        
         // Handle message here
     }
 }

@@ -102,6 +102,7 @@ void SputteringManager::update()
 
 void SputteringManager::sendTestMessage()
 {
+    /*
     if (mfc)
     {
         mfc->sendMessage("A\r");
@@ -110,6 +111,7 @@ void SputteringManager::sendTestMessage()
     {
         printf("Error: MFC is null\n");
     }
+    */
     
     if (gauge) 
     {
@@ -122,7 +124,7 @@ void SputteringManager::sendTestMessage()
 
     if (pump)
     {
-        
+        // NOTHING
     }
     else
     {
