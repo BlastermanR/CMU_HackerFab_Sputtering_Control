@@ -31,6 +31,11 @@ std::string SerialDeviceBase::popMessage() {
 }
 
 void SerialDeviceBase::onDataReceived(char c) {
+    // Ignore null bytes entirely (common glitch from RS485 turnaround)
+    if (c == '\0') {
+        return; 
+    }
+
     if (c == '\n' || c == '\r') {
         if (receiveIndex > 0) {
             SerialMessage msg;
@@ -43,7 +48,8 @@ void SerialDeviceBase::onDataReceived(char c) {
             receiveIndex = 0;
         }
     } else {
-        if (receiveIndex < sizeof(receiveBuffer) - 1) {
+        // Only accept printable ASCII characters (ignores line noise spikes)
+        if (c >= 32 && c <= 126 && receiveIndex < sizeof(receiveBuffer) - 1) {
             receiveBuffer[receiveIndex++] = c;
         }
     }
