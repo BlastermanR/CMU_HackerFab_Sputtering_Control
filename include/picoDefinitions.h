@@ -12,22 +12,31 @@
 // Debug Status
 #define DEBUG // Enables debug functionality
 
-// Port Definitions
-#define UART0_TX 16
-#define UART0_RX 17
-#define PIO_UART_TX 18
-#define PIO_UART_RX 19
+// Display Definitions
+#define DISPLAY_DC 0
+#define DISPLAY_CS 1
+#define DISPLAY_SCK 2
+#define DISPLAY_DIN 3
+#define DISPLAY_RESET 4
+#define DISPLAY_BLACKLIGHT 5
 
-// DEVICE PORTS
-// Vacuum Pump
-#define P1_DI_PIN 8
-#define P1_RO_PIN 9
-#define P1_TR_RE 10
+// RF Impedance I2C
+#define RF_SDA 6
+#define RF_SCL 7
 
-// Pressure Gauge
-#define P2_DI_PIN 12
-#define P2_RO_PIN 13
-#define P2_TR_RE 14
+// Vacuum Gauge
+#define GAUGE_DI_PIN 8
+#define GAUGE_RO_PIN 9
+#define GAUGE_TR_RE 10
+
+// Pressure Pump
+#define PUMP_TR_RE 11
+#define PUMP_DI_PIN 12
+#define PUMP_RO_PIN 13
+
+// Unused
+#define UNUSED1 14
+#define UNUSED2 15
 
 // AlicatMFC 1
 #define ALICAT_1_TX 16
@@ -36,5 +45,17 @@
 // AlicatMFC 2
 #define ALICAT_2_TX 18
 #define ALICAT_2_RX 19
+
+// USB 2
+#define USB2_D_PLUS 20
+#define USB2_D_MINUS 21
+
+// USB 3
+#define USB2_D_PLUS 22
+#define USB2_D_MINUS 23
+
+// Switches
+#define SWITCH1 22
+#define SWITCH2 28
 
 #endif
