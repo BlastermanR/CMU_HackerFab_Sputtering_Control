@@ -1,7 +1,6 @@
 /**
- * Implements the Alicat Mass Flow Controller (MFC).
- * - Utilizes UART --> RS232 converter (MAX3232)
- * - Interrupt driven reciever handler
+ * AlicatMFC.cpp
+ * @brief Implementation of the Alicat Mass Flow Controller (MFC).
  *
  * @author Ryan Massie (rmassie)
  * @date 3/4/26

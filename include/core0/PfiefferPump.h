@@ -1,19 +1,17 @@
-#ifndef ALICAT_MFC
-#define ALICAT_MFC
+/**
+ * PfiefferPump.h
+ * @brief Defines the Pfeiffer vacuum pump communication interface.
+ *
+ * @author Ryan Massie (rmassie)
+ * @date 3/7/26
+ */
+#ifndef PFIEFFER_PUMP_H
+#define PFIEFFER_PUMP_H
 
 #include "IDevice.h"
 #include "ISerialDevice.h"
-#include "picoDefinitions.h"
 
-/**
- * Defines the Alicat Mass Flow Controller (MFC).
- * - Utilizes UART --> RS232 converter (MAX3232)
- * - Interrupt driven reciever handler
- *
- * @author Ryan Massie (rmassie)
- * @date 3/4/26
- */
-class AlicatMFC : public IDevice
+class PfiefferPump : public IDevice
 {
   private:
     // Define the serial port
@@ -24,12 +22,12 @@ class AlicatMFC : public IDevice
      * @brief Constructor
      * @param dev ISerialDevice instance to use.
      */
-    AlicatMFC(ISerialDevice *dev);
+    PfiefferPump(ISerialDevice *dev);
 
     /**
      * @brief Destructor
      */
-    ~AlicatMFC();
+    ~PfiefferPump();
 
     /**
      * @brief Initialize the device (e.g., configuring hardware peripherals,
@@ -50,4 +48,4 @@ class AlicatMFC : public IDevice
     void sendMessage(const char *message) override;
 };
 
-#endif // ALICAT_MFC
+#endif // PFIEFFER_PUMP_H

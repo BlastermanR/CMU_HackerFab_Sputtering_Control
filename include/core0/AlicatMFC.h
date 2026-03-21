@@ -1,16 +1,18 @@
-#ifndef PFIEFFER_PUMP_H
-#define PFIEFFER_PUMP_H
+/**
+ * AlicatMFC.h
+ * @brief Defines the Alicat Mass Flow Controller (MFC).
+ *
+ * @author Ryan Massie (rmassie)
+ * @date 3/4/26
+ */
+#ifndef ALICAT_MFC
+#define ALICAT_MFC
 
 #include "IDevice.h"
 #include "ISerialDevice.h"
+#include "picoDefinitions.h"
 
-/**
- * TODO
- *
- * @author Ryan Massie (rmassie)
- * @date 3/7/26
- */
-class PfiefferPump : public IDevice
+class AlicatMFC : public IDevice
 {
   private:
     // Define the serial port
@@ -21,12 +23,12 @@ class PfiefferPump : public IDevice
      * @brief Constructor
      * @param dev ISerialDevice instance to use.
      */
-    PfiefferPump(ISerialDevice *dev);
+    AlicatMFC(ISerialDevice *dev);
 
     /**
      * @brief Destructor
      */
-    ~PfiefferPump();
+    ~AlicatMFC();
 
     /**
      * @brief Initialize the device (e.g., configuring hardware peripherals,
@@ -47,4 +49,4 @@ class PfiefferPump : public IDevice
     void sendMessage(const char *message) override;
 };
 
-#endif // PFIEFFER_PUMP_H
+#endif // ALICAT_MFC

@@ -1,17 +1,15 @@
+/**
+ * IDevice.h
+ * @brief Interface definition for generic devices on the Sputtering automation system.
+ *
+ * @author Ryan Massie (rmassie)
+ * @date 3/7/26
+ */
 #ifndef I_DEVICE_H
 #define I_DEVICE_H
 
 #include "picoDefinitions.h"
 #include <stdio.h>
-
-/**
- * Interface definition for generic devices on the Sputtering automation system.
- * This ensures that Mass Flow Controllers (MFCs), Vacuum Pumps, and Pressure
- * Gauges follow a unified initialization and communication interface.
- *
- * @author Ryan Massie (rmassie)
- * @date 3/7/26
- */
 
 class IDevice
 {

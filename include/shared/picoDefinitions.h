@@ -1,13 +1,12 @@
-#ifndef PICO_DEFS
-#define PICO_DEFS
-
 /**
- * Defines values related to implementation of the Raspberry Pi
- * Pico 2.
+ * picoDefinitions.h
+ * @brief Defines values related to implementation of the Raspberry Pi Pico 2.
  *
  * @author Ryan Massie (rmassie)
  * @date 3/3/26
  */
+#ifndef PICO_DEFS
+#define PICO_DEFS
 
 // Debug Status
 #define DEBUG // Enables debug functionality
@@ -51,8 +50,8 @@
 #define USB2_D_MINUS 21
 
 // USB 3
-#define USB2_D_PLUS 22
-#define USB2_D_MINUS 23
+#define USB3_D_PLUS 22
+#define USB3_D_MINUS 23
 
 // Switches
 #define SWITCH1 22

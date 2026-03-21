@@ -42,8 +42,8 @@ include(${CMAKE_SOURCE_DIR}/USBSerialLibrary/USBSerialLibrary.cmake)
 include(${CMAKE_SOURCE_DIR}/Pfiefferlib/PfiefferLibrary.cmake)
 include(${CMAKE_SOURCE_DIR}/SerialDeviceLibrary/SerialDeviceLibrary.cmake)
 
-# Use GLOB to gather files
-file(GLOB SOURCES "src/*.cpp")
+# Use GLOB_RECURSE to gather files from subdirectories
+file(GLOB_RECURSE SOURCES "src/*.cpp")
 
 # Add executable.
 add_executable(SputteringACS ${SOURCES})
@@ -68,6 +68,7 @@ target_link_libraries(SputteringACS PRIVATE
 
         # Pico Libs
         pico_stdlib
+        pico_multicore
         hardware_uart
         hardware_pio
         hardware_irq
@@ -76,7 +77,9 @@ target_link_libraries(SputteringACS PRIVATE
 # Add the standard include files to the build
 target_include_directories(SputteringACS PRIVATE
         ${CMAKE_SOURCE_DIR}/include
+        ${CMAKE_SOURCE_DIR}/include/core0
+        ${CMAKE_SOURCE_DIR}/include/core1
+        ${CMAKE_SOURCE_DIR}/include/shared
 )
 
 pico_add_extra_outputs(SputteringACS)
-

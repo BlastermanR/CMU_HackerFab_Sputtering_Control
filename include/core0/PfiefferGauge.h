@@ -1,22 +1,26 @@
+/**
+ * PfiefferGauge.h
+ * @brief Defines the Pfeiffer pressure gauge communication interface.
+ *
+ * @author Ryan Massie (rmassie)
+ * @date 3/7/26
+ */
+#ifndef PFIEFFER_GAUGE_H
+#define PFIEFFER_GAUGE_H
+
 #include "IDevice.h"
 #include "ISerialDevice.h"
 #include "PfiefferLib.h"
 #include "pico/types.h"
 #include "picoDefinitions.h"
 
-/**
- * TODO
- *
- * @author Ryan Massie (rmassie)
- * @date 3/7/26
- */
 class PfiefferGauge : public IDevice
 {
   private:
     // Define the serial port
     ISerialDevice *serialPort;
 
-    // Flag to indicate a new response has been received for state logic
+    // Flag to indicate a new response has been received for state logic        
     bool newResponse = false;
 
     // Variable to store the latest chamber pressure reading
@@ -44,7 +48,7 @@ class PfiefferGauge : public IDevice
     ~PfiefferGauge();
 
     /**
-     * @brief Initialize the device (e.g., configuring hardware peripherals,
+     * @brief Initialize the device (e.g., configuring hardware peripherals,    
      * setting up ports)
      */
     void init() override;
@@ -63,3 +67,5 @@ class PfiefferGauge : public IDevice
      */
     double readPressure() { return chamberPressure_hPa; }
 };
+
+#endif // PFIEFFER_GAUGE_H
