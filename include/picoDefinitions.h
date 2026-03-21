@@ -4,7 +4,7 @@
 /**
  * Defines values related to implementation of the Raspberry Pi
  * Pico 2.
- * 
+ *
  * @author Ryan Massie (rmassie)
  * @date 3/3/26
  */

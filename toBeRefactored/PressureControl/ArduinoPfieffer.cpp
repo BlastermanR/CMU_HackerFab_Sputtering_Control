@@ -4,17 +4,17 @@
 */
 
 #include "ArduinoPfieffer.h"
+#include <Arduino.h>
 #include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
-#include <stdint.h>
-#include <Arduino.h>
 
 // Constructor: initializes address and sets carriage return character
 ArduinoPfieffer::ArduinoPfieffer(ASCII_char address)
 {
-    _address = address;
+    _address         = address;
     _carriage_return = 13; // ASCII code for carriage return '\r'
 }
 
@@ -25,16 +25,19 @@ ArduinoPfieffer::~ArduinoPfieffer()
 }
 
 // Formats a complete Pfieffer command including checksum and carriage return
-ASCII_char ArduinoPfieffer::pfieffer_command_format(ASCII_char write, ASCII_char param_nums, ASCII_char data_len, ASCII_char data)
+ASCII_char ArduinoPfieffer::pfieffer_command_format(ASCII_char write, ASCII_char param_nums, ASCII_char data_len,
+                                                    ASCII_char data)
 {
     // Calculate total length needed for the buffer:
-    // command components + checksum (up to 3 digits) + carriage return + null terminator
-    uint32_t comm_len = strlen(_address) + strlen(write) + strlen(param_nums)
-                      + strlen(data_len) + strlen(data) + 3 + 1 + 1;
+    // command components + checksum (up to 3 digits) + carriage return + null
+    // terminator
+    uint32_t comm_len =
+        strlen(_address) + strlen(write) + strlen(param_nums) + strlen(data_len) + strlen(data) + 3 + 1 + 1;
 
     // Allocate buffer for the command string
     ASCII_char buf = (ASCII_char)malloc(comm_len * sizeof(char));
-    if (!buf) return NULL; // Return NULL if malloc fails
+    if (!buf)
+        return NULL; // Return NULL if malloc fails
 
     // Build the message by concatenating components
     buf[0] = '\0'; // Start with an empty string
@@ -46,9 +49,9 @@ ASCII_char ArduinoPfieffer::pfieffer_command_format(ASCII_char write, ASCII_char
 
     // Compute checksum and append it
     ASCII_char check_sum = get_check_sum(buf, strlen(buf));
-    strcat(buf, check_sum);      // Append checksum
-    strcat(buf, "\r");           // Append carriage return at the end
-    free(check_sum);             // Free temporary checksum string
+    strcat(buf, check_sum); // Append checksum
+    strcat(buf, "\r");      // Append carriage return at the end
+    free(check_sum);        // Free temporary checksum string
 
     return buf; // Return the final command string
 }
@@ -59,13 +62,15 @@ ASCII_char ArduinoPfieffer::get_check_sum(char *without_checksum, uint8_t len)
     uint8_t check_sum = 0;
 
     // Sum ASCII values of each character in the message
-    for (uint8_t i = 0; i < len; i++) {
+    for (uint8_t i = 0; i < len; i++)
+    {
         check_sum += without_checksum[i];
     }
 
     // Allocate 4 characters (3 digits + null terminator)
     ASCII_char sum_char = (ASCII_char)malloc(4 * sizeof(char));
-    if (!sum_char) {
+    if (!sum_char)
+    {
         return NULL; // Return NULL if malloc fails
     }
 
@@ -86,7 +91,7 @@ ASCII_char ArduinoPfieffer::control_request(ASCII_char param_num, ASCII_char dat
 {
     // Compute length of data and convert it to 2-digit ASCII string
     uint8_t data_len = strlen(data);
-    char data_len_char[3]; // 2 digits + null terminator
+    char    data_len_char[3]; // 2 digits + null terminator
     sprintf(data_len_char, "%02d", data_len);
 
     // Use the write mode "10" to send the control command
@@ -96,7 +101,8 @@ ASCII_char ArduinoPfieffer::control_request(ASCII_char param_num, ASCII_char dat
 // Frees memory allocated for any ASCII_char message created by this class
 void ArduinoPfieffer::free_message(ASCII_char message)
 {
-    if (message) {
+    if (message)
+    {
         free(message); // Only free if non-null
     }
 }

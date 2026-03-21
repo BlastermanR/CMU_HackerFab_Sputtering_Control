@@ -2,20 +2,22 @@
 #define UARTI
 
 /**
- * Implements a UART Interface to be extended to equip both PIO and hardware UART
- * for portability.
- * 
+ * Implements a UART Interface to be extended to equip both PIO and hardware
+ * UART for portability.
+ *
  * @author Ryan Massie (rmassie)
  * @date 3/4/26
  */
 
 #include <functional>
 
-// Use std::function so complex objects can pass lambdas or bound member functions
+// Use std::function so complex objects can pass lambdas or bound member
+// functions
 typedef std::function<void(char)> UartCallback;
 
-class IUart {
-public:
+class IUart
+{
+  public:
     /**
      * @brief Virtual destructor for IUart.
      */
@@ -36,7 +38,7 @@ public:
      * @brief Prints a null-terminated string to the UART.
      * @param str The string to print.
      */
-    virtual void print(const char* str) = 0;
+    virtual void print(const char *str) = 0;
 
     /**
      * @brief Waits for any pending transmissions to complete.

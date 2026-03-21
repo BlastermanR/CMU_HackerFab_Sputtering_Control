@@ -4,21 +4,23 @@
 #include "ISerialDevice.h"
 #include "UARTInterface.h"
 #include "pico/util/queue.h"
-#include <string>
 #include <cstring>
+#include <string>
 
 #define RECEIVE_BUFFER_SIZE 256
 #define SERIAL_QUEUE_SIZE 10
 
-struct SerialMessage {
+struct SerialMessage
+{
     char data[RECEIVE_BUFFER_SIZE];
 };
 
-class SerialDeviceBase : public ISerialDevice {
-protected:
-    IUart* uart;
-    queue_t msgQueue;
-    char receiveBuffer[RECEIVE_BUFFER_SIZE];
+class SerialDeviceBase : public ISerialDevice
+{
+  protected:
+    IUart   *uart;
+    queue_t  msgQueue;
+    char     receiveBuffer[RECEIVE_BUFFER_SIZE];
     uint16_t receiveIndex;
 
     /**
@@ -27,12 +29,12 @@ protected:
      */
     void onDataReceived(char c);
 
-public:
+  public:
     /**
      * @brief Constructs a SerialDeviceBase with a specific UART interface.
      * @param uartInstance Pointer to an IUart implementation.
      */
-    SerialDeviceBase(IUart* uartInstance);
+    SerialDeviceBase(IUart *uartInstance);
 
     /**
      * @brief Destructor for SerialDeviceBase. Cleans up internal message queue.

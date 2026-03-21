@@ -1,55 +1,57 @@
 #include "SerialDeviceBase.h"
 #include <algorithm>
 
-SerialDeviceBase::SerialDeviceBase(IUart* uartInstance) : uart(uartInstance), receiveIndex(0) {
+SerialDeviceBase::SerialDeviceBase(IUart *uartInstance) : uart(uartInstance), receiveIndex(0)
+{
     // Initialize the queue to hold elements of type SerialMessage
     queue_init(&msgQueue, sizeof(SerialMessage), SERIAL_QUEUE_SIZE);
     // Bind the callback
-    uart->setCallback([this](char c) {
-        this->onDataReceived(c);
-    });
+    uart->setCallback([this](char c) { this->onDataReceived(c); });
 }
 
-SerialDeviceBase::~SerialDeviceBase() {
-    queue_free(&msgQueue);
-}
+SerialDeviceBase::~SerialDeviceBase() { queue_free(&msgQueue); }
 
-void SerialDeviceBase::begin() {
-    uart->begin();
-}
+void SerialDeviceBase::begin() { uart->begin(); }
 
-bool SerialDeviceBase::hasMessage() {
-    return !queue_is_empty(&msgQueue);
-}
+bool SerialDeviceBase::hasMessage() { return !queue_is_empty(&msgQueue); }
 
-std::string SerialDeviceBase::popMessage() {
+std::string SerialDeviceBase::popMessage()
+{
     SerialMessage msg;
-    if (queue_try_remove(&msgQueue, &msg)) {
+    if (queue_try_remove(&msgQueue, &msg))
+    {
         return std::string(msg.data);
     }
     return "";
 }
 
-void SerialDeviceBase::onDataReceived(char c) {
+void SerialDeviceBase::onDataReceived(char c)
+{
     // Ignore null bytes entirely (common glitch from RS485 turnaround)
-    if (c == '\0') {
-        return; 
+    if (c == '\0')
+    {
+        return;
     }
 
-    if (c == '\n' || c == '\r') {
-        if (receiveIndex > 0) {
+    if (c == '\n' || c == '\r')
+    {
+        if (receiveIndex > 0)
+        {
             SerialMessage msg;
             // Ensure null termination and avoid buffer overflow
             size_t copyLen = std::min((size_t)receiveIndex, sizeof(msg.data) - 1);
             std::memcpy(msg.data, receiveBuffer, copyLen);
             msg.data[copyLen] = '\0';
-            
+
             queue_try_add(&msgQueue, &msg);
             receiveIndex = 0;
         }
-    } else {
+    }
+    else
+    {
         // Only accept printable ASCII characters (ignores line noise spikes)
-        if (c >= 32 && c <= 126 && receiveIndex < sizeof(receiveBuffer) - 1) {
+        if (c >= 32 && c <= 126 && receiveIndex < sizeof(receiveBuffer) - 1)
+        {
             receiveBuffer[receiveIndex++] = c;
         }
     }

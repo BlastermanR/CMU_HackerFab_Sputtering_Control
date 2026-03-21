@@ -8,12 +8,12 @@
 #include <stdint.h>
 
 // Define ASCII_char as a pointer to a character string
-typedef char* ASCII_char;
+typedef char *ASCII_char;
 
 // Class definition for handling Pfieffer vacuum command formatting
 class ArduinoPfieffer
 {
-public:
+  public:
     // Constructor: takes device address as input
     ArduinoPfieffer(ASCII_char address);
 
@@ -38,7 +38,7 @@ public:
     // Carriage return character (ASCII code 13)
     char _carriage_return;
 
-private:
+  private:
     // Stored device address (used as prefix in commands)
     ASCII_char _address;
 };

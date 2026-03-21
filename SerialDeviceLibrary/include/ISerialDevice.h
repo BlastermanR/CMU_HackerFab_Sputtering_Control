@@ -7,8 +7,9 @@
 
 #include <string>
 
-class ISerialDevice {
-public:
+class ISerialDevice
+{
+  public:
     /**
      * @brief Virtual destructor for ISerialDevice.
      */
@@ -23,7 +24,7 @@ public:
      * @brief Sends a message through the serial device.
      * @param msg The string message to send.
      */
-    virtual void send(const std::string& msg) = 0;
+    virtual void send(const std::string &msg) = 0;
 
     /**
      * @brief Checks if there are any pending received messages.

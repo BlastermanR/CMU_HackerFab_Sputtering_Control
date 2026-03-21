@@ -1,30 +1,30 @@
 #ifndef ALICAT_MFC
 #define ALICAT_MFC
 
-#include "ISerialDevice.h"
 #include "IDevice.h"
+#include "ISerialDevice.h"
 #include "picoDefinitions.h"
 
 /**
  * Defines the Alicat Mass Flow Controller (MFC).
  * - Utilizes UART --> RS232 converter (MAX3232)
  * - Interrupt driven reciever handler
- * 
+ *
  * @author Ryan Massie (rmassie)
  * @date 3/4/26
  */
 class AlicatMFC : public IDevice
 {
-    private:
+  private:
     // Define the serial port
-    ISerialDevice* serialPort;
+    ISerialDevice *serialPort;
 
-    public:
+  public:
     /**
      * @brief Constructor
      * @param dev ISerialDevice instance to use.
      */
-    AlicatMFC(ISerialDevice* dev);
+    AlicatMFC(ISerialDevice *dev);
 
     /**
      * @brief Destructor
@@ -32,7 +32,8 @@ class AlicatMFC : public IDevice
     ~AlicatMFC();
 
     /**
-     * @brief Initialize the device (e.g., configuring hardware peripherals, setting up ports)
+     * @brief Initialize the device (e.g., configuring hardware peripherals,
+     * setting up ports)
      */
     void init() override;
 
@@ -46,8 +47,7 @@ class AlicatMFC : public IDevice
      * @param message Null terminating message to send to device.
      * \0 is not sent
      */
-    void sendMessage(const char* message) override;
+    void sendMessage(const char *message) override;
 };
-
 
 #endif // ALICAT_MFC

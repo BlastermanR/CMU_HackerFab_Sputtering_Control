@@ -1,27 +1,27 @@
 #ifndef PFIEFFER_PUMP_H
 #define PFIEFFER_PUMP_H
 
-#include "ISerialDevice.h"
 #include "IDevice.h"
+#include "ISerialDevice.h"
 
 /**
  * TODO
- * 
+ *
  * @author Ryan Massie (rmassie)
  * @date 3/7/26
  */
 class PfiefferPump : public IDevice
 {
-    private:
+  private:
     // Define the serial port
-    ISerialDevice* serialPort;
+    ISerialDevice *serialPort;
 
-    public:
+  public:
     /**
      * @brief Constructor
      * @param dev ISerialDevice instance to use.
      */
-    PfiefferPump(ISerialDevice* dev);
+    PfiefferPump(ISerialDevice *dev);
 
     /**
      * @brief Destructor
@@ -29,7 +29,8 @@ class PfiefferPump : public IDevice
     ~PfiefferPump();
 
     /**
-     * @brief Initialize the device (e.g., configuring hardware peripherals, setting up ports)
+     * @brief Initialize the device (e.g., configuring hardware peripherals,
+     * setting up ports)
      */
     void init() override;
 
@@ -43,7 +44,7 @@ class PfiefferPump : public IDevice
      * @param message Null terminating message to send to device.
      * \0 is not sent
      */
-    void sendMessage(const char* message) override;
+    void sendMessage(const char *message) override;
 };
 
 #endif // PFIEFFER_PUMP_H

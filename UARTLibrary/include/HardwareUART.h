@@ -3,57 +3,66 @@
 
 /**
  * Implements the UART interface for native hardware implementation.
- * 
+ *
  * @author Ryan Massie (rmassie)
  * @date 3/4/26
  */
 
-#include "pico/stdlib.h"
-#include "hardware/uart.h"
-#include "hardware/irq.h"
 #include "UARTInterface.h"
+#include "hardware/irq.h"
+#include "hardware/uart.h"
+#include "pico/stdlib.h"
 
-class HardUart : public IUart {
-private:
-    uart_inst_t* uartInstance;
-    uint txPin;
-    uint rxPin;
-    uint baudRate;
+class HardUart : public IUart
+{
+  private:
+    uart_inst_t *uartInstance;
+    uint         txPin;
+    uint         rxPin;
+    uint         baudRate;
     UartCallback rxCallback;
 
     // Static router map for the 2 hardware UARTs (uart0, uart1)
-    static HardUart* instances[2];
+    static HardUart *instances[2];
 
-    static void irqHandlerWrapper() {
+    static void irqHandlerWrapper()
+    {
         // Check uart0
-        if (instances[0] && uart_is_readable(uart0)) {
+        if (instances[0] && uart_is_readable(uart0))
+        {
             instances[0]->handleRxIrq();
         }
         // Check uart1
-        if (instances[1] && uart_is_readable(uart1)) {
+        if (instances[1] && uart_is_readable(uart1))
+        {
             instances[1]->handleRxIrq();
         }
     }
 
-    void handleRxIrq() {
-        while (uart_is_readable(uartInstance)) {
+    void handleRxIrq()
+    {
+        while (uart_is_readable(uartInstance))
+        {
             char c = uart_getc(uartInstance);
-            if (rxCallback) rxCallback(c);
+            if (rxCallback)
+                rxCallback(c);
         }
     }
 
-public:
-    HardUart(uart_inst_t* uart, uint tx, uint rx, uint baud)
-        : uartInstance(uart), txPin(tx), rxPin(rx), baudRate(baud) {
-        
+  public:
+    HardUart(uart_inst_t *uart, uint tx, uint rx, uint baud) : uartInstance(uart), txPin(tx), rxPin(rx), baudRate(baud)
+    {
+
         // Register in the static map (0 for uart0, 1 for uart1)
-        int index = (uartInstance == uart0) ? 0 : 1;
+        int index        = (uartInstance == uart0) ? 0 : 1;
         instances[index] = this;
     }
 
-    ~HardUart() {
+    ~HardUart()
+    {
         int index = (uartInstance == uart0) ? 0 : 1;
-        if (instances[index] == this) {
+        if (instances[index] == this)
+        {
             instances[index] = nullptr;
         }
 
@@ -63,11 +72,10 @@ public:
         uart_deinit(uartInstance);
     }
 
-    void setCallback(UartCallback cb) override {
-        rxCallback = cb;
-    }
+    void setCallback(UartCallback cb) override { rxCallback = cb; }
 
-    void begin() override {
+    void begin() override
+    {
         uart_init(uartInstance, baudRate);
         gpio_set_function(txPin, GPIO_FUNC_UART);
         gpio_set_function(rxPin, GPIO_FUNC_UART);
@@ -79,23 +87,18 @@ public:
         uint irqNumber = (uartInstance == uart0) ? UART0_IRQ : UART1_IRQ;
         irq_set_exclusive_handler(irqNumber, irqHandlerWrapper);
         irq_set_enabled(irqNumber, true);
-        uart_set_irq_enables(uartInstance, true, false); // Enable RX IRQ, disable TX IRQ
+        uart_set_irq_enables(uartInstance, true,
+                             false); // Enable RX IRQ, disable TX IRQ
     }
 
-    void write(char c) override {
-        uart_putc_raw(uartInstance, c);
-    }
+    void write(char c) override { uart_putc_raw(uartInstance, c); }
 
-    void print(const char* str) override {
-        uart_puts(uartInstance, str);
-    }
+    void print(const char *str) override { uart_puts(uartInstance, str); }
 
-    void waitTxComplete() override {
-        uart_tx_wait_blocking(uartInstance);
-    }
+    void waitTxComplete() override { uart_tx_wait_blocking(uartInstance); }
 };
 
 // Initialize static array
-inline HardUart* HardUart::instances[2] = {nullptr, nullptr};
+inline HardUart *HardUart::instances[2] = {nullptr, nullptr};
 
 #endif // HARDWARE_UART_CLASS_H

@@ -1,26 +1,19 @@
 #include "SputteringManager.h"
-#include "picoDefinitions.h"
 #include "PIO_UART.h"
-#include <stdio.h>
 #include "pico/stdlib.h"
+#include "picoDefinitions.h"
+#include <stdio.h>
 
-SputteringManager::SputteringManager() 
-    : alicatUart(nullptr), 
-      alicatDevice(nullptr),
-      mfc(nullptr),
-      gaugeUart(nullptr),
-      gaugeDevice(nullptr),
-      gauge(nullptr),
-      pumpUart(nullptr),
-      pumpDevice(nullptr),
-      pump(nullptr)
+SputteringManager::SputteringManager()
+    : alicatUart(nullptr), alicatDevice(nullptr), mfc(nullptr), gaugeUart(nullptr), gaugeDevice(nullptr),
+      gauge(nullptr), pumpUart(nullptr), pumpDevice(nullptr), pump(nullptr)
 {
     // Constructor
 }
 
-SputteringManager::~SputteringManager() 
+SputteringManager::~SputteringManager()
 {
-    if (mfc) 
+    if (mfc)
     {
         delete mfc;
     }
@@ -28,7 +21,7 @@ SputteringManager::~SputteringManager()
     {
         delete alicatDevice;
     }
-    if (alicatUart) 
+    if (alicatUart)
     {
         delete alicatUart;
     }
@@ -58,34 +51,34 @@ SputteringManager::~SputteringManager()
     }
 }
 
-void SputteringManager::init() 
+void SputteringManager::init()
 {
     printf("Sputtering Manager: Initializing...\n");
-    
+
     // Dynamically define the UART first
-    alicatUart = new PioUart(pio0, 0, 1, ALICAT_1_TX, ALICAT_1_RX, 9600);
+    alicatUart   = new PioUart(pio0, 0, 1, ALICAT_1_TX, ALICAT_1_RX, 9600);
     alicatDevice = new RS232Device(alicatUart);
-    
+
     // Then define the device implementation mapped to that UART
     mfc = new AlicatMFC(alicatDevice);
     mfc->init();
 
     // Initialize Gauge UART and Device on uart0 (P2 Pins)
-    gaugeUart = new HardUart(uart0, P2_DI_PIN, P2_RO_PIN, 9600);
+    gaugeUart   = new HardUart(uart0, P2_DI_PIN, P2_RO_PIN, 9600);
     gaugeDevice = new RS485Device(gaugeUart, P2_TR_RE);
-    gauge = new PfiefferGauge(gaugeDevice);
+    gauge       = new PfiefferGauge(gaugeDevice);
     gauge->init();
 
     // Initialize Pump UART and Device on uart1 (P1 Pins)
-    pumpUart = new HardUart(uart1, P1_DI_PIN, P1_RO_PIN, 9600);
+    pumpUart   = new HardUart(uart1, P1_DI_PIN, P1_RO_PIN, 9600);
     pumpDevice = new RS485Device(pumpUart, P1_TR_RE);
-    pump = new PfiefferPump(pumpDevice);
+    pump       = new PfiefferPump(pumpDevice);
     pump->init();
 }
 
-void SputteringManager::update() 
+void SputteringManager::update()
 {
-    if (mfc) 
+    if (mfc)
     {
         mfc->update();
     }
@@ -112,8 +105,8 @@ void SputteringManager::sendTestMessage()
         printf("Error: MFC is null\n");
     }
     */
-    
-    if (gauge) 
+
+    if (gauge)
     {
         gauge->sendMessage("0020074002=?107\r");
     }

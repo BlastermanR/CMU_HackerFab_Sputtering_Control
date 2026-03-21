@@ -1,20 +1,20 @@
-#include "ISerialDevice.h"
 #include "IDevice.h"
-#include "picoDefinitions.h"
+#include "ISerialDevice.h"
 #include "PfiefferLib.h"
 #include "pico/types.h"
+#include "picoDefinitions.h"
 
 /**
  * TODO
- * 
+ *
  * @author Ryan Massie (rmassie)
  * @date 3/7/26
  */
 class PfiefferGauge : public IDevice
 {
-    private:
+  private:
     // Define the serial port
-    ISerialDevice* serialPort;
+    ISerialDevice *serialPort;
 
     // Flag to indicate a new response has been received for state logic
     bool newResponse = false;
@@ -22,22 +22,21 @@ class PfiefferGauge : public IDevice
     // Variable to store the latest chamber pressure reading
     double chamberPressure_hPa = 0.0;
 
-    public:
-
+  public:
     /**
      * @brief Utilizes UART port to send message to device
      * @param message Null terminating message to send to device.
      * \0 is not sent
-     * 
+     *
      * TODO: MARK PRIVATE AFTER TESTING
      */
-    void sendMessage(const char* message) override;
+    void sendMessage(const char *message) override;
 
     /**
      * @brief Constructor
      * @param dev ISerialDevice instance to use.
      */
-    PfiefferGauge(ISerialDevice* dev);
+    PfiefferGauge(ISerialDevice *dev);
 
     /**
      * @brief Destructor
@@ -45,7 +44,8 @@ class PfiefferGauge : public IDevice
     ~PfiefferGauge();
 
     /**
-     * @brief Initialize the device (e.g., configuring hardware peripherals, setting up ports)
+     * @brief Initialize the device (e.g., configuring hardware peripherals,
+     * setting up ports)
      */
     void init() override;
 
@@ -61,8 +61,5 @@ class PfiefferGauge : public IDevice
      * @brief Retrieve the latest chamber pressure reading
      * @return The latest chamber pressure value
      */
-    double readPressure()
-    {
-        return chamberPressure_hPa;
-    }
+    double readPressure() { return chamberPressure_hPa; }
 };

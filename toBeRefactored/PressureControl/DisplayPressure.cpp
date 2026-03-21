@@ -9,7 +9,9 @@ void displayPressure(pressure_measurement desired_pressure, pressure_measurement
     Serial.print(F("DATA,")); // Prefix for identifying pressure data
     Serial.print(millis());   // Timestamp in milliseconds since Arduino started
     Serial.print(F(","));
-    Serial.print(desired_pressure.pressure, 6); // Print desired pressure with 6 decimal places
+    Serial.print(desired_pressure.pressure,
+                 6); // Print desired pressure with 6 decimal places
     Serial.print(F(","));
-    Serial.println(measured_pressure.pressure, 6); // Print measured pressure with 6 decimal places and newline
+    Serial.println(measured_pressure.pressure,
+                   6); // Print measured pressure with 6 decimal places and newline
 }
