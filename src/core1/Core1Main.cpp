@@ -19,10 +19,6 @@ void core1_entry()
 
     while (true)
     {
-        DataPacket packet;
-        // Block until an item is available in the queue
-        queue_remove_blocking(&core_queue, &packet);
-
         // Process the item on core 1...
         // e.g. manager.handlePacket(packet);
     }

@@ -26,19 +26,21 @@ queue_t core_queue;
 
 int main()
 {
+    // Enable IO
     stdio_init_all();
-
-    // Initialize the inter-core queue before launching Core 1
-    queue_init(&core_queue, sizeof(DataPacket), 10);
 
     // Launch Core 1
     multicore_launch_core1(core1_entry);
+
+    /**
+     * Define Devices
+     */
 
     // Setup the serial communication
     USBSerial pcTerminal;
     pcTerminal.begin();
 
-    // Dynamically define the UART and Devices
+    // Define the UART and Devices
     PioUart     alicatUart(pio0, 0, 1, ALICAT_1_TX, ALICAT_1_RX, 9600);
     RS232Device alicatDevice(&alicatUart);
     AlicatMFC   mfc(&alicatDevice);
@@ -74,22 +76,5 @@ int main()
         mfc.update();
         gauge.update();
         pump.update();
-
-        // Get the current time
-        uint32_t currentTime = to_ms_since_boot(get_absolute_time());
-
-        // Check if 5 seconds have passed since the last send
-        if (currentTime - lastSendTime >= 3000)
-        {
-#ifdef DEBUG
-            gauge.sendMessage("0020074002=?107\r");
-            
-            // Push a test packet to the queue
-            DataPacket testPacket = {1, 42.0f};
-            queue_try_add(&core_queue, &testPacket);
-#endif
-            // Reset the timer
-            lastSendTime = currentTime;
-        }
     }
 }
