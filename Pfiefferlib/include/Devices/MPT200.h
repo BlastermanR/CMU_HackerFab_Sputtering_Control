@@ -1,6 +1,9 @@
 /**
  * @file MPT200.h
  * @brief Parameter definitions and device class for the Pfeiffer Vacuum MPT 200 / RPT 200 AR Gauge.
+ *
+ * @author Ryan Massie (rmassie)
+ * @date 3/4/26
  */
 
 #pragma once
