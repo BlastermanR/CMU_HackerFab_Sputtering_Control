@@ -37,6 +37,7 @@ project(SputteringACS C CXX ASM)
 pico_sdk_init()
 
 # Include Libraries
+include(${CMAKE_SOURCE_DIR}/AllicatMFClib/AllicatMFClib.cmake)
 include(${CMAKE_SOURCE_DIR}/UARTLibrary/UARTLibrary.cmake)
 include(${CMAKE_SOURCE_DIR}/USBSerialLibrary/USBSerialLibrary.cmake)
 include(${CMAKE_SOURCE_DIR}/Pfiefferlib/PfiefferLibrary.cmake)
@@ -64,6 +65,7 @@ target_link_libraries(SputteringACS PRIVATE
         # Custom Libs
         USBSerial
         UARTInterface
+        AllicatMFClib
         Pfiefferlib
         SerialDeviceLibrary
         WaveshareDisplayLibrary
