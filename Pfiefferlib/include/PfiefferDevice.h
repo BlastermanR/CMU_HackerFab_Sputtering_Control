@@ -6,7 +6,7 @@
  * by forcing type safety, bounds checking, and structured property definitions.
  * 
  * @author Ryan Massie (rmassie)
- * @date 3/4/26
+ * @date 3/25/26
  */
 
 #pragma once
