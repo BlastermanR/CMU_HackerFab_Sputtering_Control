@@ -2,6 +2,8 @@
  * @file TC110DriveUnit.h
  * @brief Parameter definitions and device class for the Pfeiffer Vacuum TC 110.
  * 
+ * Source: https://www.idealvac.com/files/ManualsII/PfeifferTC110ElectronicDriveUnit.pdf
+ * 
  * @author Ryan Massie (rmassie)
  * @date 3/25/26
  */

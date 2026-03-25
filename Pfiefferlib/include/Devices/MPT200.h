@@ -2,6 +2,8 @@
  * @file MPT200.h
  * @brief Parameter definitions and device class for the Pfeiffer Vacuum MPT 200 / RPT 200 AR Gauge.
  *
+ * Source: https://www.idealvac.com/files/manuals/Pfeiffer_DigiLine_MPT_200_Digital_Pirani_and_Cold_Cathode_Gauge_Operating_Instructions.pdf
+ * 
  * @author Ryan Massie (rmassie)
  * @date 3/25/26
  */
