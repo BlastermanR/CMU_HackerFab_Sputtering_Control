@@ -8,6 +8,7 @@
 #ifndef WAVESHARE_DISPLAY_H
 #define WAVESHARE_DISPLAY_H
 
+#include <cstdint.h>
 #include "IDisplay.h"
 #include "hardware/spi.h"
 #include "pico/stdlib.h"

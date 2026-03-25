@@ -1,17 +1,22 @@
 #ifndef PFIEFFERLIB_H
 #define PFIEFFERLIB_H
 /**
- * Defines a library of usefule objects and functions for communicating with
- * Pfieffer Vacuum pumps.
+ * @file PfiefferLib.h
+ * @brief Utility library for formatting and parsing Pfeiffer Vacuum protocol commands.
+ * 
+ * Defines the PfiefferCommand structure and provides static methods for 
+ * checksum calculation and protocol serialization.
+ * 
+ * @author Ryan Massie (rmassie)
+ * @date 3/4/26
  */
 
 #include <cstdint>
 #include <string>
 
-// Command Values
-// TODO
-
-// API Variables
+/**
+ * API Variables
+ */
 #define PFIEFFER_ADDRESS_LENGTH 3
 #define PFIEFFER_ACTION_LENGTH 2
 #define PFIEFFER_PARAMNUM_LENGTH 3
@@ -21,10 +26,12 @@
     (PFIEFFER_ADDRESS_LENGTH + PFIEFFER_ACTION_LENGTH + PFIEFFER_PARAMNUM_LENGTH + PFIEFFER_DATALEN_LENGTH +           \
      1) // Minimum size of a valid command/response (without data + carraige
         // return)
-
 inline const std::string READ_PARAMETER     = "00";
 inline const std::string DESCRIBE_PARAMETER = "10";
 
+/**
+ * PfiefferCommand Struct
+ */
 struct PfiefferCommand
 {
     std::string address{""};  // 3 characters
@@ -45,7 +52,7 @@ class PfieifferLib
      * checksum for.
      * @return The calculated checksum as an unsigned integer.
      */
-    static unsigned int calculateChecksum(PfiefferCommand *command)
+    static unsigned int calculateChecksum(const PfiefferCommand *command)
     {
         if (command == nullptr)
         {
@@ -54,33 +61,19 @@ class PfieifferLib
         }
 
         unsigned int sum = 0;
+        auto add_to_sum = [&sum](const std::string& str) {
+            for (unsigned char c : str) {
+                sum += c;
+            }
+        };
 
-        for (int i = 0; i < command->address.size(); i++)
-        {
-            sum += command->address[i];
-        }
+        add_to_sum(command->address);
+        add_to_sum(command->action);
+        add_to_sum(command->paramNum);
+        add_to_sum(command->dataLen);
+        add_to_sum(command->data);
 
-        for (int i = 0; i < command->action.size(); i++)
-        {
-            sum += command->action[i];
-        }
-
-        for (int i = 0; i < command->paramNum.size(); i++)
-        {
-            sum += command->paramNum[i];
-        }
-
-        for (int i = 0; i < command->dataLen.size(); i++)
-        {
-            sum += command->dataLen[i];
-        }
-
-        for (int i = 0; i < command->data.size(); i++)
-        {
-            sum += command->data[i];
-        }
-
-        return sum % (UINT8_MAX + 1); // Modulo 256 to fit in 2 characters
+        return sum % 256; // Modulo 256 to fit in 2 characters
     }
 
   public:
@@ -128,134 +121,80 @@ class PfieifferLib
      */
     static void decryptResponse(std::string response, PfiefferCommand *command, bool *valid = nullptr)
     {
+        if (valid)
+            *valid = false; // Default to false until fully validated
+
         if (command == nullptr)
         {
             printf("Error: Null command pointer passed to decryptResponse.\n");
-            if (valid)
-                *valid = false;
             return;
         }
 
         if (response.size() < PFIEFFER_LOGIC_SIZE)
         {
-            printf("Error: Response string too short to parse.\n");
-            printf("Received response: %s\n", response.c_str());
-            if (valid)
-                *valid = false;
+            printf("Error: Response string too short to parse.\nReceived response: %s\n", response.c_str());
             return;
         }
 
         unsigned int offset = 0;
 
-        // Read address
-        for (int i = 0; i < PFIEFFER_ADDRESS_LENGTH; i++)
-        {
-            if (!std::isdigit(response[i]))
+        // Helper lambda to extract strings, validate characters, and advance offset
+        auto extract = [&](unsigned int len, std::string &target, bool isAlphaNum = false) -> bool {
+            if (offset + len > response.size())
+                return false;
+            
+            target = response.substr(offset, len);
+            for (char c : target)
             {
-                printf("Error: Invalid character in address field of response.\n");
-                printf("Received response: %s\n", response.c_str());
-                if (valid)
-                    *valid = false;
-                return;
+                if (isAlphaNum ? !std::isalnum(c) : !std::isdigit(c))
+                    return false;
             }
-            command->address += response[i];
-        }
-        offset += PFIEFFER_ADDRESS_LENGTH;
+            offset += len;
+            return true;
+        };
 
-        // Read action
-        for (int i = 0; i < PFIEFFER_ACTION_LENGTH; i++)
+        auto parseError = [&]() {
+            printf("Error: Invalid character or formatting in response.\nReceived response: %s\n", response.c_str());
+        };
+
+        // Extract fixed-length header fields
+        if (!extract(PFIEFFER_ADDRESS_LENGTH, command->address) ||
+            !extract(PFIEFFER_ACTION_LENGTH, command->action) ||
+            !extract(PFIEFFER_PARAMNUM_LENGTH, command->paramNum) ||
+            !extract(PFIEFFER_DATALEN_LENGTH, command->dataLen))
         {
-            if (!std::isdigit(response[i]))
-            {
-                printf("Error: Invalid character in address field of response.\n");
-                printf("Received response: %s\n", response.c_str());
-                if (valid)
-                    *valid = false;
-                return;
-            }
-            command->action += response[offset + i];
+            return parseError();
         }
-        offset += PFIEFFER_ACTION_LENGTH;
 
-        // Read parameter number
-        for (int i = 0; i < PFIEFFER_PARAMNUM_LENGTH; i++)
-        {
-            if (!std::isdigit(response[i]))
-            {
-                printf("Error: Invalid character in address field of response.\n");
-                printf("Received response: %s\n", response.c_str());
-                if (valid)
-                    *valid = false;
-                return;
-            }
-            command->paramNum += response[offset + i];
-        }
-        offset += PFIEFFER_PARAMNUM_LENGTH;
-
-        // Read data length
-        for (int i = 0; i < PFIEFFER_DATALEN_LENGTH; i++)
-        {
-            if (!std::isdigit(response[i]))
-            {
-                printf("Error: Invalid character in address field of response.\n");
-                printf("Received response: %s\n", response.c_str());
-                if (valid)
-                    *valid = false;
-                return;
-            }
-            command->dataLen += response[offset + i];
-        }
-        offset += PFIEFFER_DATALEN_LENGTH;
-
-        // Read data based on data length
+        // Extract dynamic-length data field
         const unsigned int EXPECTED_DATA_LENGTH = std::stoi(command->dataLen);
-        for (int i = 0; i < EXPECTED_DATA_LENGTH; i++)
+        if (!extract(EXPECTED_DATA_LENGTH, command->data, true))
         {
-            if (!std::isalnum(response[i]))
-            {
-                printf("Error: Invalid character in address field of response.\n");
-                printf("Received response: %s\n", response.c_str());
-                if (valid)
-                    *valid = false;
-                return;
-            }
-            command->data += response[offset + i];
-        }
-        offset += EXPECTED_DATA_LENGTH;
-
-        // Read checksum
-        for (int i = 0; i < PFIEFFER_CHECKSUM_LENGTH; i++)
-        {
-            if (!std::isdigit(response[i]))
-            {
-                printf("Error: Invalid character in address field of response.\n");
-                printf("Received response: %s\n", response.c_str());
-                if (valid)
-                    *valid = false;
-                return;
-            }
-
-            command->checksum += response[offset + i];
-
-            if (std::stoi(command->checksum) != calculateChecksum(command))
-            {
-                printf("Error: Checksum mismatch in response.\n");
-                printf("Received response: %s\n", response.c_str());
-                if (valid)
-                    *valid = false;
-                return;
-            }
+            return parseError();
         }
 
-        // Check for carriage return at the end
-        if (response.back() != '\r')
+        // Extract checksum
+        if (!extract(PFIEFFER_CHECKSUM_LENGTH, command->checksum))
         {
-            printf("Error: Missing carriage return at end of response.\n");
-            printf("Received response: %s\n", response.c_str());
-            if (valid)
-                *valid = false;
+            return parseError();
+        }
+
+        // Validate checksum
+        if (std::stoi(command->checksum) != calculateChecksum(command))
+        {
+            printf("Error: Checksum mismatch in response.\nReceived response: %s\n", response.c_str());
             return;
         }
+
+        // Validate carriage return
+        if (response.back() != '\r')
+        {
+            printf("Error: Missing carriage return at end of response.\nReceived response: %s\n", response.c_str());
+            return;
+        }
+
+        if (valid)
+            *valid = true; // Fully validated
     }
 
     /**
