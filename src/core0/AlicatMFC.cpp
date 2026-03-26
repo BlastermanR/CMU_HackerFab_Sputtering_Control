@@ -59,10 +59,7 @@ void AlicatMFC::sendCommand(const AlicatCommand& cmd)
     
     if (valid)
     {
-#ifdef DEBUG
-        printf("Alicat: Sending Message: %s\n", formattedStr.c_str());
-#endif
-        serialPort->send(formattedStr.c_str());
+        sendMessage(formattedStr.c_str());
     }
     else
     {
@@ -70,6 +67,14 @@ void AlicatMFC::sendCommand(const AlicatCommand& cmd)
         printf("Alicat: Error formatting command\n");
 #endif
     }
+}
+
+void AlicatMFC::sendMessage(const char *message)
+{
+#ifdef DEBUG
+    printf("Alicat: Sending Message: %s\n", message);
+#endif
+    serialPort->send(message);
 }
 
 void AlicatMFC::pollData()

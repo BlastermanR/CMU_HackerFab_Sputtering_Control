@@ -52,6 +52,12 @@ class AlicatMFC : public IDevice
      */
     void update() override;
 
+    /**
+     * @brief Send a raw message directly to the device
+     * @param message Text string to send
+     */
+    void sendMessage(const char *message) override;
+
     // --- MFC Specific Commands ---
 
     /**
