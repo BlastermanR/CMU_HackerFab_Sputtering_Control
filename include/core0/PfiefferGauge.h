@@ -20,8 +20,11 @@ class PfiefferGauge : public IDevice
     // Define the serial port
     ISerialDevice *serialPort;
 
-    // Flag to indicate a new response has been received for state logic        
+    // Flag to indicate a new response has been received for state logic
     bool newResponse = false;
+
+    // Polling Interval to send command
+    uint64_t pollingInterval_ms = 1000;
 
     // Variable to store the latest chamber pressure reading
     double chamberPressure_hPa = 0.0;
@@ -48,7 +51,7 @@ class PfiefferGauge : public IDevice
     ~PfiefferGauge();
 
     /**
-     * @brief Initialize the device (e.g., configuring hardware peripherals,    
+     * @brief Initialize the device (e.g., configuring hardware peripherals,
      * setting up ports)
      */
     void init() override;
@@ -60,6 +63,17 @@ class PfiefferGauge : public IDevice
      * - Chamber Pressure
      */
     void update() override;
+
+    /**
+     * @brief Sets the interval for the poll command.
+     * @param interval in ms
+     */
+    void setPollingInterval_ms(uint64_t ms) { pollingInterval_ms = ms; }
+
+    /**
+     *
+     */
+    uint64_t getPollingInterval_ms() { return pollingInterval_ms; }
 
     /**
      * @brief Retrieve the latest chamber pressure reading

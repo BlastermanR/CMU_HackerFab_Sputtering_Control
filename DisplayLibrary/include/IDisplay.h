@@ -1,7 +1,7 @@
 /**
  * @file IDisplay.h
  * @brief Interface for graphical display drivers.
- * 
+ *
  * This interface defines the contract for basic display operations.
  */
 #ifndef IDISPLAY_H
@@ -13,8 +13,9 @@
  * @class IDisplay
  * @brief Abstract base class for display implementations.
  */
-class IDisplay {
-public:
+class IDisplay
+{
+  public:
     virtual ~IDisplay() = default;
 
     /**

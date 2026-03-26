@@ -7,15 +7,15 @@
  */
 
 #include "AlicatMFC.h"
+#include "Core1Main.h"
 #include "HardwareUART.h"
+#include "Intercore.h"
 #include "PIO_UART.h"
 #include "PfiefferGauge.h"
 #include "PfiefferPump.h"
 #include "RS232Device.h"
 #include "RS485Device.h"
 #include "USBSerial.h"
-#include "Core1Main.h"
-#include "Intercore.h"
 #include "pico/multicore.h"
 #include "pico/stdlib.h"
 #include "picoDefinitions.h"
@@ -56,12 +56,14 @@ int main()
     PfiefferPump pump(&pumpDevice);
 
     // Set up parsing callback
-    pcTerminal.setCallback([&pcTerminal](const std::string &command) {
-        // Echo the command back to the PC
-        pcTerminal.println(command.c_str());
+    pcTerminal.setCallback(
+        [&pcTerminal](const std::string &command)
+        {
+            // Echo the command back to the PC
+            pcTerminal.println(command.c_str());
 
-        // Future: Pass the command to the Sputtering Manager on Core 1
-    });
+            // Future: Pass the command to the Sputtering Manager on Core 1
+        });
 
     mfc.init();
     gauge.init();

@@ -3,10 +3,10 @@
 /**
  * @file PfiefferLib.h
  * @brief Utility library for formatting and parsing Pfeiffer Vacuum protocol commands.
- * 
- * Defines the PfiefferCommand structure and provides static methods for 
+ *
+ * Defines the PfiefferCommand structure and provides static methods for
  * checksum calculation and protocol serialization.
- * 
+ *
  * @author Ryan Massie (rmassie)
  * @date 3/4/26
  */
@@ -60,9 +60,11 @@ class PfieifferLib
             return 0;
         }
 
-        unsigned int sum = 0;
-        auto add_to_sum = [&sum](const std::string& str) {
-            for (unsigned char c : str) {
+        unsigned int sum        = 0;
+        auto         add_to_sum = [&sum](const std::string &str)
+        {
+            for (unsigned char c : str)
+            {
                 sum += c;
             }
         };
@@ -139,10 +141,11 @@ class PfieifferLib
         unsigned int offset = 0;
 
         // Helper lambda to extract strings, validate characters, and advance offset
-        auto extract = [&](unsigned int len, std::string &target, bool isAlphaNum = false) -> bool {
+        auto extract = [&](unsigned int len, std::string &target, bool isAlphaNum = false) -> bool
+        {
             if (offset + len > response.size())
                 return false;
-            
+
             target = response.substr(offset, len);
             for (char c : target)
             {
@@ -153,13 +156,11 @@ class PfieifferLib
             return true;
         };
 
-        auto parseError = [&]() {
-            printf("Error: Invalid character or formatting in response.\nReceived response: %s\n", response.c_str());
-        };
+        auto parseError = [&]()
+        { printf("Error: Invalid character or formatting in response.\nReceived response: %s\n", response.c_str()); };
 
         // Extract fixed-length header fields
-        if (!extract(PFIEFFER_ADDRESS_LENGTH, command->address) ||
-            !extract(PFIEFFER_ACTION_LENGTH, command->action) ||
+        if (!extract(PFIEFFER_ADDRESS_LENGTH, command->address) || !extract(PFIEFFER_ACTION_LENGTH, command->action) ||
             !extract(PFIEFFER_PARAMNUM_LENGTH, command->paramNum) ||
             !extract(PFIEFFER_DATALEN_LENGTH, command->dataLen))
         {

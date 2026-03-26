@@ -1,56 +1,118 @@
 /**
  * @file TC110DriveUnit.h
  * @brief Parameter definitions and device class for the Pfeiffer Vacuum TC 110.
- * 
+ *
  * Source: https://www.idealvac.com/files/ManualsII/PfeifferTC110ElectronicDriveUnit.pdf
- * 
+ *
  * @author Ryan Massie (rmassie)
  * @date 3/25/26
  */
 
 #pragma once
 
-#include <cstdint>
 #include "PfiefferDevice.h"
+#include <cstdint>
 
-namespace Pfieffer {
+namespace Pfieffer
+{
 
 /**
  * @brief Enum representing the TC110 parameter numbers for easy, type-safe reference.
  */
-enum class TC110Cmd : uint16_t {
+enum class TC110Cmd : uint16_t
+{
     // Control Commands
-    Heating = 1, Standby = 2, RUTimeCtrl = 4, ErrorAckn = 9,
-    PumpgStatn = 10, EnableVent = 12, CfgSpdSwPt = 17, CfgDO2 = 19,
-    MotorPump = 23, CfgDO1 = 24, OpModeBKP = 25, SpdSetMode = 26,
-    GasMode = 27, VentMode = 30, CfgAccA1 = 35, CfgAccB1 = 36,
-    CfgAccA2 = 37, CfgAccB2 = 38, SealingGas = 50, CfgAO1 = 55,
-    CtrlViaInt = 60, IntSelLckd = 61, CfgDI1 = 62, CfgDI2 = 63,
+    Heating    = 1,
+    Standby    = 2,
+    RUTimeCtrl = 4,
+    ErrorAckn  = 9,
+    PumpgStatn = 10,
+    EnableVent = 12,
+    CfgSpdSwPt = 17,
+    CfgDO2     = 19,
+    MotorPump  = 23,
+    CfgDO1     = 24,
+    OpModeBKP  = 25,
+    SpdSetMode = 26,
+    GasMode    = 27,
+    VentMode   = 30,
+    CfgAccA1   = 35,
+    CfgAccB1   = 36,
+    CfgAccA2   = 37,
+    CfgAccB2   = 38,
+    SealingGas = 50,
+    CfgAO1     = 55,
+    CtrlViaInt = 60,
+    IntSelLckd = 61,
+    CfgDI1     = 62,
+    CfgDI2     = 63,
 
     // Status Requests
-    RemotePrio = 300, SpdSwPtAtt = 302, ErrorCode = 303, OvTempElec = 304,
-    OvTempPump = 305, SetSpdAtt = 306, PumpAccel = 307, SetRotSpd_Hz = 308,
-    ActualSpd_Hz = 309, DrvCurrent = 310, OpHrsPump = 311, FwVersion = 312,
-    DrvVoltage = 313, OpHrsElec = 314, NominalSpd_Hz = 315, DrvPower = 316,
-    PumpCycles = 319, TempElec = 326, TempPmpBot = 330, AccelDecel = 336,
-    Pressure = 340, TempBearng = 342, TempMotor = 346, ElecName = 349,
-    CtrName = 350, CtrSoftware = 351, HwVersion = 354, ErrHist1 = 360,
-    ErrHist2 = 361, ErrHist3 = 362, ErrHist4 = 363, ErrHist5 = 364,
-    ErrHist6 = 365, ErrHist7 = 366, ErrHist8 = 367, ErrHist9 = 368,
-    ErrHist10 = 369, SetRotSpd_rpm = 397, ActualSpd_rpm = 398, NominalSpd_rpm = 399,
+    RemotePrio     = 300,
+    SpdSwPtAtt     = 302,
+    ErrorCode      = 303,
+    OvTempElec     = 304,
+    OvTempPump     = 305,
+    SetSpdAtt      = 306,
+    PumpAccel      = 307,
+    SetRotSpd_Hz   = 308,
+    ActualSpd_Hz   = 309,
+    DrvCurrent     = 310,
+    OpHrsPump      = 311,
+    FwVersion      = 312,
+    DrvVoltage     = 313,
+    OpHrsElec      = 314,
+    NominalSpd_Hz  = 315,
+    DrvPower       = 316,
+    PumpCycles     = 319,
+    TempElec       = 326,
+    TempPmpBot     = 330,
+    AccelDecel     = 336,
+    Pressure       = 340,
+    TempBearng     = 342,
+    TempMotor      = 346,
+    ElecName       = 349,
+    CtrName        = 350,
+    CtrSoftware    = 351,
+    HwVersion      = 354,
+    ErrHist1       = 360,
+    ErrHist2       = 361,
+    ErrHist3       = 362,
+    ErrHist4       = 363,
+    ErrHist5       = 364,
+    ErrHist6       = 365,
+    ErrHist7       = 366,
+    ErrHist8       = 367,
+    ErrHist9       = 368,
+    ErrHist10      = 369,
+    SetRotSpd_rpm  = 397,
+    ActualSpd_rpm  = 398,
+    NominalSpd_rpm = 399,
 
     // Set value settings
-    RUTimeSVal = 700, SpdSwPt1 = 701, SpdSVal = 707, PwrSVal = 708,
-    SwoffBKP = 710, SwOnBKP = 711, StdbySVal = 717, SpdSwPt2 = 719,
-    VentSpd = 720, VentTime = 721, Gaugetype = 738, NomSpdConf = 777,
-    ParamSet = 794, ServiceLin = 795, RS485Adr = 797
+    RUTimeSVal = 700,
+    SpdSwPt1   = 701,
+    SpdSVal    = 707,
+    PwrSVal    = 708,
+    SwoffBKP   = 710,
+    SwOnBKP    = 711,
+    StdbySVal  = 717,
+    SpdSwPt2   = 719,
+    VentSpd    = 720,
+    VentTime   = 721,
+    Gaugetype  = 738,
+    NomSpdConf = 777,
+    ParamSet   = 794,
+    ServiceLin = 795,
+    RS485Adr   = 797
 };
 
 /**
  * @brief TC110 Device implementation inheriting from the PfiefferDevice CRTP template.
  */
-class TC110DriveUnit : public PfiefferDevice<TC110DriveUnit> {
-public:
+class TC110DriveUnit : public PfiefferDevice<TC110DriveUnit>
+{
+  public:
     explicit TC110DriveUnit(uint8_t address = 1) : PfiefferDevice<TC110DriveUnit>(address) {}
 
     /**
@@ -83,7 +145,7 @@ public:
         {61, "IntSelLckd", 0, AccessType::READ_WRITE, 0, 1, 0, true},
         {62, "CfgDI1", 7, AccessType::READ_WRITE, 0, 6, 1, true},
         {63, "CfgDI2", 7, AccessType::READ_WRITE, 0, 6, 2, true},
-        
+
         // Status Requests
         {300, "RemotePrio", 0, AccessType::READ_ONLY, 0, 1, 0, false},
         {302, "SpdSwPtAtt", 0, AccessType::READ_ONLY, 0, 1, 0, false},
@@ -141,15 +203,17 @@ public:
         {777, "NomSpdConf", 1, AccessType::READ_WRITE, 0, 1500, 0, true},
         {794, "ParamSet", 7, AccessType::READ_WRITE, 0, 1, 0, false},
         {795, "ServiceLin", 7, AccessType::READ_WRITE, 795, 795, 795, false},
-        {797, "RS485Adr", 1, AccessType::READ_WRITE, 1, 255, 1, true}
-    };
+        {797, "RS485Adr", 1, AccessType::READ_WRITE, 1, 255, 1, true}};
 
     /**
      * @brief Inherited CRTP static callback to fetch a parameter bound array entry.
      */
-    static const PfiefferParamDef* getParamDef(uint16_t parameterNumber) {
-        for (const auto& def : DICT) {
-            if (def.number == parameterNumber) {
+    static const PfiefferParamDef *getParamDef(uint16_t parameterNumber)
+    {
+        for (const auto &def : DICT)
+        {
+            if (def.number == parameterNumber)
+            {
                 return &def;
             }
         }

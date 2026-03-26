@@ -8,26 +8,26 @@
 #ifndef ALICAT_MFC
 #define ALICAT_MFC
 
+#include "AlicatLib.h"
 #include "IDevice.h"
 #include "ISerialDevice.h"
 #include "picoDefinitions.h"
-#include "AlicatLib.h"
 
 class AlicatMFC : public IDevice
 {
   private:
     // Define the serial port
-    ISerialDevice *serialPort; 
+    ISerialDevice *serialPort;
 
     // Device state
-    char deviceId{'A'};
+    char            deviceId{'A'};
     AlicatDataFrame lastData;
 
     /**
      * @brief Helper function to format and send a command to the device
      * @param cmd Command structure to format and send
      */
-    void sendCommand(const AlicatCommand& cmd);
+    void sendCommand(const AlicatCommand &cmd);
 
   public:
     /**
@@ -82,14 +82,13 @@ class AlicatMFC : public IDevice
      */
     void tareFlow();
 
-
     // --- Data Getters ---
 
     /**
      * @brief Get the most recently parsed data frame.
      * @return Const reference to the last AlicatDataFrame.
      */
-    const AlicatDataFrame& getLastData() const;
+    const AlicatDataFrame &getLastData() const;
 
     /**
      * @brief Get the mass flow reading from the last data frame.
@@ -126,7 +125,6 @@ class AlicatMFC : public IDevice
      * @return Gas type string.
      */
     std::string getGasType() const;
-
 };
 
 #endif // ALICAT_MFC
