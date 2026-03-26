@@ -19,6 +19,22 @@
 #include <cstdlib>
 
 /**
+ * Primary Alicat Command Actions
+ * https://documents.alicat.com/Alicat-Serial-Primer.pdf
+ */
+inline const std::string ALICAT_POLL = "";                          // Obtain a data frame
+inline const std::string ALICAT_SET_GAS = "G";                      // Change current active gas
+inline const std::string ALICAT_ACTIVE_GAS = "GS";                  // Query, change, or save active gas
+inline const std::string ALICAT_AVAILABLE_GASES = "??G*";           // Obtain a list of available gases installed on the device
+inline const std::string ALICAT_CHANGE_SETPOINT = "S";              // Change the current setpoint
+inline const std::string ALICAT_QUERY_CHANGE_SETPOINT = "LS";       // Query, change, or save the current setpoint
+inline const std::string ALICAT_TARE_FLOW = "V";                    // Create a zero flow reference point
+inline const std::string ALICAT_TARE_ABSOLUTE_PRESSURE = "PC";      // Create a zero absolute pressure reference point
+inline const std::string ALICAT_TARE_GAUGE_PRESSURE = "P";          // Create a zero gauge or differential pressure reference point
+inline const std::string ALICAT_START_STREAMING = "@ @";            // Start streaming data from a device
+inline const std::string ALICAT_STOP_STREAMING = "@@";              // Stop streaming data from a device
+
+/**
  * @brief Represents a command sent to an Alicat MFC
  */
 struct AlicatCommand
