@@ -7,7 +7,7 @@
 #ifndef IDISPLAY_H
 #define IDISPLAY_H
 
-#include <stdint.h>
+#include <cstdint>
 
 /**
  * @class IDisplay

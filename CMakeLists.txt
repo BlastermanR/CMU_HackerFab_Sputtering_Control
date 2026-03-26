@@ -42,7 +42,7 @@ include(${CMAKE_SOURCE_DIR}/UARTLibrary/UARTLibrary.cmake)
 include(${CMAKE_SOURCE_DIR}/USBSerialLibrary/USBSerialLibrary.cmake)
 include(${CMAKE_SOURCE_DIR}/Pfiefferlib/PfiefferLibrary.cmake)
 include(${CMAKE_SOURCE_DIR}/SerialDeviceLibrary/SerialDeviceLibrary.cmake)
-include(${CMAKE_SOURCE_DIR}/WaveshareDisplayLibrary/WaveshareDisplayLibrary.cmake)
+include(${CMAKE_SOURCE_DIR}/DisplayLibrary/WaveshareDisplayLibrary.cmake)
 
 # Use GLOB_RECURSE to gather files from subdirectories
 file(GLOB_RECURSE SOURCES "src/*.cpp")
