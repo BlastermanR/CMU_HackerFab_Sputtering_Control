@@ -83,7 +83,7 @@ template <typename Derived> class PfiefferDevice
         outCmd.address  = addrStr;
         outCmd.action   = READ_PARAMETER;
         outCmd.paramNum = paramStr;
-        outCmd.data     = "=?\r"; // Pfeiffer protocol requests usually have this data for queries
+        outCmd.data     = QUERY_DATA_STR; // Pfeiffer protocol requests usually have this data for queries
 
         return true;
     }
@@ -120,7 +120,7 @@ template <typename Derived> class PfiefferDevice
         snprintf(dataStr, sizeof(dataStr), "%06d", static_cast<int>(value));
 
         outCmd.address  = addrStr;
-        outCmd.action   = DESCRIBE_PARAMETER; // Write action block
+        outCmd.action   = DATA_RESPONSE; // Write action block
         outCmd.paramNum = paramStr;
         outCmd.data     = dataStr;
 

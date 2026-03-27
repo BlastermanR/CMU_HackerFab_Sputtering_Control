@@ -27,7 +27,9 @@
      1) // Minimum size of a valid command/response (without data + carraige
         // return)
 inline const std::string READ_PARAMETER     = "00";
-inline const std::string DESCRIBE_PARAMETER = "10";
+inline const std::string DATA_RESPONSE      = "10";
+inline const std::string ERROR_RESPONSE     = "20";
+inline const std::string QUERY_DATA_STR     = "=?";
 
 /**
  * PfiefferCommand Struct

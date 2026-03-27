@@ -11,6 +11,7 @@
 #include "IDevice.h"
 #include "ISerialDevice.h"
 #include "PfiefferLib.h"
+#include "Devices/MPT200.h"
 #include "pico/types.h"
 #include "picoDefinitions.h"
 
@@ -19,6 +20,12 @@ class PfiefferGauge : public IDevice
   private:
     // Define the serial port
     ISerialDevice *serialPort;
+    
+    // Abstract device handling parameter definitions for MPT200 gauge
+    Pfieffer::MPT200 gaugeDef;
+
+    // Time tracking
+    uint32_t lastPollTime = 0;
 
     // Flag to indicate a new response has been received for state logic
     bool newResponse = false;
@@ -29,15 +36,15 @@ class PfiefferGauge : public IDevice
     // Variable to store the latest chamber pressure reading
     double chamberPressure_hPa = 0.0;
 
-  public:
     /**
      * @brief Utilizes UART port to send message to device
      * @param message Null terminating message to send to device.
      * \0 is not sent
      *
-     * TODO: MARK PRIVATE AFTER TESTING
      */
     void sendMessage(const char *message) override;
+
+  public:
 
     /**
      * @brief Constructor
@@ -66,14 +73,20 @@ class PfiefferGauge : public IDevice
 
     /**
      * @brief Sets the interval for the poll command.
-     * @param interval in ms
+     * @param ms Interval in ms
      */
     void setPollingInterval_ms(uint64_t ms) { pollingInterval_ms = ms; }
 
     /**
-     *
+     *  @brief Returns the polling interval in ms
+     *  @return Polling Interval
      */
     uint64_t getPollingInterval_ms() { return pollingInterval_ms; }
+
+    /**
+     * @brief Polls device for up to date pressure
+     */
+    void pollDevice();
 
     /**
      * @brief Retrieve the latest chamber pressure reading
