@@ -7,9 +7,9 @@
  */
 
 #include "AlicatMFC.h"
+#include "Debug.h"
 #include "pico/stdlib.h"
 #include "picoDefinitions.h"
-#include "Debug.h"
 #include <sstream>
 #include <stdio.h>
 

@@ -6,6 +6,8 @@
 #include "hardware/gpio.h"
 #include "hardware/pwm.h"
 #include "pico/time.h"
+#include <cstdio>
+#include <cstring>
 
 /** @name ST7789 Commands
  *  @brief ST7789 controller specific command set.
@@ -175,3 +177,163 @@ void WaveshareDisplay::fillRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, 
 }
 
 void WaveshareDisplay::clear(uint16_t color) { fillRect(0, 0, width, height, color); }
+
+// --- Basic UI/Graphics Implementation ---
+void WaveshareDisplay::drawFastHLine(uint16_t x, uint16_t y, uint16_t w, uint16_t color)
+{
+    fillRect(x, y, w, 1, color);
+}
+
+void WaveshareDisplay::drawChar(uint16_t x, uint16_t y, char c, uint16_t color, uint16_t bg, uint8_t size)
+{
+    // Basic font rendering stub. For a real app, integrate a monospaced font library (e.g., Adafruit_GFX derived or
+    // u8g2) Draw a colored block as a placeholder depending on character presence for now
+    if (c != ' ')
+    {
+        fillRect(x, y, 6 * size, 8 * size, color);
+    }
+    else
+    {
+        fillRect(x, y, 6 * size, 8 * size, bg);
+    }
+}
+
+void WaveshareDisplay::drawString(uint16_t x, uint16_t y, const char *str, uint16_t color, uint16_t bg, uint8_t size)
+{
+    int cursor_x = x;
+    while (*str)
+    {
+        drawChar(cursor_x, y, *str, color, bg, size);
+        cursor_x += 6 * size;
+        str++;
+    }
+}
+
+void WaveshareDisplay::drawCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color)
+{
+    int16_t f     = 1 - r;
+    int16_t ddF_x = 1;
+    int16_t ddF_y = -2 * r;
+    int16_t x     = 0;
+    int16_t y     = r;
+
+    drawPixel(x0, y0 + r, color);
+    drawPixel(x0, y0 - r, color);
+    drawPixel(x0 + r, y0, color);
+    drawPixel(x0 - r, y0, color);
+
+    while (x < y)
+    {
+        if (f >= 0)
+        {
+            y--;
+            ddF_y += 2;
+            f += ddF_y;
+        }
+        x++;
+        ddF_x += 2;
+        f += ddF_x;
+        drawPixel(x0 + x, y0 + y, color);
+        drawPixel(x0 - x, y0 + y, color);
+        drawPixel(x0 + x, y0 - y, color);
+        drawPixel(x0 - x, y0 - y, color);
+        drawPixel(x0 + y, y0 + x, color);
+        drawPixel(x0 - y, y0 + x, color);
+        drawPixel(x0 + y, y0 - x, color);
+        drawPixel(x0 - y, y0 - x, color);
+    }
+}
+
+void WaveshareDisplay::fillCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color)
+{
+    drawFastHLine(x0 - r, y0, 2 * r + 1, color);
+    int16_t f     = 1 - r;
+    int16_t ddF_x = 1;
+    int16_t ddF_y = -2 * r;
+    int16_t x     = 0;
+    int16_t y     = r;
+
+    while (x < y)
+    {
+        if (f >= 0)
+        {
+            y--;
+            ddF_y += 2;
+            f += ddF_y;
+        }
+        x++;
+        ddF_x += 2;
+        f += ddF_x;
+
+        drawFastHLine(x0 - x, y0 + y, 2 * x + 1, color);
+        drawFastHLine(x0 - x, y0 - y, 2 * x + 1, color);
+        drawFastHLine(x0 - y, y0 + x, 2 * y + 1, color);
+        drawFastHLine(x0 - y, y0 - x, 2 * y + 1, color);
+    }
+}
+
+// --- Sputtering UI Methods ---
+void WaveshareDisplay::initSputteringUI()
+{
+    clear(COLOR_WHITE);
+    // Draw Header
+    drawString(10, 10, "CMU Hacker Fab Sputtering", COLOR_BLACK, COLOR_WHITE, 2);
+    // Header Line
+    drawFastHLine(10, 30, 300, COLOR_BLACK);
+
+    // Draw Labels
+    drawString(10, 45, "Status:", COLOR_BLACK, COLOR_WHITE, 2);
+    drawString(10, 75, "Pump Speed:", COLOR_BLACK, COLOR_WHITE, 2);
+    drawString(10, 105, "Chamber Pressure:", COLOR_BLACK, COLOR_WHITE, 2);
+    drawString(10, 135, "Argon Flow:", COLOR_BLACK, COLOR_WHITE, 2);
+    drawString(10, 165, "Oxygen Flow:", COLOR_BLACK, COLOR_WHITE, 2);
+
+    // Default Values
+    setStatus("Idle", 0xCE79); // Light Blue-ish
+    setPumpSpeed(2500);
+    setChamberPressure(10.0f);
+    setArgonFlow(10.0f);
+    setOxygenFlow(10.0f);
+}
+
+void WaveshareDisplay::setStatus(const char *status, uint16_t indicatorColor)
+{
+    fillRect(100, 45, 150, 20, COLOR_WHITE); // clear old status text
+    drawString(100, 45, status, COLOR_BLACK, COLOR_WHITE, 2);
+
+    // Status circle indicator
+    fillCircle(280, 50, 15, indicatorColor);
+    drawCircle(280, 50, 15, COLOR_BLACK); // outline
+}
+
+void WaveshareDisplay::setPumpSpeed(int speed)
+{
+    char buf[16];
+    std::sprintf(buf, "%d", speed);
+    fillRect(150, 75, 100, 20, COLOR_WHITE);
+    drawString(150, 75, buf, COLOR_BLACK, COLOR_WHITE, 2);
+}
+
+void WaveshareDisplay::setChamberPressure(float pressure)
+{
+    char buf[32];
+    std::sprintf(buf, "%.1f hPa", pressure);
+    fillRect(210, 105, 100, 20, COLOR_WHITE);
+    drawString(210, 105, buf, COLOR_BLACK, COLOR_WHITE, 2);
+}
+
+void WaveshareDisplay::setArgonFlow(float flow)
+{
+    char buf[16];
+    std::sprintf(buf, "%.1f", flow);
+    fillRect(150, 135, 100, 20, COLOR_WHITE);
+    drawString(150, 135, buf, COLOR_BLACK, COLOR_WHITE, 2);
+}
+
+void WaveshareDisplay::setOxygenFlow(float flow)
+{
+    char buf[16];
+    std::sprintf(buf, "%.1f", flow);
+    fillRect(160, 165, 100, 20, COLOR_WHITE);
+    drawString(160, 165, buf, COLOR_BLACK, COLOR_WHITE, 2);
+}

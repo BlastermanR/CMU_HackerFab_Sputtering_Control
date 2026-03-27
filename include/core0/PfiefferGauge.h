@@ -8,10 +8,10 @@
 #ifndef PFIEFFER_GAUGE_H
 #define PFIEFFER_GAUGE_H
 
+#include "Devices/MPT200.h"
 #include "IDevice.h"
 #include "ISerialDevice.h"
 #include "PfiefferLib.h"
-#include "Devices/MPT200.h"
 #include "pico/types.h"
 #include "picoDefinitions.h"
 
@@ -23,7 +23,7 @@ class PfiefferGauge : public IDevice
   private:
     // Define the serial port
     ISerialDevice *serialPort;
-    
+
     // Abstract device handling parameter definitions for MPT200 gauge
     Pfieffer::MPT200 gaugeDef;
 
@@ -48,7 +48,6 @@ class PfiefferGauge : public IDevice
     void sendMessage(const char *message) override;
 
   public:
-
     /**
      * @brief Constructor
      * @param dev ISerialDevice instance to use.

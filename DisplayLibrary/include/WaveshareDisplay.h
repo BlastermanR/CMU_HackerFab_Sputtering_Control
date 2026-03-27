@@ -63,6 +63,32 @@ class WaveshareDisplay : public IDisplay
     /** @brief Sets the PWM duty cycle for the backlight (0-255). */
     void setBrightness(uint8_t brightness) override;
 
+    // --- Sputtering UI Functions ---
+    /** @brief Initializes the static layout of the Sputtering UI. */
+    void initSputteringUI();
+
+    /** @brief Updates the Status text and indicator circle color. */
+    void setStatus(const char *status, uint16_t indicatorColor);
+
+    /** @brief Updates the Pump Speed value. */
+    void setPumpSpeed(int speed);
+
+    /** @brief Updates the Chamber Pressure value in hPa. */
+    void setChamberPressure(float pressure);
+
+    /** @brief Updates the Argon Flow value. */
+    void setArgonFlow(float flow);
+
+    /** @brief Updates the Oxygen Flow value. */
+    void setOxygenFlow(float flow);
+
+    // --- Basic Drawing Primitives (Needed for UI) ---
+    void drawChar(uint16_t x, uint16_t y, char c, uint16_t color, uint16_t bg, uint8_t size = 1);
+    void drawString(uint16_t x, uint16_t y, const char *str, uint16_t color, uint16_t bg, uint8_t size = 1);
+    void drawCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color);
+    void fillCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color);
+    void drawFastHLine(uint16_t x, uint16_t y, uint16_t w, uint16_t color);
+
     /** @return The display width in pixels. */
     uint16_t getWidth() const { return width; }
     /** @return The display height in pixels. */

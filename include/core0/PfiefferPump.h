@@ -8,10 +8,10 @@
 #ifndef PFIEFFER_PUMP_H
 #define PFIEFFER_PUMP_H
 
+#include "Devices/TC110DriveUnit.h"
 #include "IDevice.h"
 #include "ISerialDevice.h"
 #include "PfiefferLib.h"
-#include "Devices/TC110DriveUnit.h"
 
 // Address of Pfieffer Gauge
 #define PFIEFFER_PUMP_ADDRESS 1
@@ -70,7 +70,7 @@ class PfiefferPump : public IDevice
 
     /**
      * @brief logic update function
-     * 
+     *
      * Polls
      */
     void update() override;
@@ -103,9 +103,9 @@ class PfiefferPump : public IDevice
 
     /**
      * @brief Blocking signal to activate pump
-     * 
+     *
      * Calls signalPumpOn under the hood and waits for a response
-     * 
+     *
      * @return True if pump activates, False if failure
      */
     bool activatePump();
@@ -117,9 +117,9 @@ class PfiefferPump : public IDevice
 
     /**
      * @brief Blocking signal to deactivate pump
-     * 
+     *
      * Calls signalPumpOff under the hood and waits for a response
-     * 
+     *
      * @return True if pump activates, False if failure
      */
     bool deactivatePump();
@@ -134,10 +134,7 @@ class PfiefferPump : public IDevice
      * @brief Gets the pump speed from the latest reading
      * @return Speed in hertz
      */
-    double getPumpSpeed()
-    {
-        return actualPumpSpeed_hz;
-    }
+    double getPumpSpeed() { return actualPumpSpeed_hz; }
 };
 
 #endif // PFIEFFER_PUMP_H
