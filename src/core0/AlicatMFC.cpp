@@ -9,6 +9,7 @@
 #include "AlicatMFC.h"
 #include "pico/stdlib.h"
 #include "picoDefinitions.h"
+#include "Debug.h"
 #include <sstream>
 #include <stdio.h>
 
@@ -37,9 +38,9 @@ void AlicatMFC::update()
     while (serialPort->hasMessage())
     {
         std::string msg = serialPort->popMessage();
-#ifdef DEBUG
-        printf("Alicat Message Received: %s\n", msg.c_str());
-#endif
+
+        DEBUG_PRINT("Alicat Message Received: %s\n", msg.c_str());
+
         // Handle message here
         bool            isValid = false;
         AlicatDataFrame frame;
@@ -63,17 +64,13 @@ void AlicatMFC::sendCommand(const AlicatCommand &cmd)
     }
     else
     {
-#ifdef DEBUG
-        printf("Alicat: Error formatting command\n");
-#endif
+        DEBUG_PRINT("Alicat: Error formatting command\n");
     }
 }
 
 void AlicatMFC::sendMessage(const char *message)
 {
-#ifdef DEBUG
-    printf("Alicat: Sending Message: %s\n", message);
-#endif
+    DEBUG_PRINT("Alicat: Sending Message: %s\n", message);
     serialPort->send(message);
 }
 

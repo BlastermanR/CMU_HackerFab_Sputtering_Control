@@ -12,6 +12,7 @@
 #include "math.h"
 #include "pico/stdlib.h"
 #include "picoDefinitions.h"
+#include "Debug.h"
 #include <stdio.h>
 #include <string>
 
@@ -46,9 +47,7 @@ void PfiefferGauge::update()
             continue;
         }
 
-#ifdef DEBUG
-        printf("PfiefferGauge received message: %s\n", response.c_str());
-#endif
+        DEBUG_PRINT("PfiefferGauge received message: %s\n", response.c_str());       
 
         bool valid = false;
         PfiefferCommand command;
@@ -70,15 +69,11 @@ void PfiefferGauge::update()
                 if (endPtr != command.data.substr(0, 4).c_str()) {
                     const int exponent = std::strtol(command.data.substr(4, 2).c_str(), &endPtr, 10) - EXPONENT_BIAS; 
                     
-                    chamberPressure_hPa = static_cast<double>(mantissa) * pow(10, exponent); 
-                    
-#ifdef DEBUG
-                    printf("PfiefferGauge: Parsed Pressure Reading: %f hPa\n", chamberPressure_hPa);
-#endif
+                    chamberPressure_hPa = static_cast<double>(mantissa) * pow(10, exponent);
+
+                    DEBUG_PRINT("PfiefferGauge: Parsed Pressure Reading: %f hPa\n", chamberPressure_hPa);
                 } else {
-#ifdef DEBUG
-                    printf("PfiefferGauge: Failed to parse pressure numeric data from: %s\n", command.data.c_str());
-#endif
+                    DEBUG_PRINT("PfiefferGauge: Failed to parse pressure numeric data from: %s\n", command.data.c_str());
                 }
             }
         }
@@ -111,8 +106,7 @@ void PfiefferGauge::pollDevice()
 
 void PfiefferGauge::sendMessage(const char *message)
 {
-#ifdef DEBUG
-    printf("PfiefferGauge: Sending Message: %s\n", message);
-#endif
+    DEBUG_PRINT("PfiefferGauge: Sending Message: %s\n", message);
     serialPort->send(message);
+
 }

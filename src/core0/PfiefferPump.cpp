@@ -9,14 +9,13 @@
 #include "PfiefferPump.h"
 #include "pico/stdlib.h"
 #include "picoDefinitions.h"
+#include "Debug.h"
 #include <stdio.h>
 #include <cstdlib>
 
 void PfiefferPump::sendMessage(const char *message)
 {
-#ifdef DEBUG
-    printf("Vacuum Pump: Sending Message: %s\n", message);
-#endif
+    DEBUG_PRINT("Vacuum Pump: Sending Message: %s\n", message);
     serialPort->send(message);
 }
 
@@ -45,9 +44,7 @@ void PfiefferPump::update()
             continue;
         }
 
-#ifdef DEBUG
-        printf("PfiefferPump received message: %s\n", response.c_str());
-#endif
+        DEBUG_PRINT("PfiefferPump received message: %s\n", response.c_str());
 
         bool valid = false;
         PfiefferCommand command;
@@ -62,9 +59,7 @@ void PfiefferPump::update()
                 double speed = std::strtod(command.data.c_str(), &endPtr);
                 if (endPtr != command.data.c_str()) {
                     actualPumpSpeed_hz = speed;
-#ifdef DEBUG
-                    printf("PfiefferPump: Parsed Speed Reading: %f Hz\n", actualPumpSpeed_hz);
-#endif
+                    DEBUG_PRINT("PfiefferPump: Parsed Speed Reading: %f Hz\n", actualPumpSpeed_hz);
                 }
             }
         }
