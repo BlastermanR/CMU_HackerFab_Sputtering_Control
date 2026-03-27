@@ -8,6 +8,7 @@
 #include "pico/time.h"
 #include <cstdio>
 #include <cstring>
+#include "font5x7.h"
 
 /** @name ST7789 Commands
  *  @brief ST7789 controller specific command set.
@@ -186,15 +187,30 @@ void WaveshareDisplay::drawFastHLine(uint16_t x, uint16_t y, uint16_t w, uint16_
 
 void WaveshareDisplay::drawChar(uint16_t x, uint16_t y, char c, uint16_t color, uint16_t bg, uint8_t size)
 {
-    // Basic font rendering stub. For a real app, integrate a monospaced font library (e.g., Adafruit_GFX derived or
-    // u8g2) Draw a colored block as a placeholder depending on character presence for now
-    if (c != ' ')
-    {
-        fillRect(x, y, 6 * size, 8 * size, color);
-    }
-    else
-    {
-        fillRect(x, y, 6 * size, 8 * size, bg);
+    if((x >= width)            || // Clip right
+       (y >= height)           || // Clip bottom
+       ((x + 6 * size - 1) < 0) || // Clip left
+       ((y + 8 * size - 1) < 0))   // Clip top
+        return;
+
+    for (int8_t i=0; i<5; i++ ) { // Char bitmap = 5 columns
+        uint8_t line = font[c * 5 + i];
+        for (int8_t j = 0; j<8; j++) {
+            if (line & 0x1) {
+                if (size == 1) // default size
+                    drawPixel(x+i, y+j, color);
+                else {  // big size
+                    fillRect(x+(i*size), y+(j*size), size, size, color);
+                } 
+            } else if (bg != color) {
+                if (size == 1) // default size
+                    drawPixel(x+i, y+j, bg);
+                else {  // big size
+                    fillRect(x+i*size, y+j*size, size, size, bg);
+                }
+            }
+            line >>= 1;
+        }
     }
 }
 
