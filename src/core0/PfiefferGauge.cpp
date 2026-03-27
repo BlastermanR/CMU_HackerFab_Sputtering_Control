@@ -15,7 +15,7 @@
 #include <stdio.h>
 #include <string>
 
-PfiefferGauge::PfiefferGauge(ISerialDevice *dev) : serialPort(dev), gaugeDef(1) {}
+PfiefferGauge::PfiefferGauge(ISerialDevice *dev) : serialPort(dev), gaugeDef(PFIEFFER_GAUGE_ADDRESS) {}
 
 PfiefferGauge::~PfiefferGauge()
 {

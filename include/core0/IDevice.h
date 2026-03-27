@@ -13,6 +13,13 @@
 
 class IDevice
 {
+  private:
+    /**
+     * @brief Send a bare message or command to the device
+     * @param message Null-terminated string or bytes to send
+     */
+    virtual void sendMessage(const char *message) = 0;
+
   public:
     /**
      * @brief Default destructor
@@ -24,12 +31,6 @@ class IDevice
      * setting up ports)
      */
     virtual void init() = 0;
-
-    /**
-     * @brief Send a bare message or command to the device
-     * @param message Null-terminated string or bytes to send
-     */
-    virtual void sendMessage(const char *message) = 0;
 
     /**
      * @brief Routine update function for non-blocking state machines and

@@ -15,6 +15,9 @@
 #include "pico/types.h"
 #include "picoDefinitions.h"
 
+// Address of Pfieffer Gauge
+#define PFIEFFER_GAUGE_ADDRESS 2
+
 class PfiefferGauge : public IDevice
 {
   private:
@@ -71,6 +74,8 @@ class PfiefferGauge : public IDevice
      */
     void update() override;
 
+    /***************** Polling *****************/
+
     /**
      * @brief Sets the interval for the poll command.
      * @param ms Interval in ms
@@ -87,6 +92,8 @@ class PfiefferGauge : public IDevice
      * @brief Polls device for up to date pressure
      */
     void pollDevice();
+
+    /***************** Gauge *****************/
 
     /**
      * @brief Retrieve the latest chamber pressure reading

@@ -10,12 +10,45 @@
 
 #include "IDevice.h"
 #include "ISerialDevice.h"
+#include "PfiefferLib.h"
+#include "Devices/TC110DriveUnit.h"
+
+// Address of Pfieffer Gauge
+#define PFIEFFER_PUMP_ADDRESS 1
 
 class PfiefferPump : public IDevice
 {
   private:
     // Define the serial port
     ISerialDevice *serialPort;
+
+    // Abstract device handling parameter definitions for TC110 pump
+    Pfieffer::TC110DriveUnit pumpDef;
+
+    // Time tracking
+    uint32_t lastPollTime = 0;
+
+    // Flag to indicate a new response has been received for state logic
+    bool newResponse = false;
+
+    // Polling Interval to send command
+    uint64_t pollingInterval_ms = 1000;
+
+    // Speed read from pump
+    double actualPumpSpeed_hz{0};
+
+    // Set pump speed read from pump
+    double setPumpSpeed{0};
+
+    // Bool set when pump signal activation
+    bool pumpActivated{false};
+
+    /**
+     * @brief Utilizes UART port to send message to device
+     * @param message Null terminating message to send to device.
+     * \0 is not sent
+     */
+    void sendMessage(const char *message) override;
 
   public:
     /**
@@ -37,15 +70,74 @@ class PfiefferPump : public IDevice
 
     /**
      * @brief logic update function
+     * 
+     * Polls
      */
     void update() override;
 
+    /***************** Polling *****************/
+
     /**
-     * @brief Utilizes UART port to send message to device
-     * @param message Null terminating message to send to device.
-     * \0 is not sent
+     * @brief Sets the interval for the poll command.
+     * @param ms Interval in ms
      */
-    void sendMessage(const char *message) override;
+    void setPollingInterval_ms(uint64_t ms) { pollingInterval_ms = ms; }
+
+    /**
+     *  @brief Returns the polling interval in ms
+     *  @return Polling Interval
+     */
+    uint64_t getPollingInterval_ms() { return pollingInterval_ms; }
+
+    /**
+     * @brief Polls device for up to date pressure
+     */
+    void pollDevice();
+
+    /***************** Pump *****************/
+
+    /**
+     * @brief Non-blocking signal to activate pump
+     */
+    void signalPumpOn();
+
+    /**
+     * @brief Blocking signal to activate pump
+     * 
+     * Calls signalPumpOn under the hood and waits for a response
+     * 
+     * @return True if pump activates, False if failure
+     */
+    bool activatePump();
+
+    /**
+     * @brief Non-blocking signal to deactivatePump
+     */
+    bool signalPumpOff();
+
+    /**
+     * @brief Blocking signal to deactivate pump
+     * 
+     * Calls signalPumpOff under the hood and waits for a response
+     * 
+     * @return True if pump activates, False if failure
+     */
+    bool deactivatePump();
+
+    /**
+     * @brief Blocking signal to vent chamber
+     * @return True if pump activates, False if error returned
+     */
+    bool ventPump();
+
+    /**
+     * @brief Gets the pump speed from the latest reading
+     * @return Speed in hertz
+     */
+    double getPumpSpeed()
+    {
+        return actualPumpSpeed_hz;
+    }
 };
 
 #endif // PFIEFFER_PUMP_H
