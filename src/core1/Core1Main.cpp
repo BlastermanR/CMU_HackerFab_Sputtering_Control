@@ -17,7 +17,9 @@ void core1_entry()
     // Initialize the Sputtering Manager locally on Core 1
     SputteringManager manager;
 
-    while (true)
+    bool run{true};
+
+    while (run)
     {
         // Process the item on core 1...
         // e.g. manager.handlePacket(packet);

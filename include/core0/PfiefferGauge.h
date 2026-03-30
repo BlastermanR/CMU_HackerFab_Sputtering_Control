@@ -98,7 +98,7 @@ class PfiefferGauge : public IDevice
      * @brief Retrieve the latest chamber pressure reading
      * @return The latest chamber pressure value
      */
-    double readPressure() { return chamberPressure_hPa; }
+    double getPressure() { return chamberPressure_hPa; }
 };
 
 #endif // PFIEFFER_GAUGE_H

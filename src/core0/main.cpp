@@ -79,6 +79,9 @@ int main()
      */
     bool run{true};
 
+    uint64_t currentTime;
+    uint64_t previousTime;
+
     while (run)
     {
         pcTerminal.update();
@@ -86,5 +89,18 @@ int main()
         mfc2.update();
         gauge.update();
         pump.update();
+
+        currentTime = get_absolute_time();
+
+        // Update info at regular intervals 
+        if ((currentTime - previousTime) >= CORE0_UPDATE_INTERVAL_MS)
+        {
+            sharedData.Core0Out.actualPumpSpeed = pump.getPumpSpeed();
+            sharedData.Core0Out.chamberPressure = gauge.getPressure();
+            sharedData.Core0Out.oxygenFlow = mfc1.getVolumetricFlow();
+            sharedData.Core0Out.argonFlow = mfc2.getVolumetricFlow();   
+        }
+
+        previousTime = currentTime;
     }
 }
