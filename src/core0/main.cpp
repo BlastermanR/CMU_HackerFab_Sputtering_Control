@@ -6,9 +6,9 @@
  * @date 3/4/26
  */
 
+#include <stdio.h>
 #include "AlicatMFC.h"
 #include "Core1Main.h"
-#include "HardwareUART.h"
 #include "Intercore.h"
 #include "PIO_UART.h"
 #include "PfiefferGauge.h"
@@ -16,13 +16,10 @@
 #include "RS232Device.h"
 #include "RS485Device.h"
 #include "USBSerial.h"
+#include "HardwareUART.h"
 #include "pico/multicore.h"
 #include "pico/stdlib.h"
 #include "picoDefinitions.h"
-#include <stdio.h>
-
-// Define the global queue instance
-queue_t core_queue;
 
 int main()
 {
@@ -40,10 +37,14 @@ int main()
     USBSerial pcTerminal;
     pcTerminal.begin();
 
-    // Define the UART and Devices
-    PioUart     alicatUart(pio0, 0, 1, ALICAT_1_TX, ALICAT_1_RX, 9600);
-    RS232Device alicatDevice(&alicatUart);
-    AlicatMFC   mfc(&alicatDevice);
+    // Define the ALICAT UART and Devices
+    PioUart     alicat1Uart(ALICAT1_PIO, ALICAT1_SM1, ALICAT1_SM2, ALICAT_1_TX, ALICAT_1_RX, 9600);
+    RS232Device alicat1Device(&alicat1Uart);
+    AlicatMFC   mfc1(&alicat1Device);
+
+    PioUart     alicat2Uart(ALICAT2_PIO, ALICAT2_SM1, ALICAT2_SM2, ALICAT_2_TX, ALICAT_2_RX, 9600);
+    RS232Device alicat2Device(&alicat2Uart);
+    AlicatMFC   mfc2(&alicat2Device);
 
     // Initialize Gauge UART and Device on uart0
     HardUart      gaugeUart(uart0, GAUGE_DI_PIN, GAUGE_RO_PIN, 9600);
@@ -65,17 +66,24 @@ int main()
             // Future: Pass the command to the Sputtering Manager on Core 1
         });
 
-    mfc.init();
+    /**
+     * Initialize Devices
+     */
+    mfc1.init();
+    mfc2.init();
     gauge.init();
     pump.init();
 
-    // Store the time we last sent a message
-    uint32_t lastSendTime = to_ms_since_boot(get_absolute_time());
+    /**
+     * Loop through until program exit and update devices
+     */
+    bool run{true};
 
-    while (true)
+    while (run)
     {
         pcTerminal.update();
-        mfc.update();
+        mfc1.update();
+        mfc2.update();
         gauge.update();
         pump.update();
     }

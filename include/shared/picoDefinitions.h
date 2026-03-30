@@ -8,9 +8,12 @@
 #ifndef PICO_DEFS
 #define PICO_DEFS
 
+#include "hardware/pio.h"
+
 // Debug Status
 #define DEBUG // Enables debug functionality
 
+/* Port Definitions */
 // Display Definitions
 #define DISPLAY_DC 0
 #define DISPLAY_CS 1
@@ -56,5 +59,14 @@
 // Switches
 #define SWITCH1 22
 #define SWITCH2 28
+
+/* PIO Definitions */
+#define ALICAT1_PIO pio0
+#define ALICAT1_SM1 0
+#define ALICAT1_SM2 1
+
+#define ALICAT2_PIO pio1
+#define ALICAT2_SM1 0
+#define ALICAT2_SM2 1
 
 #endif
