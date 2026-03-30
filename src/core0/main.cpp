@@ -101,6 +101,10 @@ int main()
             sharedData.Core0Out.argonFlow = mfc2.getVolumetricFlow();   
         }
 
+        // Update time
         previousTime = currentTime;
+
+        // Check for exit
+        run = getStatus(Status_Core1Err) || getStatus(Status_Exit);
     }
 }
