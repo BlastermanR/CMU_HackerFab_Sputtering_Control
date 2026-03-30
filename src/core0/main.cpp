@@ -136,6 +136,7 @@ int main()
         mfcFlow || !(abs(mfc1.getVolumetricFlow()) > 0);
         mfcFlow || !(abs(mfc1.getVolumetricFlow()) > 0);
 
+        // Check resend interval
         if ((currentTime - previousTime) >= MFC_RESENT_INTERVAL_MS)
         {
             mfc1.setSetpoint(0);
