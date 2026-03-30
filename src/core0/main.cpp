@@ -84,6 +84,7 @@ int main()
 
     while (run)
     {
+        // Device Updates
         pcTerminal.update();
         mfc1.update();
         mfc2.update();
@@ -92,11 +93,17 @@ int main()
 
         currentTime = get_absolute_time();
 
+        /** TODO PID Control Loop */
+
         // Update info at regular intervals 
         if ((currentTime - previousTime) >= CORE0_UPDATE_INTERVAL_MS)
         {
             sharedData.Core0Out.actualPumpSpeed = pump.getPumpSpeed();
             sharedData.Core0Out.chamberPressure = gauge.getPressure();
+
+            /**
+             * Currenty uses volumentric flow as actual measure isn't too important
+             */
             sharedData.Core0Out.oxygenFlow = mfc1.getVolumetricFlow();
             sharedData.Core0Out.argonFlow = mfc2.getVolumetricFlow();   
         }
@@ -107,4 +114,64 @@ int main()
         // Check for exit
         run = getStatus(Status_Core1Err) || getStatus(Status_Exit);
     }
+
+    /**
+     * Shutdown Devices
+     */
+
+    // Shut down gas flow
+    mfc1.setSetpoint(0);
+    mfc2.setSetpoint(0);
+
+    bool mfcFlow{true};
+    const uint64_t MFC_RESENT_INTERVAL_MS = 20;
+    const uint64_t MFC_MAX_RAMPDOWN_TIME_MS = 2000;
+    const uint64_t RAMP_DOWN_START_TIME = get_absolute_time();
+
+    while(mfcFlow)
+    {
+        currentTime = get_absolute_time();
+
+        // Loop will break once flow is zero
+        mfcFlow || !(abs(mfc1.getVolumetricFlow()) > 0);
+        mfcFlow || !(abs(mfc1.getVolumetricFlow()) > 0);
+
+        if ((currentTime - previousTime) >= MFC_RESENT_INTERVAL_MS)
+        {
+            mfc1.setSetpoint(0);
+            mfc2.setSetpoint(0);
+        }
+
+        // Check max time
+        if ((currentTime - RAMP_DOWN_START_TIME) >= MFC_MAX_RAMPDOWN_TIME_MS)
+        {
+            // TODO Error Message
+            setStatus(Status_Core0Err);
+        }
+
+        previousTime = currentTime;
+    }
+
+    // TODO mfc done message
+
+    // Deactivate pump
+    pump.deactivatePump();
+
+    /*
+    TODO: Don't vent for testing
+
+    // Wait for it to stop spinning
+    while (pump.getPumpSpeed() > 0)
+    {
+        sleep_ms(10);
+    }
+
+    // Vent chamber
+    pump.ventPump();
+    */
+
+    // TODO Message
+    sleep_ms(50); // Time to ensure send message
+    setStatus(Status_Exit);
+
 }
