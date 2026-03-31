@@ -19,6 +19,7 @@
  */
 enum StatusMask : uint16_t
 {
+    // Errors and Exit Signals
     Status_None        = 0,
     Status_Core0Err    = (1 << 0),
     Status_Core1Err    = (1 << 1),
@@ -26,8 +27,13 @@ enum StatusMask : uint16_t
     Status_AlicatArErr = (1 << 3),
     Status_PumpErr     = (1 << 4),
     Status_GaugeErr    = (1 << 5),
-    // Unused (6)
-    Status_Exit = (1 << 7)
+    Status_Exit        = (1 << 6),
+    // Core 0 Instruction
+    ExecuteSputteringProcess = (1 << 7),
+    PressurizeChamber = (1 << 8),
+    VentChamber = (1 << 9),
+    ShutOffGasFlow = (1 << 10),
+    PollDevices = (1 << 11) // Manually Polls Devices for latest values
 };
 
 extern std::atomic<uint16_t> statusReg;
@@ -53,10 +59,15 @@ inline void clearStatus(StatusMask mask) { statusReg.fetch_and(~mask, std::memor
 
 /**
  * @brief Checks if any error status bits are currently set.
- * @note This ignores the Status_Exit bit.
+ * @note This ignores the Status_Exit bit and any execution command bits.
  * @return True if at least one error bit is set, false otherwise.
  */
-inline bool isError() { return (statusReg.load(std::memory_order_acquire) & ~Status_Exit) != 0; }
+inline bool isError() 
+{ 
+    const uint16_t ERROR_MASK = Status_Core0Err | Status_Core1Err | Status_AlicatOxErr | 
+                                Status_AlicatArErr | Status_PumpErr | Status_GaugeErr;
+    return (statusReg.load(std::memory_order_acquire) & ERROR_MASK) != 0; 
+}
 
 /**
  * @brief Gets the first currently active error status mask.
@@ -65,7 +76,9 @@ inline bool isError() { return (statusReg.load(std::memory_order_acquire) & ~Sta
  */
 inline StatusMask getError()
 {
-    uint16_t status = statusReg.load(std::memory_order_acquire) & ~Status_Exit;
+    const uint16_t ERROR_MASK = Status_Core0Err | Status_Core1Err | Status_AlicatOxErr | 
+                                Status_AlicatArErr | Status_PumpErr | Status_GaugeErr;
+    uint16_t status = statusReg.load(std::memory_order_acquire) & ERROR_MASK;
     if (status & Status_Core0Err) return Status_Core0Err;
     if (status & Status_Core1Err) return Status_Core1Err;
     if (status & Status_AlicatOxErr) return Status_AlicatOxErr;

@@ -2,6 +2,9 @@
 #include "GlobalDevices.h"
 #include "picoDefinitions.h"
 
+// PC Communication
+USBSerial pcTerminal;
+
 // Define the ALICAT UART and Devices
 PioUart     alicat1Uart(ALICAT1_PIO, ALICAT1_SM1, ALICAT1_SM2, ALICAT_1_TX, ALICAT_1_RX, 9600);
 RS232Device alicat1Device(&alicat1Uart);

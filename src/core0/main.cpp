@@ -22,8 +22,10 @@
 #include "picoDefinitions.h"
 #include "GlobalDevices.h"
 
+void controlLoop();
 void executeNormalShutdown();
 void executeEmergencyShutdown();
+void executePressurizeChamber();
 
 int main()
 {
@@ -38,12 +40,11 @@ int main()
      */
 
     // Setup the serial communication
-    USBSerial pcTerminal;
     pcTerminal.begin();
 
     // Set up parsing callback
     pcTerminal.setCallback(
-        [&pcTerminal](const std::string &command)
+        [](const std::string &command)
         {
             // Echo the command back to the PC
             pcTerminal.println(command.c_str());
@@ -59,9 +60,109 @@ int main()
     gauge.init();
     pump.init();
 
+    {
+        bool run{true};
+
+        uint64_t currentTime;
+        uint64_t previousTime;
+
+        while(run)
+        {
+            if (getStatus(ExecuteSputteringProcess))
+            {
+                /**
+                 * Loop through until program exit and update devices
+                 */
+                controlLoop();
+                clearStatus(ExecuteSputteringProcess); // Lower flag
+            }
+
+            if (getStatus(PressurizeChamber))
+            {
+                executePressurizeChamber();
+                clearStatus(PressurizeChamber);
+            }
+
+            if (getStatus(VentChamber))
+            {
+                pump.deactivatePump();
+                pump.ventPump();
+                clearStatus(VentChamber);
+            }
+
+            if (getStatus(ShutOffGasFlow))
+            {
+                mfc1.setSetpoint(0);
+                mfc2.setSetpoint(0);
+                clearStatus(ShutOffGasFlow);
+            }
+
+            if (getStatus(PollDevices))
+            {
+                // Trigger devices to send requests
+                mfc1.update();
+                mfc2.update();
+                gauge.update();
+                pump.update();
+
+                // Wait to ensure devices have time to respond over serial
+                sleep_ms(50);
+
+                // Process received data
+                pcTerminal.update();
+                mfc1.update();
+                mfc2.update();
+                gauge.update();
+                pump.update();
+
+                // Update intercore shared values
+                sharedData.Core0Out.actualPumpSpeed = pump.getPumpSpeed();
+                sharedData.Core0Out.chamberPressure = gauge.getPressure();
+                sharedData.Core0Out.oxygenFlow      = mfc1.getVolumetricFlow();
+                sharedData.Core0Out.argonFlow       = mfc2.getVolumetricFlow();
+                
+                clearStatus(PollDevices);
+            }
+
+            // Check for exit
+            run = !(getStatus(Status_Core1Err) || getStatus(Status_Exit));
+        }
+    }
+
     /**
-     * Loop through until program exit and update devices
+     * Shutdown Procedure
      */
+
+    if (getStatus(Status_Core1Err))
+    {
+        /**
+         * If core 1 signals an error follow an immediate emergency shutdown.
+         * Signal all devices to stop and vent chamber
+         */
+        executeEmergencyShutdown();
+    }
+    else
+    {
+        /**
+         * Follow the standard shutdown policy. 
+         */
+        executeNormalShutdown();
+    }
+}
+
+/**
+ * @brief Main control loop for Core 0.
+ * 
+ * Continually updates all hardware devices (MFCs, pump, gauge, PC terminal).
+ * At regular intervals, it synchronizes device telemetry with the inter-core 
+ * shared memory.
+ * 
+ * TODO: Implement PID control functionality. This loop will be responsible for 
+ * evaluating pressure/flow setpoints from Core 1 and running the PID algorithm 
+ * to adjust the vacuum pump and MFC setpoints accordingly.
+ */
+void controlLoop()
+{
     bool run{true};
 
     uint64_t currentTime;
@@ -78,7 +179,11 @@ int main()
 
         currentTime = get_absolute_time();
 
-        /** TODO PID Control Loop */
+        /** 
+         * TODO: Execute PID Control algorithm.
+         * Calculate and update hardware setpoints based on the desired 
+         * target values from Core 1 and the current device readings.
+         */
 
         // Update info at regular intervals 
         if ((currentTime - previousTime) >= CORE0_UPDATE_INTERVAL_MS)
@@ -99,17 +204,15 @@ int main()
         // Check for exit
         run = getStatus(Status_Core1Err) || getStatus(Status_Exit);
     }
-
-    /**
-     * Shutdown Procedure
-     */
-
-    if (getStatus(Status_Core1Err))
-    {
-
-    }
 }
 
+/**
+ * @brief Performs a controlled shutdown of the Sputtering system.
+ * 
+ * Safely ramps down the Mass Flow Controllers (MFCs) by setting flow to zero,
+ * waits for the flow to cease, deactivates the vacuum pump, and prepares
+ * the system for a safe exit state.
+ */
 void executeNormalShutdown()
 {
     uint64_t currentTime = get_absolute_time();
@@ -173,4 +276,33 @@ void executeNormalShutdown()
     // TODO Message
     sleep_ms(50); // Time to ensure send message
     setStatus(Status_Exit);
+}
+
+/**
+ * @brief Immediately halts all operations during an error state.
+ * 
+ * Sets the MFCs to zero flow immediately without waiting, deactivates the 
+ * vacuum pump, and opens the vent valve to bring the chamber to atmospheric 
+ * pressure as safely and quickly as possible.
+ */
+void executeEmergencyShutdown()
+{
+    // Shutdown MFCs
+    mfc1.setSetpoint(0);
+    mfc2.setSetpoint(0);
+
+    // Shutdown Pump & Vent
+    pump.deactivatePump();
+    pump.ventPump();
+}
+
+/**
+ * @brief Safely runs the pump to pressuize/evacuate the chamber.
+ * 
+ * Closes activates the vacuum pump to begin 
+ * establishing vacuum pressure within the main chamber.
+ */
+void executePressurizeChamber()
+{
+    pump.activatePump();
 }

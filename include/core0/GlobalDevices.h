@@ -9,7 +9,11 @@
 #include "RS485Device.h"
 #include "PIO_UART.h"
 #include "HardwareUART.h"
+#include "USBSerial.h"
 #include "picoDefinitions.h"
+
+// PC Communication
+extern USBSerial pcTerminal;
 
 // ALICAT 1 Devices
 extern PioUart     alicat1Uart;
