@@ -7,7 +7,7 @@
  */
 
 #include "PfiefferGauge.h"
-#include "Debug.h"
+#include "USBSerial.h"
 #include "hardware/gpio.h"
 #include "hardware/timer.h"
 #include "math.h"
@@ -48,7 +48,7 @@ void PfiefferGauge::update()
             continue;
         }
 
-        DEBUG_PRINT("PfiefferGauge received message: %s\n", response.c_str());
+        { char _dbg[OUTPUT_MSG_TEXT_LEN]; snprintf(_dbg, sizeof(_dbg), "Gauge RX: %s", response.c_str()); USBSerial::log(Source_Core0, _dbg, V_DEBUG); }
 
         bool            valid = false;
         PfiefferCommand command;
@@ -75,12 +75,11 @@ void PfiefferGauge::update()
 
                     chamberPressure_hPa = static_cast<double>(mantissa) * pow(10, exponent);
 
-                    DEBUG_PRINT("PfiefferGauge: Parsed Pressure Reading: %f hPa\n", chamberPressure_hPa);
+                    { char _dbg[OUTPUT_MSG_TEXT_LEN]; snprintf(_dbg, sizeof(_dbg), "Gauge pressure: %.4e hPa", chamberPressure_hPa); USBSerial::log(Source_Core0, _dbg, V_DEBUG); }
                 }
                 else
                 {
-                    DEBUG_PRINT("PfiefferGauge: Failed to parse pressure numeric data from: %s\n",
-                                command.data.c_str());
+                    { char _dbg[OUTPUT_MSG_TEXT_LEN]; snprintf(_dbg, sizeof(_dbg), "Gauge: Bad pressure data: %s", command.data.c_str()); USBSerial::log(Source_Core0, _dbg, V_DEBUG); }
                 }
             }
         }
@@ -114,6 +113,6 @@ void PfiefferGauge::pollDevice()
 
 void PfiefferGauge::sendMessage(const char *message)
 {
-    DEBUG_PRINT("PfiefferGauge: Sending Message: %s\n", message);
+    { char _dbg[OUTPUT_MSG_TEXT_LEN]; snprintf(_dbg, sizeof(_dbg), "Gauge TX: %s", message); USBSerial::log(Source_Core0, _dbg, V_DEBUG); }
     serialPort->send(message);
 }

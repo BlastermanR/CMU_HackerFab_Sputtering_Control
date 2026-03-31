@@ -7,7 +7,7 @@
  */
 
 #include "AlicatMFC.h"
-#include "Debug.h"
+#include "USBSerial.h"
 #include "pico/stdlib.h"
 #include "picoDefinitions.h"
 #include <sstream>
@@ -39,7 +39,7 @@ void AlicatMFC::update()
     {
         std::string msg = serialPort->popMessage();
 
-        DEBUG_PRINT("Alicat Message Received: %s\n", msg.c_str());
+        { char _dbg[OUTPUT_MSG_TEXT_LEN]; snprintf(_dbg, sizeof(_dbg), "MFC RX: %s", msg.c_str()); USBSerial::log(Source_Core0, _dbg, V_DEBUG); }
 
         // Handle message here
         bool            isValid = false;
@@ -64,13 +64,13 @@ void AlicatMFC::sendCommand(const AlicatCommand &cmd)
     }
     else
     {
-        DEBUG_PRINT("Alicat: Error formatting command\n");
+        USBSerial::log(Source_Core0, "MFC: Error formatting command", V_DEBUG);
     }
 }
 
 void AlicatMFC::sendMessage(const char *message)
 {
-    DEBUG_PRINT("Alicat: Sending Message: %s\n", message);
+    { char _dbg[OUTPUT_MSG_TEXT_LEN]; snprintf(_dbg, sizeof(_dbg), "MFC TX: %s", message); USBSerial::log(Source_Core0, _dbg, V_DEBUG); }
     serialPort->send(message);
 }
 

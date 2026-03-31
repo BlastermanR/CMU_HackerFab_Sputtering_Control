@@ -7,7 +7,7 @@
  */
 
 #include "PfiefferPump.h"
-#include "Debug.h"
+#include "USBSerial.h"
 #include "pico/stdlib.h"
 #include "picoDefinitions.h"
 #include <cstdlib>
@@ -15,7 +15,7 @@
 
 void PfiefferPump::sendMessage(const char *message)
 {
-    DEBUG_PRINT("Vacuum Pump: Sending Message: %s\n", message);
+    { char _dbg[OUTPUT_MSG_TEXT_LEN]; snprintf(_dbg, sizeof(_dbg), "Pump TX: %s", message); USBSerial::log(Source_Core0, _dbg, V_DEBUG); }
     serialPort->send(message);
 }
 
@@ -45,7 +45,7 @@ void PfiefferPump::update()
             continue;
         }
 
-        DEBUG_PRINT("PfiefferPump received message: %s\n", response.c_str());
+        { char _dbg[OUTPUT_MSG_TEXT_LEN]; snprintf(_dbg, sizeof(_dbg), "Pump RX: %s", response.c_str()); USBSerial::log(Source_Core0, _dbg, V_DEBUG); }
 
         bool            valid = false;
         PfiefferCommand command;
@@ -62,7 +62,7 @@ void PfiefferPump::update()
                 if (endPtr != command.data.c_str())
                 {
                     actualPumpSpeed_hz = speed;
-                    DEBUG_PRINT("PfiefferPump: Parsed Speed Reading: %f Hz\n", actualPumpSpeed_hz);
+                    { char _dbg[OUTPUT_MSG_TEXT_LEN]; snprintf(_dbg, sizeof(_dbg), "Pump speed: %.2f Hz", actualPumpSpeed_hz); USBSerial::log(Source_Core0, _dbg, V_DEBUG); }
                 }
             }
         }
