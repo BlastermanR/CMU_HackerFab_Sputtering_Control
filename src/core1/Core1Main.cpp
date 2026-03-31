@@ -94,6 +94,7 @@ void core1_entry()
     // Core 1 owns USB I/O
     USBSerial pcTerminal;
     pcTerminal.begin();
+    USBSerial::log(Source_Core1, "USB serial ready", V_INFO);
 
     SputteringManager manager;
 
@@ -135,6 +136,9 @@ void core1_entry()
 
         // Check for exit
         run = !(isError() || getStatus(Status_Exit));
+
+        if (!run)
+            USBSerial::log(Source_Core1, "Core 1 exiting main loop", V_STATUS);
 
         sleep_ms(10);
     }

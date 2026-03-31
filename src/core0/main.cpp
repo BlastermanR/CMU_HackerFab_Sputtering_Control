@@ -42,10 +42,15 @@ int main()
     /**
      * Initialize Devices
      */
+    USBSerial::log(Source_Core0, "Initializing devices", V_INFO);
     mfc1.init();
+    USBSerial::log(Source_Core0, "MFC1 initialized", V_DEBUG);
     mfc2.init();
+    USBSerial::log(Source_Core0, "MFC2 initialized", V_DEBUG);
     gauge.init();
+    USBSerial::log(Source_Core0, "Gauge initialized", V_DEBUG);
     pump.init();
+    USBSerial::log(Source_Core0, "Pump initialized", V_DEBUG);
 
     // Signal Core 0 initialization complete
     setStatus(Core0_Begin);
@@ -84,21 +89,22 @@ int main()
         {
             if (getStatus(ExecuteSputteringProcess))
             {
-                /**
-                 * Loop through until program exit and update devices
-                 */
+                USBSerial::log(Source_Core0, "Entering control loop", V_INFO);
                 controlLoop();
-                clearStatus(ExecuteSputteringProcess); // Lower flag
+                clearStatus(ExecuteSputteringProcess);
+                USBSerial::log(Source_Core0, "Exited control loop", V_INFO);
             }
 
             if (getStatus(PressurizeChamber))
             {
+                USBSerial::log(Source_Core0, "Activating pump", V_INFO);
                 pump.activatePump();
                 clearStatus(PressurizeChamber);
             }
 
             if (getStatus(VentChamber))
             {
+                USBSerial::log(Source_Core0, "Venting chamber", V_INFO);
                 pump.deactivatePump();
                 pump.ventPump();
                 clearStatus(VentChamber);
@@ -106,6 +112,7 @@ int main()
 
             if (getStatus(ShutOffGasFlow))
             {
+                USBSerial::log(Source_Core0, "Shutting off gas flow", V_INFO);
                 mfc1.setSetpoint(0);
                 mfc2.setSetpoint(0);
                 clearStatus(ShutOffGasFlow);
@@ -113,6 +120,7 @@ int main()
 
             if (getStatus(PollDevices))
             {
+                USBSerial::log(Source_Core0, "Polling devices", V_INFO);
                 executePollDevices();
                 clearStatus(PollDevices);
             }
@@ -130,17 +138,12 @@ int main()
 
     if (getStatus(Status_Core1Err))
     {
-        /**
-         * If core 1 signals an error follow an immediate emergency shutdown.
-         * Signal all devices to stop and vent chamber
-         */
+        USBSerial::log(Source_Core0, "Core 1 error, emergency shutdown", V_CRITICAL);
         executeEmergencyShutdown();
     }
     else
     {
-        /**
-         * Follow the standard shutdown policy. 
-         */
+        USBSerial::log(Source_Core0, "Normal shutdown initiated", V_STATUS);
         executeNormalShutdown();
     }
 }
@@ -212,6 +215,7 @@ void executeNormalShutdown()
     uint64_t currentTime = get_absolute_time();
     uint64_t previousTime;
 
+    USBSerial::log(Source_Core0, "Ramping down MFCs", V_INFO);
     // Shut down gas flow
     mfc1.setSetpoint(0);
     mfc2.setSetpoint(0);
@@ -242,7 +246,7 @@ void executeNormalShutdown()
         // Check max time
         if ((currentTime - RAMP_DOWN_START_TIME) >= MFC_MAX_RAMPDOWN_TIME_MS)
         {
-            // TODO Error Message
+            USBSerial::log(Source_Core0, "MFC rampdown timeout", V_CRITICAL);
             setStatus(Status_Core0Err);
         }
 
@@ -250,6 +254,7 @@ void executeNormalShutdown()
     }
 
     // TODO mfc done message
+    USBSerial::log(Source_Core0, "MFCs stopped, deactivating pump", V_INFO);
 
     // Deactivate pump
     pump.deactivatePump();
@@ -268,6 +273,7 @@ void executeNormalShutdown()
     */
 
     // TODO Message
+    USBSerial::log(Source_Core0, "Normal shutdown complete", V_STATUS);
     sleep_ms(50); // Time to ensure send message
     setStatus(Status_Exit);
 }
@@ -281,6 +287,8 @@ void executeNormalShutdown()
  */
 void executeEmergencyShutdown()
 {
+    USBSerial::log(Source_Core0, "Emergency shutdown: stopping all devices", V_CRITICAL);
+
     // Shutdown MFCs
     mfc1.setSetpoint(0);
     mfc2.setSetpoint(0);
