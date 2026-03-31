@@ -10,6 +10,8 @@
 
 #include <atomic>
 #include <stdint.h>
+#include "pico/util/queue.h"
+#include "Messages.h"
 
 #define CORE0_UPDATE_INTERVAL_MS 20
 
@@ -37,6 +39,16 @@ enum StatusMask : uint16_t
 };
 
 extern std::atomic<uint16_t> statusReg;
+
+extern queue_t commandQueue;
+extern queue_t core0OutQueue;
+extern queue_t core1OutQueue;
+
+/**
+ * @brief Initializes the inter-core communication queues.
+ * Must be called before launching Core 1.
+ */
+void initQueues();
 
 /**
  * @brief Gets the current status of the specified mask.

@@ -7,6 +7,7 @@
  */
 
 #include <stdio.h>
+#include <cstring>
 #include "AlicatMFC.h"
 #include "Core1Main.h"
 #include "Intercore.h"
@@ -15,12 +16,23 @@
 #include "PfiefferPump.h"
 #include "RS232Device.h"
 #include "RS485Device.h"
-#include "USBSerial.h"
 #include "HardwareUART.h"
 #include "pico/multicore.h"
 #include "pico/stdlib.h"
 #include "picoDefinitions.h"
 #include "GlobalDevices.h"
+
+/**
+ * @brief Helper to push a formatted string to the Core 0 output queue.
+ */
+static void core0Print(const char *text)
+{
+    OutputMessage msg{};
+    msg.source = Source_Core0;
+    strncpy(msg.text, text, OUTPUT_MSG_TEXT_LEN - 1);
+    msg.text[OUTPUT_MSG_TEXT_LEN - 1] = '\0';
+    queue_try_add(&core0OutQueue, &msg);
+}
 
 void controlLoop();
 void executeNormalShutdown();
@@ -32,25 +44,11 @@ int main()
     // Enable IO
     stdio_init_all();
 
+    // Initialize inter-core queues before launching Core 1
+    initQueues();
+
     // Launch Core 1
     multicore_launch_core1(core1_entry);
-
-    /**
-     * Define Devices
-     */
-
-    // Setup the serial communication
-    pcTerminal.begin();
-
-    // Set up parsing callback
-    pcTerminal.setCallback(
-        [](const std::string &command)
-        {
-            // Echo the command back to the PC
-            pcTerminal.println(command.c_str());
-
-            // Future: Pass the command to the Sputtering Manager on Core 1
-        });
 
     /**
      * Initialize Devices
@@ -152,7 +150,6 @@ void controlLoop()
     while (run)
     {
         // Device Updates
-        pcTerminal.update();
         mfc1.update();
         mfc2.update();
         gauge.update();
@@ -296,7 +293,6 @@ void executePollDevices()
     sleep_ms(50);
 
     // Process received data
-    pcTerminal.update();
     mfc1.update();
     mfc2.update();
     gauge.update();

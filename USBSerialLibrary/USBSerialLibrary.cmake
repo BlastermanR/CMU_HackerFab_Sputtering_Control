@@ -10,9 +10,11 @@ add_library(${LIBRARY_NAME} STATIC ${${LIBRARY_NAME}_SOURCES})
 # Header Files
 target_include_directories(${LIBRARY_NAME} PUBLIC 
     ${CMAKE_CURRENT_LIST_DIR}/include
+    ${CMAKE_SOURCE_DIR}/include/shared
 )
 
 # Required Libraries
 target_link_libraries(${LIBRARY_NAME} PUBLIC
     pico_stdlib
+    pico_util
 )

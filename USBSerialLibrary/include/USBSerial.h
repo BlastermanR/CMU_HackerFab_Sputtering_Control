@@ -2,24 +2,31 @@
 #define USB_SERIAL
 
 /**
- * Implements a Serial interface for recieving input from a host PC.
- * To be used for simple tests, not final serial implementation
+ * Implements a USB Serial interface for inter-core communication.
+ * Core 1 owns the USB I/O. Incoming text commands are parsed into
+ * CommandMessage structs and pushed to the command queue. Outbound
+ * messages from both cores are drained from their respective output
+ * queues and printed to the terminal.
  *
  * @author Ryan Massie (rmassie)
  * @date 3/4/26
  */
 
-#include <functional>
 #include <string>
-
-// Callback passes a full string command once the user hits 'Enter'
-typedef std::function<void(const std::string &)> UsbCommandCallback;
+#include "Messages.h"
 
 class USBSerial
 {
   private:
-    std::string        inputBuffer;
-    UsbCommandCallback commandCallback;
+    std::string inputBuffer;
+
+    /**
+     * @brief Parses a raw text command into a CommandMessage.
+     * @param input The raw string from the terminal.
+     * @param msg   Output CommandMessage to populate.
+     * @return True if the command was recognized, false otherwise.
+     */
+    bool parseCommand(const std::string &input, CommandMessage &msg);
 
   public:
     /**
@@ -33,17 +40,15 @@ class USBSerial
     void begin();
 
     /**
-     * @brief Main loop function to process USB serial input.
-     *
-     * This should be called frequently to check for new data and trigger callbacks.
+     * @brief Non-blocking input reader. Accumulates characters and on Enter,
+     * parses the string into a CommandMessage and pushes it to the command queue.
      */
-    void update();
+    void readInput();
 
     /**
-     * @brief Sets the callback function for received commands.
-     * @param cb The callback function taking a const std::string reference.
+     * @brief Drains both core output queues and prints their messages to USB.
      */
-    void setCallback(UsbCommandCallback cb);
+    void drainOutputQueues();
 
     /**
      * @brief Prints a null-terminated string to the USB serial output.
