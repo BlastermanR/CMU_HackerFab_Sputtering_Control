@@ -25,7 +25,7 @@
 void controlLoop();
 void executeNormalShutdown();
 void executeEmergencyShutdown();
-void executePressurizeChamber();
+void executePollDevices();
 
 int main()
 {
@@ -79,7 +79,7 @@ int main()
 
             if (getStatus(PressurizeChamber))
             {
-                executePressurizeChamber();
+                pump.activatePump();
                 clearStatus(PressurizeChamber);
             }
 
@@ -99,33 +99,14 @@ int main()
 
             if (getStatus(PollDevices))
             {
-                // Trigger devices to send requests
-                mfc1.update();
-                mfc2.update();
-                gauge.update();
-                pump.update();
-
-                // Wait to ensure devices have time to respond over serial
-                sleep_ms(50);
-
-                // Process received data
-                pcTerminal.update();
-                mfc1.update();
-                mfc2.update();
-                gauge.update();
-                pump.update();
-
-                // Update intercore shared values
-                sharedData.Core0Out.actualPumpSpeed = pump.getPumpSpeed();
-                sharedData.Core0Out.chamberPressure = gauge.getPressure();
-                sharedData.Core0Out.oxygenFlow      = mfc1.getVolumetricFlow();
-                sharedData.Core0Out.argonFlow       = mfc2.getVolumetricFlow();
-                
+                executePollDevices();
                 clearStatus(PollDevices);
             }
 
             // Check for exit
             run = !(getStatus(Status_Core1Err) || getStatus(Status_Exit));
+
+            sleep_ms(5); // Short delay to wait for something to change
         }
     }
 
@@ -297,12 +278,33 @@ void executeEmergencyShutdown()
 }
 
 /**
- * @brief Safely runs the pump to pressuize/evacuate the chamber.
+ * @brief Manually polls all devices and updates shared memory.
  * 
- * Closes activates the vacuum pump to begin 
- * establishing vacuum pressure within the main chamber.
+ * Triggers an update request to all peripheral devices, waits briefly for
+ * responses to return over serial, then parses the received data and
+ * updates the intercore shared memory structure.
  */
-void executePressurizeChamber()
+void executePollDevices()
 {
-    pump.activatePump();
+    // Trigger devices to send requests
+    mfc1.update();
+    mfc2.update();
+    gauge.update();
+    pump.update();
+
+    // Wait to ensure devices have time to respond over serial
+    sleep_ms(50);
+
+    // Process received data
+    pcTerminal.update();
+    mfc1.update();
+    mfc2.update();
+    gauge.update();
+    pump.update();
+
+    // Update intercore shared values
+    sharedData.Core0Out.actualPumpSpeed = pump.getPumpSpeed();
+    sharedData.Core0Out.chamberPressure = gauge.getPressure();
+    sharedData.Core0Out.oxygenFlow      = mfc1.getVolumetricFlow();
+    sharedData.Core0Out.argonFlow       = mfc2.getVolumetricFlow();
 }
