@@ -17,23 +17,11 @@
 #include "RS232Device.h"
 #include "RS485Device.h"
 #include "HardwareUART.h"
+#include "USBSerial.h"
 #include "pico/multicore.h"
 #include "pico/stdlib.h"
 #include "picoDefinitions.h"
 #include "GlobalDevices.h"
-
-/**
- * @brief Helper to push a formatted string to the Core 0 output queue.
- */
-static void core0Print(const char *text, Verbosity level = V_STATUS)
-{
-    OutputMessage msg{};
-    msg.source = Source_Core0;
-    msg.level  = level;
-    strncpy(msg.text, text, OUTPUT_MSG_TEXT_LEN - 1);
-    msg.text[OUTPUT_MSG_TEXT_LEN - 1] = '\0';
-    queue_try_add(&core0OutQueue, &msg);
-}
 
 void controlLoop();
 void executeNormalShutdown();

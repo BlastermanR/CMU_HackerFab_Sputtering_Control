@@ -67,13 +67,46 @@ enum MessageSource : uint8_t
 };
 
 /**
+ * @brief Distinguishes log messages from structured data packets.
+ */
+enum MessageType : uint8_t
+{
+    Msg_Log  = 0,
+    Msg_Data = 1,
+};
+
+/**
+ * @brief Identifiers for telemetry data fields sent as data packets.
+ */
+enum DataId : uint8_t
+{
+    Data_PumpSpeed        = 0,
+    Data_ChamberPressure  = 1,
+    Data_ArgonFlow        = 2,
+    Data_OxygenFlow       = 3,
+};
+
+/**
  * @brief Fixed-size output message pushed into the output queues.
+ *
+ * Uses a tagged union: Msg_Log messages carry human-readable text,
+ * Msg_Data messages carry a typed telemetry value.
  */
 struct OutputMessage
 {
     MessageSource source;
     Verbosity     level;
-    char          text[OUTPUT_MSG_TEXT_LEN];
+    MessageType   type;
+
+    union
+    {
+        char text[OUTPUT_MSG_TEXT_LEN];
+        struct
+        {
+            DataId id;
+            float  value;
+        } data;
+    };
 };
 
 #endif // MESSAGES_H

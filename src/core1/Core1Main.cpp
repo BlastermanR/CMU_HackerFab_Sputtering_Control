@@ -18,19 +18,6 @@
 #include <cstring>
 
 /**
- * @brief Helper to push a formatted string to the Core 1 output queue.
- */
-static void core1Print(const char *text, Verbosity level = V_STATUS)
-{
-    OutputMessage msg{};
-    msg.source = Source_Core1;
-    msg.level  = level;
-    strncpy(msg.text, text, OUTPUT_MSG_TEXT_LEN - 1);
-    msg.text[OUTPUT_MSG_TEXT_LEN - 1] = '\0';
-    queue_try_add(&core1OutQueue, &msg);
-}
-
-/**
  * @brief Dispatches a command message by setting the appropriate status
  *        register flags or writing to shared data.
  */
@@ -40,51 +27,51 @@ static void dispatchCommand(const CommandMessage &cmd)
     {
         case Cmd_StartProcess:
             setStatus(ExecuteSputteringProcess);
-            core1Print("Starting sputtering process");
+            USBSerial::log(Source_Core1, "Starting sputtering process");
             break;
         case Cmd_StopProcess:
             clearStatus(ExecuteSputteringProcess);
-            core1Print("Stopping sputtering process");
+            USBSerial::log(Source_Core1, "Stopping sputtering process");
             break;
         case Cmd_PressurizeChamber:
             setStatus(PressurizeChamber);
-            core1Print("Pressurizing chamber");
+            USBSerial::log(Source_Core1, "Pressurizing chamber");
             break;
         case Cmd_VentChamber:
             setStatus(VentChamber);
-            core1Print("Venting chamber");
+            USBSerial::log(Source_Core1, "Venting chamber");
             break;
         case Cmd_ShutOffGas:
             setStatus(ShutOffGasFlow);
-            core1Print("Shutting off gas flow");
+            USBSerial::log(Source_Core1, "Shutting off gas flow");
             break;
         case Cmd_PollDevices:
             setStatus(PollDevices);
-            core1Print("Polling devices");
+            USBSerial::log(Source_Core1, "Polling devices");
             break;
         case Cmd_SetArgonFlow:
             sharedData.Core1Out.setArgonFlow = cmd.param1;
-            core1Print("Argon flow setpoint updated");
+            USBSerial::log(Source_Core1, "Argon flow setpoint updated");
             break;
         case Cmd_SetOxygenFlow:
             sharedData.Core1Out.setOxygenFlow = cmd.param1;
-            core1Print("Oxygen flow setpoint updated");
+            USBSerial::log(Source_Core1, "Oxygen flow setpoint updated");
             break;
         case Cmd_SetPumpSpeed:
             sharedData.Core1Out.setPumpSpeed = cmd.param1;
-            core1Print("Pump speed setpoint updated");
+            USBSerial::log(Source_Core1, "Pump speed setpoint updated");
             break;
         case Cmd_EnablePump:
             sharedData.Core1Out.enablePump = true;
-            core1Print("Pump enabled");
+            USBSerial::log(Source_Core1, "Pump enabled");
             break;
         case Cmd_DisablePump:
             sharedData.Core1Out.enablePump = false;
-            core1Print("Pump disabled");
+            USBSerial::log(Source_Core1, "Pump disabled");
             break;
         case Cmd_Exit:
             setStatus(Status_Exit);
-            core1Print("Exit requested", V_CRITICAL);
+            USBSerial::log(Source_Core1, "Exit requested", V_CRITICAL);
             break;
         case Cmd_SetVerbosity:
         {
@@ -93,7 +80,7 @@ static void dispatchCommand(const CommandMessage &cmd)
             verbosityLevel.store(v, std::memory_order_release);
             char buf[OUTPUT_MSG_TEXT_LEN];
             snprintf(buf, sizeof(buf), "Verbosity set to %u", v);
-            core1Print(buf, V_CRITICAL);
+            USBSerial::log(Source_Core1, buf, V_CRITICAL);
             break;
         }
         default:

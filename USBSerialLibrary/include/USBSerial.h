@@ -8,6 +8,10 @@
  * messages from both cores are drained from their respective output
  * queues and printed to the terminal.
  *
+ * The static log() and sendData() methods may be called from either
+ * core. They push messages into the spinlock-protected Pico SDK
+ * queues, making cross-core calls safe without additional locking.
+ *
  * @author Ryan Massie (rmassie)
  * @date 3/4/26
  */
@@ -29,9 +33,6 @@ class USBSerial
     bool parseCommand(const std::string &input, CommandMessage &msg);
 
   public:
-    /**
-     * @brief Constructs a new USBSerial object.
-     */
     USBSerial();
 
     /**
@@ -47,20 +48,28 @@ class USBSerial
 
     /**
      * @brief Drains both core output queues and prints their messages to USB.
+     * Log messages print as "[CoreN] text". Data messages print as "$DataName:value".
      */
     void drainOutputQueues();
 
     /**
-     * @brief Prints a null-terminated string to the USB serial output.
-     * @param str The string to print.
+     * @brief Pushes a human-readable log message to the output queue.
+     * Safe to call from either core.
+     * @param source Which core is sending (Source_Core0 or Source_Core1).
+     * @param text   The log text (truncated to OUTPUT_MSG_TEXT_LEN-1).
+     * @param level  Verbosity level (default V_STATUS).
      */
-    void print(const char *str);
+    static void log(MessageSource source, const char *text, Verbosity level = V_STATUS);
 
     /**
-     * @brief Prints a null-terminated string followed by a newline to the USB serial output.
-     * @param str The string to print.
+     * @brief Pushes a structured data packet to the output queue.
+     * Safe to call from either core.
+     * @param source Which core is sending.
+     * @param id     The telemetry data identifier.
+     * @param value  The telemetry value.
+     * @param level  Verbosity level (default V_STATUS).
      */
-    void println(const char *str);
+    static void sendData(MessageSource source, DataId id, float value, Verbosity level = V_STATUS);
 };
 
 #endif // USB_SERIAL

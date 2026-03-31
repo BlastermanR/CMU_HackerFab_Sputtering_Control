@@ -13,9 +13,47 @@ void USBSerial::begin()
     printf("USB Serial Interface Initialized.\n");
 }
 
-void USBSerial::print(const char *str) { printf("%s", str); }
+// ---------- Static cross-core API ----------
 
-void USBSerial::println(const char *str) { printf("%s\n", str); }
+void USBSerial::log(MessageSource source, const char *text, Verbosity level)
+{
+    OutputMessage msg{};
+    msg.source = source;
+    msg.level  = level;
+    msg.type   = Msg_Log;
+    strncpy(msg.text, text, OUTPUT_MSG_TEXT_LEN - 1);
+    msg.text[OUTPUT_MSG_TEXT_LEN - 1] = '\0';
+
+    queue_t *q = (source == Source_Core0) ? &core0OutQueue : &core1OutQueue;
+    queue_try_add(q, &msg);
+}
+
+static const char *dataIdToString(DataId id)
+{
+    switch (id)
+    {
+        case Data_PumpSpeed:       return "PumpSpeed";
+        case Data_ChamberPressure: return "Pressure";
+        case Data_ArgonFlow:       return "ArgonFlow";
+        case Data_OxygenFlow:      return "OxygenFlow";
+        default:                   return "Unknown";
+    }
+}
+
+void USBSerial::sendData(MessageSource source, DataId id, float value, Verbosity level)
+{
+    OutputMessage msg{};
+    msg.source   = source;
+    msg.level    = level;
+    msg.type     = Msg_Data;
+    msg.data.id    = id;
+    msg.data.value = value;
+
+    queue_t *q = (source == Source_Core0) ? &core0OutQueue : &core1OutQueue;
+    queue_try_add(q, &msg);
+}
+
+// ---------- Instance methods (Core 1 only) ----------
 
 void USBSerial::readInput()
 {
@@ -58,13 +96,23 @@ void USBSerial::drainOutputQueues()
     while (queue_try_remove(&core0OutQueue, &msg))
     {
         if (msg.level <= currentVerbosity)
-            printf("[Core0] %s\n", msg.text);
+        {
+            if (msg.type == Msg_Data)
+                printf("$%s:%.4f\n", dataIdToString(msg.data.id), msg.data.value);
+            else
+                printf("[Core0] %s\n", msg.text);
+        }
     }
 
     while (queue_try_remove(&core1OutQueue, &msg))
     {
         if (msg.level <= currentVerbosity)
-            printf("[Core1] %s\n", msg.text);
+        {
+            if (msg.type == Msg_Data)
+                printf("$%s:%.4f\n", dataIdToString(msg.data.id), msg.data.value);
+            else
+                printf("[Core1] %s\n", msg.text);
+        }
     }
 }
 
