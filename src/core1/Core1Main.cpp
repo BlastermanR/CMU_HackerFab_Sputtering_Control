@@ -14,15 +14,17 @@
 #include "Intercore.h"
 #include "SputteringManager.h"
 #include "USBSerial.h"
+#include <cstdio>
 #include <cstring>
 
 /**
  * @brief Helper to push a formatted string to the Core 1 output queue.
  */
-static void core1Print(const char *text)
+static void core1Print(const char *text, Verbosity level = V_STATUS)
 {
     OutputMessage msg{};
     msg.source = Source_Core1;
+    msg.level  = level;
     strncpy(msg.text, text, OUTPUT_MSG_TEXT_LEN - 1);
     msg.text[OUTPUT_MSG_TEXT_LEN - 1] = '\0';
     queue_try_add(&core1OutQueue, &msg);
@@ -82,8 +84,18 @@ static void dispatchCommand(const CommandMessage &cmd)
             break;
         case Cmd_Exit:
             setStatus(Status_Exit);
-            core1Print("Exit requested");
+            core1Print("Exit requested", V_CRITICAL);
             break;
+        case Cmd_SetVerbosity:
+        {
+            uint8_t v = (uint8_t)cmd.param1;
+            if (v > V_DEBUG) v = V_DEBUG;
+            verbosityLevel.store(v, std::memory_order_release);
+            char buf[OUTPUT_MSG_TEXT_LEN];
+            snprintf(buf, sizeof(buf), "Verbosity set to %u", v);
+            core1Print(buf, V_CRITICAL);
+            break;
+        }
         default:
             break;
     }

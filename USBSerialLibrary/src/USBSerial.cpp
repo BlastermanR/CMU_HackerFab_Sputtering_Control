@@ -53,15 +53,18 @@ void USBSerial::readInput()
 void USBSerial::drainOutputQueues()
 {
     OutputMessage msg;
+    uint8_t currentVerbosity = verbosityLevel.load(std::memory_order_acquire);
 
     while (queue_try_remove(&core0OutQueue, &msg))
     {
-        printf("[Core0] %s\n", msg.text);
+        if (msg.level <= currentVerbosity)
+            printf("[Core0] %s\n", msg.text);
     }
 
     while (queue_try_remove(&core1OutQueue, &msg))
     {
-        printf("[Core1] %s\n", msg.text);
+        if (msg.level <= currentVerbosity)
+            printf("[Core1] %s\n", msg.text);
     }
 }
 
@@ -132,6 +135,12 @@ bool USBSerial::parseCommand(const std::string &input, CommandMessage &msg)
     if (input.rfind("SETPUMP ", 0) == 0)
     {
         msg.id     = Cmd_SetPumpSpeed;
+        msg.param1 = (float)atof(input.c_str() + 8);
+        return true;
+    }
+    if (input.rfind("VERBOSE ", 0) == 0)
+    {
+        msg.id     = Cmd_SetVerbosity;
         msg.param1 = (float)atof(input.c_str() + 8);
         return true;
     }

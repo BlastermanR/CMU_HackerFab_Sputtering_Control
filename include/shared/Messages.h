@@ -15,6 +15,18 @@
 #define OUTPUT_QUEUE_SIZE   32
 
 /**
+ * @brief Runtime verbosity levels for output filtering.
+ * Messages with a level <= the current verbosityLevel are printed.
+ */
+enum Verbosity : uint8_t
+{
+    V_CRITICAL = 0,
+    V_STATUS   = 1,
+    V_INFO     = 2,
+    V_DEBUG    = 3,
+};
+
+/**
  * @brief Identifiers for inbound commands received over USB.
  */
 enum CommandId : uint8_t
@@ -32,6 +44,7 @@ enum CommandId : uint8_t
     Cmd_EnablePump,
     Cmd_DisablePump,
     Cmd_Exit,
+    Cmd_SetVerbosity,
 };
 
 /**
@@ -59,6 +72,7 @@ enum MessageSource : uint8_t
 struct OutputMessage
 {
     MessageSource source;
+    Verbosity     level;
     char          text[OUTPUT_MSG_TEXT_LEN];
 };
 

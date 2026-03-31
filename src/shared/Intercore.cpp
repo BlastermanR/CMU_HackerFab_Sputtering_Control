@@ -9,6 +9,7 @@
 
 // Communication Atomics
 std::atomic<uint16_t> statusReg{0};
+std::atomic<uint8_t>  verbosityLevel{V_STATUS};
 
 // Inter-core communication queues
 queue_t commandQueue;

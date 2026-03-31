@@ -39,6 +39,7 @@ enum StatusMask : uint16_t
 };
 
 extern std::atomic<uint16_t> statusReg;
+extern std::atomic<uint8_t>  verbosityLevel;
 
 extern queue_t commandQueue;
 extern queue_t core0OutQueue;
