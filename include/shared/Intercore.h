@@ -13,7 +13,8 @@
 #include "pico/util/queue.h"
 #include "Messages.h"
 
-#define CORE0_UPDATE_INTERVAL_MS 20
+#define CORE0_UPDATE_INTERVAL_MS   20
+#define HANDSHAKE_TIMEOUT_MS      5000
 
 /**
  * Define enum for status register bit masks to ensure type safety
@@ -35,7 +36,11 @@ enum StatusMask : uint16_t
     PressurizeChamber = (1 << 8),
     VentChamber = (1 << 9),
     ShutOffGasFlow = (1 << 10),
-    PollDevices = (1 << 11) // Manually Polls Devices for latest values
+    PollDevices = (1 << 11), // Manually Polls Devices for latest values
+
+    // Startup
+    Core0_Begin = (1 << 14),
+    Core1_Begin = (1 << 15)
 };
 
 extern std::atomic<uint16_t> statusReg;

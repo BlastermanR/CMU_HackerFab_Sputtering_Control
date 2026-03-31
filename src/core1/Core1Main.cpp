@@ -97,6 +97,25 @@ void core1_entry()
 
     SputteringManager manager;
 
+    // Wait for Core 0 to finish initialization
+    {
+        uint64_t handshakeStart = get_absolute_time();
+        while (!getStatus(Core0_Begin))
+        {
+            if ((get_absolute_time() - handshakeStart) >= (uint64_t)HANDSHAKE_TIMEOUT_MS * 1000)
+            {
+                USBSerial::log(Source_Core1, "Core 0 handshake timeout", V_CRITICAL);
+                setStatus(Status_Core0Err);
+                return;
+            }
+            sleep_ms(1);
+        }
+    }
+
+    // Signal Core 1 initialization complete
+    setStatus(Core1_Begin);
+    USBSerial::log(Source_Core1, "Core 1 initialized", V_INFO);
+
     bool run{true};
 
     while (run)

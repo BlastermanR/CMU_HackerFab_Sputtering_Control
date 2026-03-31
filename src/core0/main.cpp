@@ -47,6 +47,33 @@ int main()
     gauge.init();
     pump.init();
 
+    // Signal Core 0 initialization complete
+    setStatus(Core0_Begin);
+    USBSerial::log(Source_Core0, "Core 0 initialized, waiting for Core 1", V_INFO);
+
+    // Wait for Core 1 to signal ready
+    {
+        uint64_t handshakeStart = get_absolute_time();
+        while (!getStatus(Core1_Begin))
+        {
+            if ((get_absolute_time() - handshakeStart) >= (uint64_t)HANDSHAKE_TIMEOUT_MS * 1000)
+            {
+                USBSerial::log(Source_Core0, "Core 1 handshake timeout", V_CRITICAL);
+                setStatus(Status_Core1Err);
+                break;
+            }
+            sleep_ms(1);
+        }
+    }
+
+    if (isError())
+    {
+        executeEmergencyShutdown();
+        return 1;
+    }
+
+    USBSerial::log(Source_Core0, "Core 1 ready, entering main loop", V_INFO);
+
     {
         bool run{true};
 
