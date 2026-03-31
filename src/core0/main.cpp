@@ -20,6 +20,10 @@
 #include "pico/multicore.h"
 #include "pico/stdlib.h"
 #include "picoDefinitions.h"
+#include "GlobalDevices.h"
+
+void executeNormalShutdown();
+void executeEmergencyShutdown();
 
 int main()
 {
@@ -36,25 +40,6 @@ int main()
     // Setup the serial communication
     USBSerial pcTerminal;
     pcTerminal.begin();
-
-    // Define the ALICAT UART and Devices
-    PioUart     alicat1Uart(ALICAT1_PIO, ALICAT1_SM1, ALICAT1_SM2, ALICAT_1_TX, ALICAT_1_RX, 9600);
-    RS232Device alicat1Device(&alicat1Uart);
-    AlicatMFC   mfc1(&alicat1Device);
-
-    PioUart     alicat2Uart(ALICAT2_PIO, ALICAT2_SM1, ALICAT2_SM2, ALICAT_2_TX, ALICAT_2_RX, 9600);
-    RS232Device alicat2Device(&alicat2Uart);
-    AlicatMFC   mfc2(&alicat2Device);
-
-    // Initialize Gauge UART and Device on uart0
-    HardUart      gaugeUart(uart0, GAUGE_DI_PIN, GAUGE_RO_PIN, 9600);
-    RS485Device   gaugeDevice(&gaugeUart, GAUGE_TR_RE);
-    PfiefferGauge gauge(&gaugeDevice);
-
-    // Initialize Pump UART and Device on uart1
-    HardUart     pumpUart(uart1, PUMP_DI_PIN, PUMP_RO_PIN, 9600);
-    RS485Device  pumpDevice(&pumpUart, PUMP_TR_RE);
-    PfiefferPump pump(&pumpDevice);
 
     // Set up parsing callback
     pcTerminal.setCallback(
@@ -116,8 +101,19 @@ int main()
     }
 
     /**
-     * Shutdown Devices
+     * Shutdown Procedure
      */
+
+    if (getStatus(Status_Core1Err))
+    {
+
+    }
+}
+
+void executeNormalShutdown()
+{
+    uint64_t currentTime = get_absolute_time();
+    uint64_t previousTime;
 
     // Shut down gas flow
     mfc1.setSetpoint(0);
@@ -126,11 +122,14 @@ int main()
     bool mfcFlow{true};
     const uint64_t MFC_RESENT_INTERVAL_MS = 20;
     const uint64_t MFC_MAX_RAMPDOWN_TIME_MS = 2000;
-    const uint64_t RAMP_DOWN_START_TIME = get_absolute_time();
+    const uint64_t RAMP_DOWN_START_TIME = currentTime;
 
     while(mfcFlow)
     {
         currentTime = get_absolute_time();
+
+        mfc1.update();
+        mfc2.update();
 
         // Loop will break once flow is zero
         mfcFlow || !(abs(mfc1.getVolumetricFlow()) > 0);
@@ -174,5 +173,4 @@ int main()
     // TODO Message
     sleep_ms(50); // Time to ensure send message
     setStatus(Status_Exit);
-
 }

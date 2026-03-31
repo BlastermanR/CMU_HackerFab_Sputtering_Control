@@ -17,7 +17,7 @@
  * Define enum for status register bit masks to ensure type safety
  * and avoid preprocessor macro pitfalls.
  */
-enum StatusMask : uint8_t
+enum StatusMask : uint16_t
 {
     Status_None        = 0,
     Status_Core0Err    = (1 << 0),
@@ -30,7 +30,7 @@ enum StatusMask : uint8_t
     Status_Exit = (1 << 7)
 };
 
-extern std::atomic<uint8_t> statusReg;
+extern std::atomic<uint16_t> statusReg;
 
 /**
  * @brief Gets the current status of the specified mask.
@@ -65,7 +65,7 @@ inline bool isError() { return (statusReg.load(std::memory_order_acquire) & ~Sta
  */
 inline StatusMask getError()
 {
-    uint8_t status = statusReg.load(std::memory_order_acquire) & ~Status_Exit;
+    uint16_t status = statusReg.load(std::memory_order_acquire) & ~Status_Exit;
     if (status & Status_Core0Err) return Status_Core0Err;
     if (status & Status_Core1Err) return Status_Core1Err;
     if (status & Status_AlicatOxErr) return Status_AlicatOxErr;

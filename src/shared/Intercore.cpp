@@ -8,4 +8,4 @@
 #include "Intercore.h"
 
 // Communication Atomics
-std::atomic<uint8_t> statusReg{0};
+std::atomic<uint16_t> statusReg{0};
