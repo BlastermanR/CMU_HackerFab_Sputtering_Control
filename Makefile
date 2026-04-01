@@ -72,6 +72,7 @@ format:
 .PHONY: clean
 clean:
 	@rm -rf $(BUILD_DIR)
+	@rm -rf $(TEST_BUILD_DIR)
 
 # 6. Test: Builds and runs the Google Test unit test suite on the host
 .PHONY: test
@@ -79,11 +80,6 @@ test:
 	@if [ ! -d "$(TEST_BUILD_DIR)" ]; then cmake -B $(TEST_BUILD_DIR) -S tests -G Ninja; fi
 	ninja -C $(TEST_BUILD_DIR)
 	cd $(TEST_BUILD_DIR) && ctest --output-on-failure
-
-# 6a. Test-clean: Removes the test build directory
-.PHONY: test-clean
-test-clean:
-	@rm -rf $(TEST_BUILD_DIR)
 
 # 7. Helper: Rescue Reset
 .PHONY: rescue
