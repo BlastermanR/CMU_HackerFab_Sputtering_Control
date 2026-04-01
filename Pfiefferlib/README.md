@@ -1,41 +1,36 @@
 # Pfeiffer Vacuum Library (Pfiefferlib)
 
-A C++17 communication library for interfacing with Pfeiffer Vacuum devices (Turbo Pumps, Gauges, etc.) over RS-485 / RS-232 using the Pfeiffer Vacuum Protocol.
-
-## Project Structure
-
-```text
-Pfiefferlib/
-├── PfiefferLibrary.cmake   # CMake integration
-├── include/
-│   ├── PfiefferLib.h       # Bare protocol (Checksums, Parsing, Structs)
-│   ├── PfiefferDevice.h    # CRTP Base class for typed device handling
-│   └── Devices/            # Specific device implementations
-│       ├── TC110DriveUnit.h # TC 110 Electronic Drive Unit (Turbo Pump)
-│       └── MPT200.h         # MPT 200 AR Cold Cathode Gauge
-```
+A lightweight, headers-only C++17 library for forming and parsing Pfeiffer Vacuum serial protocol commands. Supports Pfeiffer Turbo Pumps, Gauges, and other RS-485/RS-232 devices using the standard Pfeiffer Vacuum serial protocol.
 
 ## Features
 
-- **Zero-Overhead Abstracting:** Uses the **Curiously Recurring Template Pattern (CRTP)** to provide a generic interface without `vtable` or dynamic allocation overhead.
-- **Protocol Safety:** Automatic checksum calculation (Modulo 256) and character validation for incoming responses.
-- **Parameter Guarding:** Each device defines a static dictionary of parameters including:
+- **Command Formatting** — Builds correctly structured query and setpoint strings, including automatic data-length and Modulo-256 checksum fields.
+- **Response Parsing** — Validates and decrypts incoming Pfeiffer response frames, populating a `PfiefferCommand` struct.
+- **Zero-Overhead Abstraction** — Uses the **Curiously Recurring Template Pattern (CRTP)** to provide a generic device interface without `vtable` or dynamic allocation overhead.
+- **Parameter Guarding** — Each device defines a static dictionary of parameters including:
   - **Access Control:** Prevents writing to Read-Only parameters or reading Write-Only ones.
-  - **Bounds Checking:** Automatically validates `double` inputs against `min`/`max` limits defined in the manufacturer manual.
-  - **Data Typing:** Tracks Pfeiffer data types (e.g., Integer, Real, String) for correct serialization.
+  - **Bounds Checking:** Automatically validates inputs against `min`/`max` limits defined in the manufacturer manual.
+  - **Data Typing:** Tracks Pfeiffer data types (Boolean, Integer, Real, String, Expo) for correct serialization.
 
-## Usage
+## Files
 
-### Integrating with CMake
+| File | Purpose |
+|------|---------|
+| `include/PfiefferLib.h` | Core protocol library — `PfiefferCommand`, `PfieifferLib` static methods (format, parse, checksum) |
+| `include/PfiefferDevice.h` | CRTP base class `PfiefferDevice<Derived>` — access control, bounds checking, command creation |
+| `include/Devices/TC110DriveUnit.h` | TC 110 Electronic Drive Unit (Turbo Pump) — full parameter dictionary and `TC110Cmd` enum |
+| `include/Devices/MPT200.h` | MPT 200 AR Cold Cathode Gauge — parameter dictionary and `MPT200Cmd` enum |
 
-Add the library to your `CMakeLists.txt`:
+## CMake Integration
 
 ```cmake
 include(Pfiefferlib/PfiefferLibrary.cmake)
 target_link_libraries(your_project PRIVATE Pfiefferlib)
 ```
 
-### Basic Communication Example
+## Usage
+
+### Sending a write command (TC110 Turbo Pump)
 
 ```cpp
 #include "Devices/TC110DriveUnit.h"
@@ -45,41 +40,106 @@ using namespace Pfieffer;
 // 1. Initialize a device with its RS-485 address (default is 1)
 TC110DriveUnit turboPump(1);
 
-// 2. Prepare a command structure
+// 2. Create a validated write command (e.g., turn on the pump motor)
+// Checks that MotorPump supports write and that 1.0 is within the allowed range.
 PfiefferCommand cmd;
-
-// 3. Create a validated Write Command (e.g., Turning on the pump)
-// This checks if 'MotorPump' supports write and if '1.0' is within allowed range.
 if (turboPump.createWriteCommand((uint16_t)TC110Cmd::MotorPump, 1.0, cmd)) {
-    // Get the raw string to send via your UART/Serial library
-    std::string raw = PfieifferLib::formatCommand(&cmd);
-    // Send(raw);
-}
-
-// 4. Create a Read Command
-if (turboPump.createReadCommand((uint16_t)TC110Cmd::ActualSpd_Hz, cmd)) {
-    std::string raw = PfieifferLib::formatCommand(&cmd);
-    // Send(raw);
+    bool valid = false;
+    std::string raw = PfieifferLib::formatCommand(&cmd, &valid);
+    // Send raw over your RS-485/UART interface...
 }
 ```
 
-### Parsing Responses
+### Sending a read command
 
 ```cpp
-std::string response = "0011030906000500132\r"; // Example RAW response from pump
+// Read the actual spindle speed in Hz
+PfiefferCommand cmd;
+if (turboPump.createReadCommand((uint16_t)TC110Cmd::ActualSpd_Hz, cmd)) {
+    bool valid = false;
+    std::string raw = PfieifferLib::formatCommand(&cmd, &valid);
+    // Send raw over your RS-485/UART interface...
+}
+```
+
+### Parsing a response
+
+```cpp
+// Example raw DATA_RESPONSE frame from the pump (ActualSpd_Hz = 500 Hz)
+std::string response = "0011030906000500132\r";
 PfiefferCommand reply;
 bool isValid = false;
 
 PfieifferLib::decryptResponse(response, &reply, &isValid);
 
 if (isValid) {
-    printf("Parameter %s value is: %s\n", reply.paramNum.c_str(), reply.data.c_str());
+    printf("Param %s = %s\n", reply.paramNum.c_str(), reply.data.c_str());
+}
+```
+
+### Reading pressure from the MPT 200 gauge
+
+```cpp
+#include "Devices/MPT200.h"
+
+using namespace Pfieffer;
+
+MPT200 gauge(2); // RS-485 address 2
+PfiefferCommand cmd;
+
+if (gauge.createReadCommand((uint16_t)MPT200Cmd::Pressure, cmd)) {
+    bool valid = false;
+    std::string raw = PfieifferLib::formatCommand(&cmd, &valid);
+    // Send raw and await the response...
 }
 ```
 
 ## Adding New Devices
 
-To add a new Pfeiffer device, create a new header in `include/Devices/` and inherit from `PfiefferDevice<YourClass>`. Define a static `getParamDef(uint16_t paramNum)` method and a `DICT[]` array containing the parameter definitions from the device manual.
+Create a new header in `include/Devices/` and inherit from `PfiefferDevice<YourClass>`. Implement a static `getParamDef(uint16_t paramNum)` method and a `DICT[]` constexpr array populated with `PfiefferParamDef` entries from the device manual.
+
+```cpp
+class MyDevice : public PfiefferDevice<MyDevice> {
+public:
+    explicit MyDevice(uint8_t address = 1) : PfiefferDevice<MyDevice>(address) {}
+
+    static constexpr PfiefferParamDef DICT[] = {
+        {303, "Error", 4, AccessType::READ_ONLY, 0, 0, 0, false},
+        // ...
+    };
+
+    static const PfiefferParamDef *getParamDef(uint16_t parameterNumber) {
+        for (const auto &def : DICT)
+            if (def.number == parameterNumber) return &def;
+        return nullptr;
+    }
+};
+```
+
+## Protocol Notes
+
+Pfeiffer devices communicate over RS-485 using a fixed-field binary-ASCII frame terminated by a carriage return (`\r`). Every frame — command or response — follows the same layout:
+
+```
+<address(3)><action(2)><paramNum(3)><dataLen(3)><data><checksum(2)>\r
+```
+
+| Field | Length | Description |
+|-------|--------|-------------|
+| `address` | 3 chars | RS-485 device address, zero-padded (e.g. `001`) |
+| `action` | 2 chars | `00` = read request, `10` = data response, `20` = error response |
+| `paramNum` | 3 chars | Parameter number, zero-padded (e.g. `309`) |
+| `dataLen` | 3 chars | Length of the data field in characters, zero-padded |
+| `data` | variable | Parameter value or query string (`=?` for read requests) |
+| `checksum` | 2 chars | Modulo-256 sum of all preceding ASCII characters, zero-padded |
+
+Known action codes:
+
+| Code | Meaning |
+|------|---------|
+| `00` | Read/query request (`READ_PARAMETER`) |
+| `10` | Successful data response (`DATA_RESPONSE`) |
+| `20` | Error response (`ERROR_RESPONSE`) |
 
 ## Author
 **Ryan Massie (rmassie)**  
