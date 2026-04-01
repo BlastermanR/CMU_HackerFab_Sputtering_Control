@@ -17,6 +17,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include "AlicatErrors.h"
 #include "AlicatGases.h"
 
 /**
@@ -60,7 +61,8 @@ struct AlicatDataFrame
     double      volumetricFlow{0.0};
     double      massFlow{0.0};
     double      setpoint{0.0};
-    std::string gasType{""};
+    std::string              gasType{""};
+    std::vector<std::string> statusCodes{}; // Status/error codes present in the frame (e.g. "MOV", "POV")
 };
 
 class AlicatLib
@@ -134,6 +136,27 @@ class AlicatLib
         return gas ? gas->longName : nullptr;
     }
 
+    /**
+     * @brief Check whether a string is a known Alicat status code.
+     * @param code Null-terminated string to check (e.g. "MOV").
+     * @return true if the string matches a known status code.
+     */
+    static bool isStatusCode(const char *code)
+    {
+        return lookupAlicatStatusByCode(code) != nullptr;
+    }
+
+    /**
+     * @brief Get the human-readable description for a status code.
+     * @param code The 3-character status code (e.g. "MOV").
+     * @return Description C-string, or nullptr if not recognised.
+     */
+    static const char *getStatusDescription(const char *code)
+    {
+        const AlicatStatusDef *s = lookupAlicatStatusByCode(code);
+        return s ? s->description : nullptr;
+    }
+
     static void parseResponse(const std::string &response, AlicatDataFrame *frame, bool *valid = nullptr)
     {
         if (valid)
@@ -192,6 +215,16 @@ class AlicatLib
         parseSuccess &= safeStrtod(tokens[4], frame->massFlow);
         parseSuccess &= safeStrtod(tokens[5], frame->setpoint);
         frame->gasType = tokens[6];
+
+        // Collect any status/error codes from trailing tokens (tokens[7+]).
+        // Only tokens matching known Alicat status codes are collected;
+        // unrecognised trailing tokens are silently ignored.
+        frame->statusCodes.clear();
+        for (std::size_t ti = 7; ti < tokens.size(); ++ti)
+        {
+            if (lookupAlicatStatusByCode(tokens[ti].c_str()) != nullptr)
+                frame->statusCodes.push_back(tokens[ti]);
+        }
 
         if (parseSuccess)
         {

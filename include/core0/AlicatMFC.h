@@ -128,6 +128,12 @@ class AlicatMFC : public IDevice
      * @return Gas type string.
      */
     std::string getGasType() const;
+
+    /**
+     * @brief Get any status/error codes from the last data frame.
+     * @return Const reference to the vector of 3-character status code strings.
+     */
+    const std::vector<std::string> &getStatusCodes() const;
 };
 
 #endif // ALICAT_MFC

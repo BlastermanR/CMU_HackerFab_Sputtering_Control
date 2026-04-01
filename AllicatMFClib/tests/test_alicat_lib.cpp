@@ -6,8 +6,9 @@
  * @date 3/31/26
  */
 #include <gtest/gtest.h>
-#include "AlicatLib.h"
+#include "AlicatErrors.h"
 #include "AlicatGases.h"
+#include "AlicatLib.h"
 
 // ── formatCommand tests ─────────────────────────────────────────────────────
 
@@ -268,4 +269,81 @@ TEST(AlicatGasValidation, KnownGasNames)
 
     EXPECT_STREQ(AlicatLib::getGasShortName(ALICAT_GAS_D_2),  "D-2");
     EXPECT_STREQ(AlicatLib::getGasLongName(ALICAT_GAS_D_2),   "Deuterium");
+}
+
+// ── Status/error code tests ──────────────────────────────────────────────────
+
+TEST(AlicatStatusCodes, NoStatusInCleanFrame)
+{
+    std::string response = "A 14.70 25.00 0.50 0.48 1.00 Ar";
+    AlicatDataFrame frame;
+    bool valid = false;
+    AlicatLib::parseResponse(response, &frame, &valid);
+
+    EXPECT_TRUE(valid);
+    EXPECT_TRUE(frame.statusCodes.empty());
+}
+
+TEST(AlicatStatusCodes, SingleStatusCode)
+{
+    std::string response = "A 14.70 25.00 0.50 0.48 1.00 Ar MOV";
+    AlicatDataFrame frame;
+    bool valid = false;
+    AlicatLib::parseResponse(response, &frame, &valid);
+
+    EXPECT_TRUE(valid);
+    ASSERT_EQ(frame.statusCodes.size(), 1u);
+    EXPECT_EQ(frame.statusCodes[0], "MOV");
+}
+
+TEST(AlicatStatusCodes, MultipleStatusCodes)
+{
+    std::string response = "A 14.70 25.00 0.50 0.48 1.00 Ar POV TOV MOV";
+    AlicatDataFrame frame;
+    bool valid = false;
+    AlicatLib::parseResponse(response, &frame, &valid);
+
+    EXPECT_TRUE(valid);
+    ASSERT_EQ(frame.statusCodes.size(), 3u);
+    EXPECT_EQ(frame.statusCodes[0], "POV");
+    EXPECT_EQ(frame.statusCodes[1], "TOV");
+    EXPECT_EQ(frame.statusCodes[2], "MOV");
+}
+
+TEST(AlicatStatusCodes, UnknownTrailingTokenIgnored)
+{
+    // "XYZ" is not a known status code and should be silently ignored
+    std::string response = "A 14.70 25.00 0.50 0.48 1.00 Ar XYZ";
+    AlicatDataFrame frame;
+    bool valid = false;
+    AlicatLib::parseResponse(response, &frame, &valid);
+
+    EXPECT_TRUE(valid);
+    EXPECT_TRUE(frame.statusCodes.empty());
+}
+
+TEST(AlicatStatusCodes, AllTableEntriesRecognised)
+{
+    for (std::size_t i = 0; i < ALICAT_STATUS_TABLE_SIZE; ++i)
+    {
+        SCOPED_TRACE(::testing::Message() << "code=" << ALICAT_STATUS_TABLE[i].code);
+        EXPECT_TRUE(AlicatLib::isStatusCode(ALICAT_STATUS_TABLE[i].code));
+        EXPECT_NE(AlicatLib::getStatusDescription(ALICAT_STATUS_TABLE[i].code), nullptr);
+    }
+}
+
+TEST(AlicatStatusCodes, UnknownCodeRejected)
+{
+    EXPECT_FALSE(AlicatLib::isStatusCode("XYZ"));
+    EXPECT_EQ(AlicatLib::getStatusDescription("XYZ"), nullptr);
+    EXPECT_FALSE(AlicatLib::isStatusCode(nullptr));
+}
+
+TEST(AlicatStatusCodes, KnownDescriptions)
+{
+    EXPECT_STREQ(AlicatLib::getStatusDescription("MOV"), "Mass flow rate overage (outside measurable range)");
+    EXPECT_STREQ(AlicatLib::getStatusDescription("POV"), "Pressure reading overage (outside measurable range)");
+    EXPECT_STREQ(AlicatLib::getStatusDescription("VOV"), "Volumetric flow rate overage (outside measurable range)");
+    EXPECT_STREQ(AlicatLib::getStatusDescription("HLD"), "Valve drive hold enabled (bypass active loop control)");
+    EXPECT_STREQ(AlicatLib::getStatusDescription("ADC"), "ADC internal communication error");
 }

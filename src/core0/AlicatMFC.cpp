@@ -49,6 +49,15 @@ void AlicatMFC::update()
         if (isValid && frame.id == deviceId)
         {
             lastData = frame;
+
+            // Log any status/error codes present in the frame
+            for (const std::string &code : frame.statusCodes)
+            {
+                char _dbg[OUTPUT_MSG_TEXT_LEN];
+                snprintf(_dbg, sizeof(_dbg), "MFC status: %s - %s",
+                         code.c_str(), AlicatLib::getStatusDescription(code.c_str()));
+                USBSerial::log(Source_Core0, _dbg, V_STATUS);
+            }
         }
     }
 }
@@ -137,3 +146,5 @@ double AlicatMFC::getTemperature() const { return lastData.temperature; }
 double AlicatMFC::getSetpoint() const { return lastData.setpoint; }
 
 std::string AlicatMFC::getGasType() const { return lastData.gasType; }
+
+const std::vector<std::string> &AlicatMFC::getStatusCodes() const { return lastData.statusCodes; }
