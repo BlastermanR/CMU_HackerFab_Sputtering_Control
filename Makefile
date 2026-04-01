@@ -23,7 +23,7 @@
 #     your workspace while ignoring the build folder entirely. 
 #
 # make test
-#     A placeholder for your future unit testing suite.
+#     Builds and runs the Google Test unit test suite on the host.
 #
 # make clean
 #     Safely removes the build directory for a fresh state.
@@ -34,6 +34,7 @@
 
 # --- Project Paths ---
 BUILD_DIR ?= build
+TEST_BUILD_DIR ?= build_tests
 PICOTOOL ?= ${USERPROFILE}/.pico-sdk/picotool/2.2.0-a4/picotool/picotool.exe
 OPENOCD ?= ${USERPROFILE}/.pico-sdk/openocd/0.12.0+dev/openocd.exe
 OPENOCD_SCRIPTS ?= ${USERPROFILE}/.pico-sdk/openocd/0.12.0+dev/scripts
@@ -72,11 +73,17 @@ format:
 clean:
 	@rm -rf $(BUILD_DIR)
 
-# 6. Test: Placeholder for future unit tests (e.g. CTest)
+# 6. Test: Builds and runs the Google Test unit test suite on the host
 .PHONY: test
 test:
-	@echo [Unit Tests] No tests defined yet. Use CTest in the future.
-	@# cd $(BUILD_DIR) && ctest --output-on-failure
+	@if [ ! -d "$(TEST_BUILD_DIR)" ]; then cmake -B $(TEST_BUILD_DIR) -S tests -G Ninja; fi
+	ninja -C $(TEST_BUILD_DIR)
+	cd $(TEST_BUILD_DIR) && ctest --output-on-failure
+
+# 6a. Test-clean: Removes the test build directory
+.PHONY: test-clean
+test-clean:
+	@rm -rf $(TEST_BUILD_DIR)
 
 # 7. Helper: Rescue Reset
 .PHONY: rescue

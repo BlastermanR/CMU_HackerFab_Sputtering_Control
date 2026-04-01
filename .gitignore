@@ -1,2 +1,6 @@
-build
+# VS Code Files
 !.vscode/*
+
+# Build
+build
+build_tests
