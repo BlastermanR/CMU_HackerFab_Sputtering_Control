@@ -23,6 +23,7 @@
 #include "picoDefinitions.h"
 #include "GlobalDevices.h"
 
+// Function Declarations
 void controlLoop();
 void executeNormalShutdown();
 void executeEmergencyShutdown();
@@ -83,9 +84,6 @@ int main()
 
     {
         bool run{true};
-
-        uint64_t currentTime;
-        uint64_t previousTime;
 
         while(run)
         {
@@ -239,14 +237,14 @@ void executeNormalShutdown()
         mfcFlow || !(abs(mfc1.getVolumetricFlow()) > 0);
 
         // Check resend interval
-        if ((currentTime - previousTime) >= MFC_RESENT_INTERVAL_MS)
+        if ((currentTime - previousTime) >= MFC_RESENT_INTERVAL_MS * 1000)
         {
             mfc1.setSetpoint(0);
             mfc2.setSetpoint(0);
         }
 
         // Check max time
-        if ((currentTime - RAMP_DOWN_START_TIME) >= MFC_MAX_RAMPDOWN_TIME_MS)
+        if ((currentTime - RAMP_DOWN_START_TIME) >= MFC_MAX_RAMPDOWN_TIME_MS * 1000)
         {
             USBSerial::log(Source_Core0, "MFC rampdown timeout", V_CRITICAL);
             setStatus(Status_Core0Err);
