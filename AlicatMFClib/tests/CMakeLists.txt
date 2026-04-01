@@ -1,8 +1,8 @@
-# Unit tests for AllicatMFClib
+# Unit tests for AlicatMFClib
 # Can be built standalone or included from the top-level test build.
 #
 # Standalone usage:
-#   cmake -B build_tests -S AllicatMFClib/tests -G Ninja
+#   cmake -B build_tests -S AlicatMFClib/tests -G Ninja
 #   ninja -C build_tests
 #   ctest --test-dir build_tests --output-on-failure
 #
@@ -13,7 +13,7 @@ cmake_minimum_required(VERSION 3.14)
 
 # ── Standalone bootstrap (skipped when included from parent) ─────────────────
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
-    project(AllicatMFClib_Tests CXX)
+    project(AlicatMFClib_Tests CXX)
     set(CMAKE_CXX_STANDARD 17)
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
 

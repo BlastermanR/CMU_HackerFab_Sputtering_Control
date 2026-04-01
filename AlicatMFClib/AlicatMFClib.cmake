@@ -1,5 +1,5 @@
 # Build the Alicat MFC Protocol Library
-set(LIBRARY_NAME AllicatMFClib)
+set(LIBRARY_NAME AlicatMFClib)
 
 # Define Library
 add_library(${LIBRARY_NAME} INTERFACE)
