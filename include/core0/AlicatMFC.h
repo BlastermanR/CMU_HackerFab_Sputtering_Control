@@ -8,6 +8,7 @@
 #ifndef ALICAT_MFC
 #define ALICAT_MFC
 
+#include "AlicatGases.h"
 #include "AlicatLib.h"
 #include "IDevice.h"
 #include "ISerialDevice.h"
@@ -72,10 +73,12 @@ class AlicatMFC : public IDevice
     void setSetpoint(double setpoint);
 
     /**
-     * @brief Changes the active gas.
-     * @param gasNumber The gas index to switch to.
+     * @brief Changes the active gas. Validates the gas ID against the Alicat
+     * gas table before sending. Logs a V_STATUS error and returns without
+     * sending if the ID is not recognised.
+     * @param gasId The Alicat gas number (use ALICAT_GAS_* defines).
      */
-    void setGas(int gasNumber);
+    void setGas(uint8_t gasId);
 
     /**
      * @brief Tares the flow sensor (creates a no-flow reference).

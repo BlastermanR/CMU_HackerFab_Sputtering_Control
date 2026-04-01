@@ -44,9 +44,11 @@ int main()
      */
     USBSerial::log(Source_Core0, "Initializing devices", V_INFO);
     mfc1.init();
-    USBSerial::log(Source_Core0, "MFC1 initialized", V_DEBUG);
+    mfc1.setGas(ALICAT_GAS_O2);
+    USBSerial::log(Source_Core0, "MFC1 initialized to Oxygen", V_DEBUG);
     mfc2.init();
-    USBSerial::log(Source_Core0, "MFC2 initialized", V_DEBUG);
+    mfc1.setGas(ALICAT_GAS_AR);
+    USBSerial::log(Source_Core0, "MFC2 initialized to Argon", V_DEBUG);
     gauge.init();
     USBSerial::log(Source_Core0, "Gauge initialized", V_DEBUG);
     pump.init();

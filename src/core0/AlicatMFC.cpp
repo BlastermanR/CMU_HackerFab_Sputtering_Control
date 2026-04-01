@@ -97,12 +97,22 @@ void AlicatMFC::setSetpoint(double setpoint)
     sendCommand(cmd);
 }
 
-void AlicatMFC::setGas(int gasNumber)
+void AlicatMFC::setGas(uint8_t gasId)
 {
+    if (!AlicatLib::isValidGasId(gasId))
+    {
+        char _dbg[OUTPUT_MSG_TEXT_LEN];
+        snprintf(_dbg, sizeof(_dbg), "MFC: Unknown gas ID %u", static_cast<unsigned>(gasId));
+        USBSerial::log(Source_Core0, _dbg, V_STATUS);
+        return;
+    }
+
+    { char _dbg[OUTPUT_MSG_TEXT_LEN]; snprintf(_dbg, sizeof(_dbg), "MFC: Setting gas %u - %s (%s)", static_cast<unsigned>(gasId), AlicatLib::getGasShortName(gasId), AlicatLib::getGasLongName(gasId)); USBSerial::log(Source_Core0, _dbg, V_STATUS); }
+
     AlicatCommand cmd;
     cmd.id     = deviceId;
     cmd.action = ALICAT_SET_GAS;
-    cmd.data   = std::to_string(gasNumber);
+    cmd.data   = std::to_string(gasId);
     sendCommand(cmd);
 }
 

@@ -17,6 +17,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include "AlicatGases.h"
 
 /**
  * Primary Alicat Command Actions
@@ -101,6 +102,38 @@ class AlicatLib
      * @param valid Optional pointer to a boolean that will be set to true if the
      * response is valid and parsed successfully, false otherwise.
      */
+    /**
+     * @brief Validate that a gas ID exists in the Alicat gas table.
+     * @param gasId Gas number to check (use ALICAT_GAS_* defines).
+     * @return true if the ID is a known Alicat gas, false otherwise.
+     */
+    static bool isValidGasId(uint8_t gasId)
+    {
+        return lookupAlicatGasById(gasId) != nullptr;
+    }
+
+    /**
+     * @brief Get the short name for a gas ID (e.g. "Ar" for Argon).
+     * @param gasId Gas number to look up.
+     * @return The short name C-string, or nullptr if the ID is unknown.
+     */
+    static const char *getGasShortName(uint8_t gasId)
+    {
+        const AlicatGasDef *gas = lookupAlicatGasById(gasId);
+        return gas ? gas->shortName : nullptr;
+    }
+
+    /**
+     * @brief Get the long name for a gas ID (e.g. "Argon").
+     * @param gasId Gas number to look up.
+     * @return The long name C-string, or nullptr if the ID is unknown.
+     */
+    static const char *getGasLongName(uint8_t gasId)
+    {
+        const AlicatGasDef *gas = lookupAlicatGasById(gasId);
+        return gas ? gas->longName : nullptr;
+    }
+
     static void parseResponse(const std::string &response, AlicatDataFrame *frame, bool *valid = nullptr)
     {
         if (valid)

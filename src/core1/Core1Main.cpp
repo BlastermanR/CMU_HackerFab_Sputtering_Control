@@ -138,7 +138,10 @@ void core1_entry()
         run = !(isError() || getStatus(Status_Exit));
 
         if (!run)
+        {
             USBSerial::log(Source_Core1, "Core 1 exiting main loop", V_STATUS);
+            pcTerminal.drainOutputQueues();
+        }
 
         sleep_ms(10);
     }
