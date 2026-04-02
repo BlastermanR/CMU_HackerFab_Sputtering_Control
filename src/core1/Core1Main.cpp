@@ -12,7 +12,6 @@
 
 #include "Core1Main.h"
 #include "Intercore.h"
-#include "SputteringManager.h"
 #include "USBSerial.h"
 #include <cstdio>
 #include <cstring>
@@ -95,8 +94,6 @@ void core1_entry()
     USBSerial pcTerminal;
     pcTerminal.begin();
     pcTerminal.drainOutputQueues();
-
-    SputteringManager manager;
 
     // Wait for Core 0 to finish initialization
     {
