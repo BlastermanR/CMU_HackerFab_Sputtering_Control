@@ -27,9 +27,16 @@
 int main()
 {
     /*********** Initialzation Space ***********/
-
+    
     // Enable IO
     stdio_init_all();
+
+    // Wait for USB connection to be active before printing
+    // This ensures you see the banner in the terminal
+    while (!stdio_usb_connected()) {
+        sleep_ms(100);
+    }
+    
     printf("========================================\n");
     printf("  CMU HackerFab Sputtering Control v0.1\n");
     printf("========================================\n");
@@ -59,7 +66,7 @@ int main()
     mfc1.setGas(ALICAT_GAS_O2);
     USBSerial::log(Source_Core0, "MFC1 initialized to Oxygen", V_DEBUG);
     mfc2.init();
-    mfc1.setGas(ALICAT_GAS_AR);
+    mfc2.setGas(ALICAT_GAS_AR);
     USBSerial::log(Source_Core0, "MFC2 initialized to Argon", V_DEBUG);
     gauge.init();
     USBSerial::log(Source_Core0, "Gauge initialized", V_DEBUG);
@@ -77,7 +84,7 @@ int main()
         {
             if ((get_absolute_time() - handshakeStart) >= (uint64_t)HANDSHAKE_TIMEOUT_MS * 1000)
             {
-                USBSerial::log(Source_Core0, "Core 1 handshake timeout", V_CRITICAL);
+                printf("Handshake Error: Core 1 handshake timeout!\n"); // Ensure Print to terminal
                 setStatus(Status_Core1Err);
                 break;
             }

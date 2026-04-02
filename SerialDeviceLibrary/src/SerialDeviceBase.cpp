@@ -42,6 +42,8 @@ void SerialDeviceBase::onDataReceived(char c)
             size_t copyLen = std::min((size_t)receiveIndex, sizeof(msg.data) - 1);
             std::memcpy(msg.data, receiveBuffer, copyLen);
             msg.data[copyLen] = '\0';
+            
+            SERIAL_PRINT("[Serial Rx] %s\n", msg.data);
 
             queue_try_add(&msgQueue, &msg);
             receiveIndex = 0;

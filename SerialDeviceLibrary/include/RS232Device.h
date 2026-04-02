@@ -16,7 +16,11 @@ class RS232Device : public SerialDeviceBase
      * @brief Sends a message over RS232.
      * @param msg The string message to send.
      */
-    void send(const std::string &msg) override { uart->print(msg.c_str()); }
+    void send(const std::string &msg) override
+    {
+        SERIAL_PRINT("[RS232 Tx] %s\n", msg.c_str());
+        uart->print(msg.c_str());
+    }
 };
 
 #endif // RS232_DEVICE_H

@@ -107,8 +107,7 @@ void core1_entry()
         {
             if ((get_absolute_time() - handshakeStart) >= (uint64_t)HANDSHAKE_TIMEOUT_MS * 1000)
             {
-                USBSerial::log(Source_Core1, "Core 0 handshake timeout", V_CRITICAL);
-                pcTerminal.drainOutputQueues(); // Ensure message is printed before returning
+                printf("Handshake Error: Core 0 handshake timeout!\n"); // Ensure Print to terminal
                 setStatus(Status_Core0Err);
                 return;
             }

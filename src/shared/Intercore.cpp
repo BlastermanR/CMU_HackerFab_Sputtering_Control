@@ -9,7 +9,7 @@
 
 // Communication Atomics
 std::atomic<uint32_t> statusReg{0};
-std::atomic<uint8_t>  verbosityLevel{V_STATUS};
+std::atomic<uint8_t>  verbosityLevel{V_DEBUG}; // Set default to V_DEBUG to see initialization logs
 
 // Inter-core communication queues
 queue_t commandQueue;

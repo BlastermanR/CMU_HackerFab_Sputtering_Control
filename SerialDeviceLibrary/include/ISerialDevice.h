@@ -7,6 +7,16 @@
 
 #include <string>
 
+// Uncomment the following line to enable serial debug prints
+// #define SERIAL_DEBUG
+
+#ifdef SERIAL_DEBUG
+#include <stdio.h>
+#define SERIAL_PRINT(fmt, ...) printf(fmt, ##__VA_ARGS__)
+#else
+#define SERIAL_PRINT(fmt, ...)
+#endif
+
 class ISerialDevice
 {
   public:
