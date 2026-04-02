@@ -56,6 +56,14 @@ bool queue_try_remove(queue_t *q, void *data)
     return true;
 }
 
+bool queue_try_peek(queue_t *q, void *data)
+{
+    if (q->rptr == q->wptr)
+        return false; // empty
+    memcpy(data, q->buffer + q->rptr * q->element_size, q->element_size);
+    return true;
+}
+
 bool queue_is_empty(queue_t *q)
 {
     return q->rptr == q->wptr;

@@ -61,6 +61,7 @@ void queue_init(queue_t *q, unsigned int element_size, unsigned int element_coun
 void queue_free(queue_t *q);
 bool queue_try_add(queue_t *q, const void *data);
 bool queue_try_remove(queue_t *q, void *data);
+bool queue_try_peek(queue_t *q, void *data);
 bool queue_is_empty(queue_t *q);
 
 /* ── hardware/pio.h stubs (minimal — just the types) ─────────────────── */

@@ -94,6 +94,7 @@ enum DataId : uint8_t
  */
 struct OutputMessage
 {
+    uint32_t      timestamp;
     MessageSource source;
     Verbosity     level;
     MessageType   type;

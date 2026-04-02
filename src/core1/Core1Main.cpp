@@ -119,6 +119,7 @@ void core1_entry()
     // Signal Core 1 initialization complete
     setStatus(Core1_Begin);
     USBSerial::log(Source_Core1, "Core 1 initialized", V_INFO);
+    USBSerial::log(Source_Core1, "Waiting for commands", V_INFO);
 
     bool run{true};
 

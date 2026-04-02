@@ -18,6 +18,7 @@ void USBSerial::begin()
 void USBSerial::log(MessageSource source, const char *text, Verbosity level)
 {
     OutputMessage msg{};
+    msg.timestamp = to_ms_since_boot(get_absolute_time());
     msg.source = source;
     msg.level  = level;
     msg.type   = Msg_Log;
@@ -90,28 +91,52 @@ void USBSerial::readInput()
 
 void USBSerial::drainOutputQueues()
 {
-    OutputMessage msg;
+    OutputMessage msg0, msg1;
+    bool hasMsg0, hasMsg1;
     uint8_t currentVerbosity = verbosityLevel.load(std::memory_order_acquire);
 
-    while (queue_try_remove(&core0OutQueue, &msg))
+    while (true)
     {
-        if (msg.level <= currentVerbosity)
-        {
-            if (msg.type == Msg_Data)
-                printf("$%s:%.4f\n", dataIdToString(msg.data.id), msg.data.value);
-            else
-                printf("[Core0] %s\n", msg.text);
-        }
-    }
+        hasMsg0 = queue_try_peek(&core0OutQueue, &msg0);
+        hasMsg1 = queue_try_peek(&core1OutQueue, &msg1);
 
-    while (queue_try_remove(&core1OutQueue, &msg))
-    {
-        if (msg.level <= currentVerbosity)
+        if (!hasMsg0 && !hasMsg1)
         {
-            if (msg.type == Msg_Data)
-                printf("$%s:%.4f\n", dataIdToString(msg.data.id), msg.data.value);
+            break;
+        }
+
+        OutputMessage* msgToPrint = nullptr;
+
+        if (hasMsg0 && hasMsg1)
+        {
+            if (msg0.timestamp <= msg1.timestamp)
+            {
+                queue_try_remove(&core0OutQueue, &msg0);
+                msgToPrint = &msg0;
+            }
             else
-                printf("[Core1] %s\n", msg.text);
+            {
+                queue_try_remove(&core1OutQueue, &msg1);
+                msgToPrint = &msg1;
+            }
+        }
+        else if (hasMsg0)
+        {
+            queue_try_remove(&core0OutQueue, &msg0);
+            msgToPrint = &msg0;
+        }
+        else
+        {
+            queue_try_remove(&core1OutQueue, &msg1);
+            msgToPrint = &msg1;
+        }
+
+        if (msgToPrint->level <= currentVerbosity)
+        {
+            if (msgToPrint->type == Msg_Data)
+                printf("[%7lu] $%s:%.4f\n", msgToPrint->timestamp, dataIdToString(msgToPrint->data.id), msgToPrint->data.value);
+            else
+                printf("[%7lu] [Core%u] %s\n", msgToPrint->timestamp, msgToPrint->source, msgToPrint->text);
         }
     }
 }
