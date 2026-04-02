@@ -24,30 +24,30 @@ enum StatusMask : uint32_t
 {
     // Errors and Exit Signals
     Status_None        = 0,
-    Status_Core0Err    = (1 << 0),
-    Status_Core1Err    = (1 << 1),
-    Status_AlicatOxErr = (1 << 2),
-    Status_AlicatArErr = (1 << 3),
-    Status_PumpErr     = (1 << 4),
-    Status_GaugeErr    = (1 << 5),
-    Status_Exit        = (1 << 6),
+    Status_Core0Err    = (1U << 0),
+    Status_Core1Err    = (1U << 1),
+    Status_AlicatOxErr = (1U << 2),
+    Status_AlicatArErr = (1U << 3),
+    Status_PumpErr     = (1U << 4),
+    Status_GaugeErr    = (1U << 5),
+    Status_Exit        = (1U << 6),
 
     // Core 0 Instructions
-    ExecuteSputteringProcess = (1 << 7),
-    PressurizeChamber = (1 << 8),
-    VentChamber = (1 << 9),
-    ShutOffGasFlow = (1 << 10),
-    PollDevices = (1 << 11), // Manually Polls Devices for latest values
+    ExecuteSputteringProcess = (1U << 7),
+    PressurizeChamber = (1U << 8),
+    VentChamber = (1U << 9),
+    ShutOffGasFlow = (1U << 10),
+    PollDevices = (1U << 11), // Manually Polls Devices for latest values
 
-    SetArgonFlow = (1 << 12),
-    SetOxygenFlow = (1 << 13),
-    SetPumpSpeed = (1 << 14),
-    EnablePump = (1 << 15),
-    DisablePump = (1 << 16),
+    SetArgonFlow = (1U << 12),
+    SetOxygenFlow = (1U << 13),
+    SetPumpSpeed = (1U << 14),
+    EnablePump = (1U << 15),
+    DisablePump = (1U << 16),
 
     // Startup
-    Core0_Begin = (1 << 30),
-    Core1_Begin = (1 << 31)
+    Core0_Begin = (1U << 30),
+    Core1_Begin = (1U << 31)
 };
 
 extern std::atomic<uint32_t> statusReg;

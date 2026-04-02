@@ -92,7 +92,6 @@ int main()
     }
 
     USBSerial::log(Source_Core0, "Core 1 ready, entering main loop", V_INFO);
-
     {
         bool run{true};
 
@@ -138,27 +137,27 @@ int main()
                         break;
 
                     case SetArgonFlow:
-                        // TODO: Implement Argon flow specific logic outside of control loop
+                        USBSerial::log(Source_Core0, "SetArgonFlow command received (Not implemented)", V_INFO);
                         clearStatus(SetArgonFlow);
                         break;
 
                     case SetOxygenFlow:
-                        // TODO: Implement Oxygen flow specific logic outside of control loop
+                        USBSerial::log(Source_Core0, "SetOxygenFlow command received (Not implemented)", V_INFO);
                         clearStatus(SetOxygenFlow);
                         break;
 
                     case SetPumpSpeed:
-                        // TODO: Implement pump speed specific logic outside of control loop
+                        USBSerial::log(Source_Core0, "SetPumpSpeed command received (Not implemented)", V_INFO);
                         clearStatus(SetPumpSpeed);
                         break;
 
                     case EnablePump:
-                        // TODO: Implement enable pump logic outside of control loop
+                        USBSerial::log(Source_Core0, "EnablePump command received (Not implemented)", V_INFO);
                         clearStatus(EnablePump);
                         break;
 
                     case DisablePump:
-                        // TODO: Implement disable pump logic outside of control loop
+                        USBSerial::log(Source_Core0, "DisablePump command received (Not implemented)", V_INFO);
                         clearStatus(DisablePump);
                         break;
 
