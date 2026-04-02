@@ -98,42 +98,73 @@ int main()
 
         while(run)
         {
-            if (getStatus(ExecuteSputteringProcess))
-            {
-                USBSerial::log(Source_Core0, "Entering control loop", V_INFO);
-                SputteringManagement::controlLoop();
-                clearStatus(ExecuteSputteringProcess);
-                USBSerial::log(Source_Core0, "Exited control loop", V_INFO);
-            }
+            StatusMask activeCmd = isCommand();
 
-            if (getStatus(PressurizeChamber))
+            if (activeCmd != Status_None)
             {
-                USBSerial::log(Source_Core0, "Activating pump", V_INFO);
-                pump.activatePump();
-                clearStatus(PressurizeChamber);
-            }
+                switch (activeCmd)
+                {
+                    case ExecuteSputteringProcess:
+                        USBSerial::log(Source_Core0, "Entering control loop", V_INFO);
+                        SputteringManagement::controlLoop();
+                        clearStatus(ExecuteSputteringProcess);
+                        USBSerial::log(Source_Core0, "Exited control loop", V_INFO);
+                        break;
+                        
+                    case PressurizeChamber:
+                        USBSerial::log(Source_Core0, "Activating pump", V_INFO);
+                        pump.activatePump();
+                        clearStatus(PressurizeChamber);
+                        break;
+                        
+                    case VentChamber:
+                        USBSerial::log(Source_Core0, "Venting chamber", V_INFO);
+                        pump.deactivatePump();
+                        pump.ventPump();
+                        clearStatus(VentChamber);
+                        break;
+                        
+                    case ShutOffGasFlow:
+                        USBSerial::log(Source_Core0, "Shutting off gas flow", V_INFO);
+                        mfc1.setSetpoint(0);
+                        mfc2.setSetpoint(0);
+                        clearStatus(ShutOffGasFlow);
+                        break;
+                        
+                    case PollDevices:
+                        USBSerial::log(Source_Core0, "Polling devices", V_INFO);
+                        SputteringManagement::executePollDevices();
+                        clearStatus(PollDevices);
+                        break;
 
-            if (getStatus(VentChamber))
-            {
-                USBSerial::log(Source_Core0, "Venting chamber", V_INFO);
-                pump.deactivatePump();
-                pump.ventPump();
-                clearStatus(VentChamber);
-            }
+                    case SetArgonFlow:
+                        // TODO: Implement Argon flow specific logic outside of control loop
+                        clearStatus(SetArgonFlow);
+                        break;
 
-            if (getStatus(ShutOffGasFlow))
-            {
-                USBSerial::log(Source_Core0, "Shutting off gas flow", V_INFO);
-                mfc1.setSetpoint(0);
-                mfc2.setSetpoint(0);
-                clearStatus(ShutOffGasFlow);
-            }
+                    case SetOxygenFlow:
+                        // TODO: Implement Oxygen flow specific logic outside of control loop
+                        clearStatus(SetOxygenFlow);
+                        break;
 
-            if (getStatus(PollDevices))
-            {
-                USBSerial::log(Source_Core0, "Polling devices", V_INFO);
-                SputteringManagement::executePollDevices();
-                clearStatus(PollDevices);
+                    case SetPumpSpeed:
+                        // TODO: Implement pump speed specific logic outside of control loop
+                        clearStatus(SetPumpSpeed);
+                        break;
+
+                    case EnablePump:
+                        // TODO: Implement enable pump logic outside of control loop
+                        clearStatus(EnablePump);
+                        break;
+
+                    case DisablePump:
+                        // TODO: Implement disable pump logic outside of control loop
+                        clearStatus(DisablePump);
+                        break;
+
+                    default:
+                        break;
+                }
             }
 
             // Check for exit

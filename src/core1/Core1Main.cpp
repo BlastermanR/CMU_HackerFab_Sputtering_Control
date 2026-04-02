@@ -50,22 +50,27 @@ static void dispatchCommand(const CommandMessage &cmd)
             break;
         case Cmd_SetArgonFlow:
             sharedData.Core1Out.setArgonFlow = cmd.param1;
+            setStatus(SetArgonFlow);
             USBSerial::log(Source_Core1, "Argon flow setpoint updated");
             break;
         case Cmd_SetOxygenFlow:
             sharedData.Core1Out.setOxygenFlow = cmd.param1;
+            setStatus(SetOxygenFlow);
             USBSerial::log(Source_Core1, "Oxygen flow setpoint updated");
             break;
         case Cmd_SetPumpSpeed:
             sharedData.Core1Out.setPumpSpeed = cmd.param1;
+            setStatus(SetPumpSpeed);
             USBSerial::log(Source_Core1, "Pump speed setpoint updated");
             break;
         case Cmd_EnablePump:
             sharedData.Core1Out.enablePump = true;
+            setStatus(EnablePump);
             USBSerial::log(Source_Core1, "Pump enabled");
             break;
         case Cmd_DisablePump:
             sharedData.Core1Out.enablePump = false;
+            setStatus(DisablePump);
             USBSerial::log(Source_Core1, "Pump disabled");
             break;
         case Cmd_Exit:

@@ -20,7 +20,7 @@
  * Define enum for status register bit masks to ensure type safety
  * and avoid preprocessor macro pitfalls.
  */
-enum StatusMask : uint16_t
+enum StatusMask : uint32_t
 {
     // Errors and Exit Signals
     Status_None        = 0,
@@ -31,19 +31,26 @@ enum StatusMask : uint16_t
     Status_PumpErr     = (1 << 4),
     Status_GaugeErr    = (1 << 5),
     Status_Exit        = (1 << 6),
-    // Core 0 Instruction
+
+    // Core 0 Instructions
     ExecuteSputteringProcess = (1 << 7),
     PressurizeChamber = (1 << 8),
     VentChamber = (1 << 9),
     ShutOffGasFlow = (1 << 10),
     PollDevices = (1 << 11), // Manually Polls Devices for latest values
 
+    SetArgonFlow = (1 << 12),
+    SetOxygenFlow = (1 << 13),
+    SetPumpSpeed = (1 << 14),
+    EnablePump = (1 << 15),
+    DisablePump = (1 << 16),
+
     // Startup
-    Core0_Begin = (1 << 14),
-    Core1_Begin = (1 << 15)
+    Core0_Begin = (1 << 30),
+    Core1_Begin = (1 << 31)
 };
 
-extern std::atomic<uint16_t> statusReg;
+extern std::atomic<uint32_t> statusReg;
 extern std::atomic<uint8_t>  verbosityLevel;
 
 extern queue_t commandQueue;
@@ -82,7 +89,7 @@ inline void clearStatus(StatusMask mask) { statusReg.fetch_and(~mask, std::memor
  */
 inline bool isError() 
 { 
-    const uint16_t ERROR_MASK = Status_Core0Err | Status_Core1Err | Status_AlicatOxErr | 
+    const uint32_t ERROR_MASK = Status_Core0Err | Status_Core1Err | Status_AlicatOxErr | 
                                 Status_AlicatArErr | Status_PumpErr | Status_GaugeErr;
     return (statusReg.load(std::memory_order_acquire) & ERROR_MASK) != 0; 
 }
@@ -94,15 +101,34 @@ inline bool isError()
  */
 inline StatusMask getError()
 {
-    const uint16_t ERROR_MASK = Status_Core0Err | Status_Core1Err | Status_AlicatOxErr | 
+    const uint32_t ERROR_MASK = Status_Core0Err | Status_Core1Err | Status_AlicatOxErr | 
                                 Status_AlicatArErr | Status_PumpErr | Status_GaugeErr;
-    uint16_t status = statusReg.load(std::memory_order_acquire) & ERROR_MASK;
+    uint32_t status = statusReg.load(std::memory_order_acquire) & ERROR_MASK;
     if (status & Status_Core0Err) return Status_Core0Err;
     if (status & Status_Core1Err) return Status_Core1Err;
     if (status & Status_AlicatOxErr) return Status_AlicatOxErr;
     if (status & Status_AlicatArErr) return Status_AlicatArErr;
     if (status & Status_PumpErr) return Status_PumpErr;
     if (status & Status_GaugeErr) return Status_GaugeErr;
+    return Status_None;
+}
+
+/**
+ * @brief Checks for active commands and returns the lowest set command bit.
+ * @return The first active command StatusMask, or Status_None if no commands exist.
+ */
+inline StatusMask isCommand()
+{
+    const uint32_t COMMAND_MASK = ExecuteSputteringProcess | PressurizeChamber | 
+                                  VentChamber | ShutOffGasFlow | PollDevices |
+                                  SetArgonFlow | SetOxygenFlow | SetPumpSpeed |
+                                  EnablePump | DisablePump;
+                                  
+    uint32_t commandBits = statusReg.load(std::memory_order_acquire) & COMMAND_MASK;
+    if (commandBits)
+    {
+        return static_cast<StatusMask>(commandBits & -commandBits);
+    }
     return Status_None;
 }
 

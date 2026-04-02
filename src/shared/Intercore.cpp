@@ -8,7 +8,7 @@
 #include "Intercore.h"
 
 // Communication Atomics
-std::atomic<uint16_t> statusReg{0};
+std::atomic<uint32_t> statusReg{0};
 std::atomic<uint8_t>  verbosityLevel{V_STATUS};
 
 // Inter-core communication queues
