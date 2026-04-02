@@ -31,13 +31,29 @@ void executePollDevices();
 
 int main()
 {
+    /*********** Initialzation Space ***********/
+
     // Enable IO
     stdio_init_all();
+    printf("========================================\n");
+    printf("  CMU HackerFab Sputtering Control v0.1\n");
+    printf("========================================\n");
+    printf("   ____ __  __ _    _  _ \n");
+    printf("  / ___|  \\/  | |  | || |\n");
+    printf(" | |   | |\\/| | |  | || |\n");
+    printf(" | |___| |  | | |__| ||_|\n");
+    printf("  \\____|_|  |_|\\____/ (_) \n");
+    printf("========================================\n");
+    printf("System IO Intialiazed!\n");
 
     // Initialize inter-core queues before launching Core 1
     initQueues();
+    printf("Intercore Queues Initialized!\n");
 
     // Launch Core 1
+    printf("Launching Core 1; Handing off control. buh bye! \n");
+
+    /*********** Multicore Barrier ***********/
     multicore_launch_core1(core1_entry);
 
     /**

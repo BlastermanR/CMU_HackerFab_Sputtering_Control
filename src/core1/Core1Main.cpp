@@ -94,7 +94,7 @@ void core1_entry()
     // Core 1 owns USB I/O
     USBSerial pcTerminal;
     pcTerminal.begin();
-    USBSerial::log(Source_Core1, "USB serial ready", V_INFO);
+    pcTerminal.drainOutputQueues();
 
     SputteringManager manager;
 
@@ -106,9 +106,11 @@ void core1_entry()
             if ((get_absolute_time() - handshakeStart) >= (uint64_t)HANDSHAKE_TIMEOUT_MS * 1000)
             {
                 USBSerial::log(Source_Core1, "Core 0 handshake timeout", V_CRITICAL);
+                pcTerminal.drainOutputQueues(); // Ensure message is printed before returning
                 setStatus(Status_Core0Err);
                 return;
             }
+            pcTerminal.drainOutputQueues(); // Keep the queue clear while waiting
             sleep_ms(1);
         }
     }

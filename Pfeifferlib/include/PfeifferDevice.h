@@ -127,8 +127,17 @@ template <typename Derived> class PfeifferDevice
         return true;
     }
 
+    /**
+     * @brief Returns the RS-485 device address.
+     * @return The device address byte.
+     */
     uint8_t getAddress() const { return m_address; }
-    void    setAddress(uint8_t addr) { m_address = addr; }
+
+    /**
+     * @brief Sets the RS-485 device address.
+     * @param addr The new device address byte.
+     */
+    void setAddress(uint8_t addr) { m_address = addr; }
 };
 
 } // namespace Pfeiffer
