@@ -18,7 +18,7 @@ class RS232Device : public SerialDeviceBase
      */
     void send(const std::string &msg) override
     {
-        SERIAL_PRINT("[RS232 Tx] %s\n", msg.c_str());
+        SERIAL_PRINT("[RS232 Tx (Pin %u)] %s\n", uart->getTxPin(), msg.c_str());
         uart->print(msg.c_str());
     }
 };

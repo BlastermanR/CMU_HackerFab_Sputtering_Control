@@ -31,7 +31,7 @@ class RS485Device : public SerialDeviceBase
      */
     void send(const std::string &msg) override
     {
-        SERIAL_PRINT("[RS485 Tx] %s\n", msg.c_str());
+        SERIAL_PRINT("[RS485 Tx (Pin %u)] %s\n", uart->getTxPin(), msg.c_str());
 
         // Toggle RTS high for transmit
         gpio_put(rtsPin, 1);

@@ -10,6 +10,7 @@
  */
 
 #include <functional>
+#include <stdint.h>
 
 // Use std::function so complex objects can pass lambdas or bound member
 // functions
@@ -50,6 +51,18 @@ class IUart
      * @param cb The callback function taking a char parameter.
      */
     virtual void setCallback(UartCallback cb) = 0;
+
+    /**
+     * @brief Gets the TX pin number.
+     * @return The TX GPIO pin number.
+     */
+    virtual unsigned int getTxPin() const = 0;
+
+    /**
+     * @brief Gets the RX pin number.
+     * @return The RX GPIO pin number.
+     */
+    virtual unsigned int getRxPin() const = 0;
 };
 
 #endif // UARTI

@@ -50,6 +50,13 @@ class HardUart : public IUart
     }
 
   public:
+    /**
+     * @brief Constructs a HardUart object.
+     * @param uart The hardware UART instance (uart0 or uart1).
+     * @param tx The GPIO pin used for transmission.
+     * @param rx The GPIO pin used for reception.
+     * @param baud The desired baud rate.
+     */
     HardUart(uart_inst_t *uart, uint tx, uint rx, uint baud) : uartInstance(uart), txPin(tx), rxPin(rx), baudRate(baud)
     {
 
@@ -58,6 +65,9 @@ class HardUart : public IUart
         instances[index] = this;
     }
 
+    /**
+     * @brief Destructor for HardUart. Cleans up IRQs and de-initializes UART.
+     */
     ~HardUart()
     {
         int index = (uartInstance == uart0) ? 0 : 1;
@@ -72,8 +82,15 @@ class HardUart : public IUart
         uart_deinit(uartInstance);
     }
 
+    /**
+     * @brief Sets the callback for received characters.
+     * @param cb Function to call when a character is received.
+     */
     void setCallback(UartCallback cb) override { rxCallback = cb; }
 
+    /**
+     * @brief Initializes the hardware UART, configures pins, and enables interrupts.
+     */
     void begin() override
     {
         uart_init(uartInstance, baudRate);
@@ -91,11 +108,34 @@ class HardUart : public IUart
                              false); // Enable RX IRQ, disable TX IRQ
     }
 
+    /**
+     * @brief Writes a single character to the hardware UART.
+     * @param c Character to write.
+     */
     void write(char c) override { uart_putc_raw(uartInstance, c); }
 
+    /**
+     * @brief Prints a null-terminated string to the hardware UART.
+     * @param str String to print.
+     */
     void print(const char *str) override { uart_puts(uartInstance, str); }
 
+    /**
+     * @brief Blocks until all characters in the TX FIFO have been transmitted.
+     */
     void waitTxComplete() override { uart_tx_wait_blocking(uartInstance); }
+
+    /**
+     * @brief Gets the configured TX pin.
+     * @return TX GPIO pin number.
+     */
+    unsigned int getTxPin() const override { return txPin; }
+
+    /**
+     * @brief Gets the configured RX pin.
+     * @return RX GPIO pin number.
+     */
+    unsigned int getRxPin() const override { return rxPin; }
 };
 
 // Initialize static array

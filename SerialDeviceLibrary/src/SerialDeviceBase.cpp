@@ -43,7 +43,7 @@ void SerialDeviceBase::onDataReceived(char c)
             std::memcpy(msg.data, receiveBuffer, copyLen);
             msg.data[copyLen] = '\0';
             
-            SERIAL_PRINT("[Serial Rx] %s\n", msg.data);
+            SERIAL_PRINT("[Serial Rx (Pin %u)] %s\n", uart->getRxPin(), msg.data);
 
             queue_try_add(&msgQueue, &msg);
             receiveIndex = 0;

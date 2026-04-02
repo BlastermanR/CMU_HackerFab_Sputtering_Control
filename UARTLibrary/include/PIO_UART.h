@@ -72,6 +72,15 @@ class PioUart : public IUart
     }
 
   public:
+    /**
+     * @brief Constructs a PioUart object.
+     * @param pio The PIO instance (pio0, pio1, or pio2).
+     * @param tSm State machine number for TX.
+     * @param rSm State machine number for RX.
+     * @param tx The GPIO pin used for transmission.
+     * @param rx The GPIO pin used for reception.
+     * @param baud The desired baud rate.
+     */
     PioUart(PIO pio, uint tSm, uint rSm, uint tx, uint rx, uint baud)
         : pioInstance(pio), txSm(tSm), rxSm(rSm), txPin(tx), rxPin(rx), baudRate(baud)
     {
@@ -80,6 +89,9 @@ class PioUart : public IUart
         instances[pioIndex][rxSm] = this;
     }
 
+    /**
+     * @brief Destructor for PioUart. Cleans up IRQs and disables state machines.
+     */
     ~PioUart()
     {
         int pioIndex = (pioInstance == pio0) ? 0 : (pioInstance == pio1) ? 1 : 2;
@@ -95,8 +107,15 @@ class PioUart : public IUart
         pio_sm_set_enabled(pioInstance, rxSm, false);
     }
 
+    /**
+     * @brief Sets the callback for received characters.
+     * @param cb Function to call when a character is received via PIO.
+     */
     void setCallback(UartCallback cb) override { rxCallback = cb; }
 
+    /**
+     * @brief Configures the PIO programs, initializes state machines, and sets up interrupts.
+     */
     void begin() override
     {
         // Load the compiled PIO programs for TX and RX into the chosen PIO block's
@@ -135,14 +154,25 @@ class PioUart : public IUart
         irq_set_enabled(irqNumber, true);
     }
 
+    /**
+     * @brief Writes a single character to the PIO UART. Blocks if FIFO is full.
+     * @param c Character to write.
+     */
     void write(char c) override { pio_sm_put_blocking(pioInstance, txSm, (uint32_t)c); }
 
+    /**
+     * @brief Prints a null-terminated string to the PIO UART.
+     * @param str String to print.
+     */
     void print(const char *str) override
     {
         while (*str)
             write(*str++);
     }
 
+    /**
+     * @brief Blocks until the TX FIFO is empty and then waits for the last byte to clear the shifter.
+     */
     void waitTxComplete() override
     {
         while (!pio_sm_is_tx_fifo_empty(pioInstance, txSm))
@@ -152,6 +182,18 @@ class PioUart : public IUart
         uint32_t delay_us = (10000000 + baudRate - 1) / baudRate;
         sleep_us(delay_us);
     }
+
+    /**
+     * @brief Gets the configured TX pin.
+     * @return TX GPIO pin number.
+     */
+    unsigned int getTxPin() const override { return txPin; }
+
+    /**
+     * @brief Gets the configured RX pin.
+     * @return RX GPIO pin number.
+     */
+    unsigned int getRxPin() const override { return rxPin; }
 };
 
 // Initialize static array for 3 PIO blocks

@@ -24,6 +24,9 @@
 #include "picoDefinitions.h"
 #include "GlobalDevices.h"
 
+// Enable for serial testing
+#define SERIAL_DEBUG
+
 int main()
 {
     /*********** Initialzation Space ***********/
@@ -32,7 +35,7 @@ int main()
     stdio_init_all();
 
     // Wait for USB connection to be active before printing
-    // This ensures you see the banner in the terminal
+    // This ensures the user sees the banner in the terminal
     while (!stdio_usb_connected()) {
         sleep_ms(100);
     }
