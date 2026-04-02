@@ -99,7 +99,34 @@ TEST_F(IntercoreTest, GetErrorReturnsLowPriorityAlone)
     setStatus(Status_GaugeErr);
     EXPECT_EQ(getError(), Status_GaugeErr);
 }
+// ── isCommand ───────────────────────────────────────────────────────────────
 
+TEST_F(IntercoreTest, IsCommandReturnsNoneWhenNone)
+{
+    EXPECT_EQ(isCommand(), Status_None);
+}
+
+TEST_F(IntercoreTest, IsCommandReturnsLowestBit)
+{
+    // Multiple commands: ExecuteSputteringProcess (1<<7), VentChamber (1<<9)
+    setStatus(ExecuteSputteringProcess);
+    setStatus(VentChamber);
+
+    EXPECT_EQ(isCommand(), ExecuteSputteringProcess);
+
+    // Clear the first one, should return the next
+    clearStatus(ExecuteSputteringProcess);
+    EXPECT_EQ(isCommand(), VentChamber);
+}
+
+TEST_F(IntercoreTest, IsCommandIgnoresNonCommandBits)
+{
+    // Set an error bit and a startup bit
+    setStatus(Status_Core0Err);
+    setStatus(Core0_Begin);
+
+    EXPECT_EQ(isCommand(), Status_None);
+}
 // ── Startup / command bits ──────────────────────────────────────────────────
 
 TEST_F(IntercoreTest, StartupBitsRoundTrip)

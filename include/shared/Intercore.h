@@ -136,7 +136,7 @@ inline StatusMask isCommand()
  * @brief Structure for inter-core data sharing. This structure is designed to
  * hold all the shared variables that need to be accessed by both cores.
  */
-typedef struct
+struct intercoreData
 {
     struct
     {
@@ -165,7 +165,7 @@ typedef struct
         /* Oxygen MFC */
         float setOxygenFlow{0.0f};
     } Core1Out;
-} intercoreData;
+};
 
 /**
  * @brief Volatile static structure for inter-core data sharing.
