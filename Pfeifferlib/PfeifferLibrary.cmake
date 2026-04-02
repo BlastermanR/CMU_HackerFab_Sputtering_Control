@@ -1,5 +1,5 @@
 # Build the USB Serial Library
-set(LIBRARY_NAME Pfiefferlib)
+set(LIBRARY_NAME Pfeifferlib)
 
 # Define Library
 add_library(${LIBRARY_NAME} INTERFACE)

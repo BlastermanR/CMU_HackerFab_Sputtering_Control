@@ -1,8 +1,8 @@
 /**
- * @file PfiefferDevice.h
+ * @file PfeifferDevice.h
  * @brief CRTP Template base class for Pfeiffer Vacuum devices.
  *
- * Provides a standardized template constraint over Pfieffer commands
+ * Provides a standardized template constraint over Pfeiffer commands
  * by forcing type safety, bounds checking, and structured property definitions.
  *
  * @author Ryan Massie (rmassie)
@@ -11,12 +11,12 @@
 
 #pragma once
 
-#include "PfiefferLib.h"
+#include "PfeifferLib.h"
 #include <cstdint>
 #include <cstdio>
 #include <string>
 
-namespace Pfieffer
+namespace Pfeiffer
 {
 
 /**
@@ -32,7 +32,7 @@ enum class AccessType
 /**
  * @brief Generic struct representing the constraints and properties of a device parameter.
  */
-struct PfiefferParamDef
+struct PfeifferParamDef
 {
     uint16_t    number;      //!< Device-specific parameter number identifier.
     const char *name;        //!< Short string descriptor of the parameter.
@@ -52,24 +52,24 @@ struct PfiefferParamDef
  *
  * @tparam Derived The specific device implementation class.
  */
-template <typename Derived> class PfiefferDevice
+template <typename Derived> class PfeifferDevice
 {
   protected:
     uint8_t m_address;
 
   public:
-    explicit PfiefferDevice(uint8_t address = 1) : m_address(address) {}
+    explicit PfeifferDevice(uint8_t address = 1) : m_address(address) {}
 
     /**
      * @brief Creates a validated Read Command targeting this device.
      *
      * @param paramNumber The parameter to query.
-     * @param outCmd Reference to a PfiefferCommand struct to be populated.
+     * @param outCmd Reference to a PfeifferCommand struct to be populated.
      * @return true if successful, false if access denied or parameter missing.
      */
-    bool createReadCommand(uint16_t paramNumber, PfiefferCommand &outCmd) const
+    bool createReadCommand(uint16_t paramNumber, PfeifferCommand &outCmd) const
     {
-        const PfiefferParamDef *def = Derived::getParamDef(paramNumber);
+        const PfeifferParamDef *def = Derived::getParamDef(paramNumber);
         if (!def || def->access == AccessType::WRITE_ONLY)
         {
             return false;
@@ -93,12 +93,12 @@ template <typename Derived> class PfiefferDevice
      *
      * @param paramNumber The parameter to overwrite.
      * @param value The numeric value to send.
-     * @param outCmd Reference to a PfiefferCommand struct to be populated.
+     * @param outCmd Reference to a PfeifferCommand struct to be populated.
      * @return true on success, false if access denied, out of bounds, or parameter missing.
      */
-    bool createWriteCommand(uint16_t paramNumber, double value, PfiefferCommand &outCmd) const
+    bool createWriteCommand(uint16_t paramNumber, double value, PfeifferCommand &outCmd) const
     {
-        const PfiefferParamDef *def = Derived::getParamDef(paramNumber);
+        const PfeifferParamDef *def = Derived::getParamDef(paramNumber);
         if (!def || def->access == AccessType::READ_ONLY)
         {
             return false;
@@ -131,4 +131,4 @@ template <typename Derived> class PfiefferDevice
     void    setAddress(uint8_t addr) { m_address = addr; }
 };
 
-} // namespace Pfieffer
+} // namespace Pfeiffer

@@ -1,11 +1,11 @@
-# Pfeiffer Vacuum Library (Pfiefferlib)
+# Pfeiffer Vacuum Library (Pfeifferlib)
 
 A lightweight, headers-only C++17 library for forming and parsing Pfeiffer Vacuum serial protocol commands. Supports Pfeiffer Turbo Pumps, Gauges, and other RS-485/RS-232 devices using the standard Pfeiffer Vacuum serial protocol.
 
 ## Features
 
 - **Command Formatting** — Builds correctly structured query and setpoint strings, including automatic data-length and Modulo-256 checksum fields.
-- **Response Parsing** — Validates and decrypts incoming Pfeiffer response frames, populating a `PfiefferCommand` struct.
+- **Response Parsing** — Validates and decrypts incoming Pfeiffer response frames, populating a `PfeifferCommand` struct.
 - **Zero-Overhead Abstraction** — Uses the **Curiously Recurring Template Pattern (CRTP)** to provide a generic device interface without `vtable` or dynamic allocation overhead.
 - **Parameter Guarding** — Each device defines a static dictionary of parameters including:
   - **Access Control:** Prevents writing to Read-Only parameters or reading Write-Only ones.
@@ -16,16 +16,16 @@ A lightweight, headers-only C++17 library for forming and parsing Pfeiffer Vacuu
 
 | File | Purpose |
 |------|---------|
-| `include/PfiefferLib.h` | Core protocol library — `PfiefferCommand`, `PfieifferLib` static methods (format, parse, checksum) |
-| `include/PfiefferDevice.h` | CRTP base class `PfiefferDevice<Derived>` — access control, bounds checking, command creation |
+| `include/PfeifferLib.h` | Core protocol library — `PfeifferCommand`, `PfeifferLib` static methods (format, parse, checksum) |
+| `include/PfeifferDevice.h` | CRTP base class `PfeifferDevice<Derived>` — access control, bounds checking, command creation |
 | `include/Devices/TC110DriveUnit.h` | TC 110 Electronic Drive Unit (Turbo Pump) — full parameter dictionary and `TC110Cmd` enum |
 | `include/Devices/MPT200.h` | MPT 200 AR Cold Cathode Gauge — parameter dictionary and `MPT200Cmd` enum |
 
 ## CMake Integration
 
 ```cmake
-include(Pfiefferlib/PfiefferLibrary.cmake)
-target_link_libraries(your_project PRIVATE Pfiefferlib)
+include(Pfeifferlib/PfeifferLibrary.cmake)
+target_link_libraries(your_project PRIVATE Pfeifferlib)
 ```
 
 ## Usage
@@ -35,17 +35,17 @@ target_link_libraries(your_project PRIVATE Pfiefferlib)
 ```cpp
 #include "Devices/TC110DriveUnit.h"
 
-using namespace Pfieffer;
+using namespace Pfeiffer;
 
 // 1. Initialize a device with its RS-485 address (default is 1)
 TC110DriveUnit turboPump(1);
 
 // 2. Create a validated write command (e.g., turn on the pump motor)
 // Checks that MotorPump supports write and that 1.0 is within the allowed range.
-PfiefferCommand cmd;
+PfeifferCommand cmd;
 if (turboPump.createWriteCommand((uint16_t)TC110Cmd::MotorPump, 1.0, cmd)) {
     bool valid = false;
-    std::string raw = PfieifferLib::formatCommand(&cmd, &valid);
+    std::string raw = PfeifferLib::formatCommand(&cmd, &valid);
     // Send raw over your RS-485/UART interface...
 }
 ```
@@ -54,10 +54,10 @@ if (turboPump.createWriteCommand((uint16_t)TC110Cmd::MotorPump, 1.0, cmd)) {
 
 ```cpp
 // Read the actual spindle speed in Hz
-PfiefferCommand cmd;
+PfeifferCommand cmd;
 if (turboPump.createReadCommand((uint16_t)TC110Cmd::ActualSpd_Hz, cmd)) {
     bool valid = false;
-    std::string raw = PfieifferLib::formatCommand(&cmd, &valid);
+    std::string raw = PfeifferLib::formatCommand(&cmd, &valid);
     // Send raw over your RS-485/UART interface...
 }
 ```
@@ -67,10 +67,10 @@ if (turboPump.createReadCommand((uint16_t)TC110Cmd::ActualSpd_Hz, cmd)) {
 ```cpp
 // Example raw DATA_RESPONSE frame from the pump (ActualSpd_Hz = 500 Hz)
 std::string response = "0011030906000500132\r";
-PfiefferCommand reply;
+PfeifferCommand reply;
 bool isValid = false;
 
-PfieifferLib::decryptResponse(response, &reply, &isValid);
+PfeifferLib::decryptResponse(response, &reply, &isValid);
 
 if (isValid) {
     printf("Param %s = %s\n", reply.paramNum.c_str(), reply.data.c_str());
@@ -82,33 +82,33 @@ if (isValid) {
 ```cpp
 #include "Devices/MPT200.h"
 
-using namespace Pfieffer;
+using namespace Pfeiffer;
 
 MPT200 gauge(2); // RS-485 address 2
-PfiefferCommand cmd;
+PfeifferCommand cmd;
 
 if (gauge.createReadCommand((uint16_t)MPT200Cmd::Pressure, cmd)) {
     bool valid = false;
-    std::string raw = PfieifferLib::formatCommand(&cmd, &valid);
+    std::string raw = PfeifferLib::formatCommand(&cmd, &valid);
     // Send raw and await the response...
 }
 ```
 
 ## Adding New Devices
 
-Create a new header in `include/Devices/` and inherit from `PfiefferDevice<YourClass>`. Implement a static `getParamDef(uint16_t paramNum)` method and a `DICT[]` constexpr array populated with `PfiefferParamDef` entries from the device manual.
+Create a new header in `include/Devices/` and inherit from `PfeifferDevice<YourClass>`. Implement a static `getParamDef(uint16_t paramNum)` method and a `DICT[]` constexpr array populated with `PfeifferParamDef` entries from the device manual.
 
 ```cpp
-class MyDevice : public PfiefferDevice<MyDevice> {
+class MyDevice : public PfeifferDevice<MyDevice> {
 public:
-    explicit MyDevice(uint8_t address = 1) : PfiefferDevice<MyDevice>(address) {}
+    explicit MyDevice(uint8_t address = 1) : PfeifferDevice<MyDevice>(address) {}
 
-    static constexpr PfiefferParamDef DICT[] = {
+    static constexpr PfeifferParamDef DICT[] = {
         {303, "Error", 4, AccessType::READ_ONLY, 0, 0, 0, false},
         // ...
     };
 
-    static const PfiefferParamDef *getParamDef(uint16_t parameterNumber) {
+    static const PfeifferParamDef *getParamDef(uint16_t parameterNumber) {
         for (const auto &def : DICT)
             if (def.number == parameterNumber) return &def;
         return nullptr;

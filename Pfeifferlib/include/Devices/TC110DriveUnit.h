@@ -10,10 +10,10 @@
 
 #pragma once
 
-#include "PfiefferDevice.h"
+#include "PfeifferDevice.h"
 #include <cstdint>
 
-namespace Pfieffer
+namespace Pfeiffer
 {
 
 /**
@@ -108,17 +108,17 @@ enum class TC110Cmd : uint16_t
 };
 
 /**
- * @brief TC110 Device implementation inheriting from the PfiefferDevice CRTP template.
+ * @brief TC110 Device implementation inheriting from the PfeifferDevice CRTP template.
  */
-class TC110DriveUnit : public PfiefferDevice<TC110DriveUnit>
+class TC110DriveUnit : public PfeifferDevice<TC110DriveUnit>
 {
   public:
-    explicit TC110DriveUnit(uint8_t address = 1) : PfiefferDevice<TC110DriveUnit>(address) {}
+    explicit TC110DriveUnit(uint8_t address = 1) : PfeifferDevice<TC110DriveUnit>(address) {}
 
     /**
      * @brief Constexpr array mapping all known TC110 Parameters to definitions.
      */
-    static constexpr PfiefferParamDef DICT[] = {
+    static constexpr PfeifferParamDef DICT[] = {
         // {ParamID, "Name", DataType, AccessType, MinVal, MaxVal, DefaultVal, NonVolatile}
         // Basic Control Commands
         {1, "Heating", 0, AccessType::READ_WRITE, 0, 1, 0, true},
@@ -208,7 +208,7 @@ class TC110DriveUnit : public PfiefferDevice<TC110DriveUnit>
     /**
      * @brief Inherited CRTP static callback to fetch a parameter bound array entry.
      */
-    static const PfiefferParamDef *getParamDef(uint16_t parameterNumber)
+    static const PfeifferParamDef *getParamDef(uint16_t parameterNumber)
     {
         for (const auto &def : DICT)
         {
@@ -221,4 +221,4 @@ class TC110DriveUnit : public PfiefferDevice<TC110DriveUnit>
     }
 };
 
-} // namespace Pfieffer
+} // namespace Pfeiffer

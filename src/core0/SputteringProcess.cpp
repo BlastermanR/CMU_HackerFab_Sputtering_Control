@@ -11,8 +11,8 @@ using namespace SputteringConstants;
 
 SputteringProcess::SputteringProcess(AlicatMFC&     mfc_argon,
                                      AlicatMFC&     mfc_oxygen,
-                                     PfiefferGauge& gauge,
-                                     PfiefferPump&  pump)
+                                     PfeifferGauge& gauge,
+                                     PfeifferPump&  pump)
     : _mfcArgon(mfc_argon),
       _mfcOxygen(mfc_oxygen),
       _gauge(gauge),

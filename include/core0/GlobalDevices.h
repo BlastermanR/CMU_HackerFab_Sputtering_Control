@@ -3,8 +3,8 @@
 #define GLOBALDEVICES_H
 
 #include "AlicatMFC.h"
-#include "PfiefferGauge.h"
-#include "PfiefferPump.h"
+#include "PfeifferGauge.h"
+#include "PfeifferPump.h"
 #include "RS232Device.h"
 #include "RS485Device.h"
 #include "PIO_UART.h"
@@ -24,11 +24,11 @@ extern AlicatMFC   mfc2;
 // Gauge Devices (uart0)
 extern HardUart      gaugeUart;
 extern RS485Device   gaugeDevice;
-extern PfiefferGauge gauge;
+extern PfeifferGauge gauge;
 
 // Pump Devices (uart1)
 extern HardUart     pumpUart;
 extern RS485Device  pumpDevice;
-extern PfiefferPump pump;
+extern PfeifferPump pump;
 
 #endif // GLOBALDEVICES_H

@@ -1,18 +1,18 @@
 /**
- * @file test_pfieffer_lib.cpp
- * @brief Unit tests for PfieifferLib protocol formatting, parsing, and checksum.
+ * @file test_pfeiffer_lib.cpp
+ * @brief Unit tests for PfeifferLib protocol formatting, parsing, and checksum.
  *
  * @author Ryan Massie (rmassie)
  * @date 3/31/26
  */
 #include <gtest/gtest.h>
-#include "PfiefferLib.h"
+#include "PfeifferLib.h"
 
 // ── Helper: Build a valid Pfeiffer response string ──────────────────────────
 // Frame: [address 3][action 2][paramNum 3][dataLen 3][data N][checksum 2]\r
 // Checksum = (sum of ASCII of all fields except checksum) % 256
 
-static std::string buildPfiefferFrame(const std::string &addr, const std::string &action,
+static std::string buildPfeifferFrame(const std::string &addr, const std::string &action,
                                       const std::string &paramNum, const std::string &data)
 {
     // dataLen is the string length of data, zero-padded to 3 chars
@@ -37,16 +37,16 @@ static std::string buildPfiefferFrame(const std::string &addr, const std::string
 
 // ── formatCommand tests ─────────────────────────────────────────────────────
 
-TEST(PfiefferLibFormat, ReadCommand)
+TEST(PfeifferLibFormat, ReadCommand)
 {
-    PfiefferCommand cmd;
+    PfeifferCommand cmd;
     cmd.address  = "001";
     cmd.action   = READ_PARAMETER; // "00"
     cmd.paramNum = "740";
     cmd.data     = QUERY_DATA_STR; // "=?"
 
     bool valid = false;
-    std::string result = PfieifferLib::formatCommand(&cmd, &valid);
+    std::string result = PfeifferLib::formatCommand(&cmd, &valid);
 
     // Should contain the address, action, paramNum, dataLen, data, checksum, \r
     EXPECT_FALSE(result.empty());
@@ -58,24 +58,24 @@ TEST(PfiefferLibFormat, ReadCommand)
     EXPECT_NE(result.find("740"), std::string::npos);
 }
 
-TEST(PfiefferLibFormat, NullPointer)
+TEST(PfeifferLibFormat, NullPointer)
 {
     bool valid = true;
-    std::string result = PfieifferLib::formatCommand(nullptr, &valid);
+    std::string result = PfeifferLib::formatCommand(nullptr, &valid);
 
     EXPECT_FALSE(valid);
     EXPECT_EQ(result, "");
 }
 
-TEST(PfiefferLibFormat, DataLengthCalculated)
+TEST(PfeifferLibFormat, DataLengthCalculated)
 {
-    PfiefferCommand cmd;
+    PfeifferCommand cmd;
     cmd.address  = "001";
     cmd.action   = DATA_RESPONSE; // "10"
     cmd.paramNum = "010";
     cmd.data     = "000001"; // 6 chars
 
-    PfieifferLib::formatCommand(&cmd, nullptr);
+    PfeifferLib::formatCommand(&cmd, nullptr);
 
     // After formatting, dataLen should be set to "6"
     EXPECT_EQ(cmd.dataLen, "6");
@@ -83,14 +83,14 @@ TEST(PfiefferLibFormat, DataLengthCalculated)
 
 // ── decryptResponse tests ───────────────────────────────────────────────────
 
-TEST(PfiefferLibDecrypt, ValidResponse)
+TEST(PfeifferLibDecrypt, ValidResponse)
 {
     // Build a valid frame: address 001, action 10, paramNum 309, data "001500"
-    std::string frame = buildPfiefferFrame("001", "10", "309", "001500");
+    std::string frame = buildPfeifferFrame("001", "10", "309", "001500");
 
-    PfiefferCommand cmd;
+    PfeifferCommand cmd;
     bool valid = false;
-    PfieifferLib::decryptResponse(frame, &cmd, &valid);
+    PfeifferLib::decryptResponse(frame, &cmd, &valid);
 
     EXPECT_TRUE(valid);
     EXPECT_EQ(cmd.address, "001");
@@ -99,71 +99,71 @@ TEST(PfiefferLibDecrypt, ValidResponse)
     EXPECT_EQ(cmd.data, "001500");
 }
 
-TEST(PfiefferLibDecrypt, ChecksumMismatch)
+TEST(PfeifferLibDecrypt, ChecksumMismatch)
 {
-    std::string frame = buildPfiefferFrame("001", "10", "309", "001500");
+    std::string frame = buildPfeifferFrame("001", "10", "309", "001500");
     // Corrupt the checksum (last 3 chars before \r are checksum + \r)
     frame[frame.size() - 2] = '0';
     frame[frame.size() - 3] = '0';
 
-    PfiefferCommand cmd;
+    PfeifferCommand cmd;
     bool valid = true;
-    PfieifferLib::decryptResponse(frame, &cmd, &valid);
+    PfeifferLib::decryptResponse(frame, &cmd, &valid);
 
     EXPECT_FALSE(valid);
 }
 
-TEST(PfiefferLibDecrypt, TooShort)
+TEST(PfeifferLibDecrypt, TooShort)
 {
-    PfiefferCommand cmd;
+    PfeifferCommand cmd;
     bool valid = true;
-    PfieifferLib::decryptResponse("001", &cmd, &valid);
+    PfeifferLib::decryptResponse("001", &cmd, &valid);
 
     EXPECT_FALSE(valid);
 }
 
-TEST(PfiefferLibDecrypt, NullPointer)
+TEST(PfeifferLibDecrypt, NullPointer)
 {
     bool valid = true;
-    PfieifferLib::decryptResponse("something", nullptr, &valid);
+    PfeifferLib::decryptResponse("something", nullptr, &valid);
 
     EXPECT_FALSE(valid);
 }
 
-TEST(PfiefferLibDecrypt, MissingCarriageReturn)
+TEST(PfeifferLibDecrypt, MissingCarriageReturn)
 {
-    std::string frame = buildPfiefferFrame("001", "10", "309", "001500");
+    std::string frame = buildPfeifferFrame("001", "10", "309", "001500");
     // Remove trailing \r
     frame.pop_back();
 
-    PfiefferCommand cmd;
+    PfeifferCommand cmd;
     bool valid = true;
-    PfieifferLib::decryptResponse(frame, &cmd, &valid);
+    PfeifferLib::decryptResponse(frame, &cmd, &valid);
 
     EXPECT_FALSE(valid);
 }
 
 // ── isRead tests ────────────────────────────────────────────────────────────
 
-TEST(PfiefferLibIsRead, ReadAction)
+TEST(PfeifferLibIsRead, ReadAction)
 {
-    PfiefferCommand cmd;
+    PfeifferCommand cmd;
     cmd.action = READ_PARAMETER; // "00"
 
-    EXPECT_TRUE(PfieifferLib::isRead(&cmd));
+    EXPECT_TRUE(PfeifferLib::isRead(&cmd));
 }
 
-TEST(PfiefferLibIsRead, NonReadAction)
+TEST(PfeifferLibIsRead, NonReadAction)
 {
-    PfiefferCommand cmd;
+    PfeifferCommand cmd;
     cmd.action = DATA_RESPONSE; // "10"
 
-    EXPECT_FALSE(PfieifferLib::isRead(&cmd));
+    EXPECT_FALSE(PfeifferLib::isRead(&cmd));
 }
 
-TEST(PfiefferLibIsRead, NullPointer)
+TEST(PfeifferLibIsRead, NullPointer)
 {
     bool valid = true;
-    EXPECT_FALSE(PfieifferLib::isRead(nullptr, &valid));
+    EXPECT_FALSE(PfeifferLib::isRead(nullptr, &valid));
     EXPECT_FALSE(valid);
 }

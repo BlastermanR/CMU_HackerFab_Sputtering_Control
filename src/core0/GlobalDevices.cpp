@@ -14,9 +14,9 @@ AlicatMFC   mfc2(&alicat2Device);
 // Initialize Gauge UART and Device on uart0
 HardUart      gaugeUart(uart0, GAUGE_DI_PIN, GAUGE_RO_PIN, 9600);
 RS485Device   gaugeDevice(&gaugeUart, GAUGE_TR_RE);
-PfiefferGauge gauge(&gaugeDevice);
+PfeifferGauge gauge(&gaugeDevice);
 
 // Initialize Pump UART and Device on uart1
 HardUart     pumpUart(uart1, PUMP_DI_PIN, PUMP_RO_PIN, 9600);
 RS485Device  pumpDevice(&pumpUart, PUMP_TR_RE);
-PfiefferPump pump(&pumpDevice);
+PfeifferPump pump(&pumpDevice);

@@ -8,6 +8,8 @@
  *          IDLE -> PUMPING_DOWN -> GAS_STABILIZING -> SPUTTERING -> SHUTTING_DOWN -> IDLE
  *          Any active phase -> FAULT (on safety violation)
  *
+ *  TODO: THIS IS JUST AN AI PROTOYPE, WILL REQUIRE MASSIVE REVISIONS
+ * 
  * @author Ryan Massie (rmassie)
  * @date 4/1/26
  */
@@ -15,8 +17,8 @@
 #define SPUTTERING_PROCESS_H
 
 #include "AlicatMFC.h"
-#include "PfiefferGauge.h"
-#include "PfiefferPump.h"
+#include "PfeifferGauge.h"
+#include "PfeifferPump.h"
 
 
 // ----------------------------------------------------------------------------
@@ -140,8 +142,8 @@ public:
     // Inject device references. Does not take ownership.
     SputteringProcess(AlicatMFC& mfc_argon,
                       AlicatMFC& mfc_oxygen,
-                      PfiefferGauge& gauge,
-                      PfiefferPump& pump);
+                      PfeifferGauge& gauge,
+                      PfeifferPump& pump);
 
     // ---- Process control -----------------------------------------------
 
@@ -183,8 +185,8 @@ private:
     // ---- Device references ---------------------------------------------
     AlicatMFC&     _mfcArgon;
     AlicatMFC&     _mfcOxygen;
-    PfiefferGauge& _gauge;
-    PfiefferPump&  _pump;
+    PfeifferGauge& _gauge;
+    PfeifferPump&  _pump;
 
     // ---- State ---------------------------------------------------------
     ProcessState _state       = ProcessState::IDLE;

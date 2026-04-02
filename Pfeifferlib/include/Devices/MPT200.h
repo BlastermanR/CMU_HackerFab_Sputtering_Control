@@ -11,10 +11,10 @@
 
 #pragma once
 
-#include "PfiefferDevice.h"
+#include "PfeifferDevice.h"
 #include <cstdint>
 
-namespace Pfieffer
+namespace Pfeiffer
 {
 
 /**
@@ -37,17 +37,17 @@ enum class MPT200Cmd : uint16_t
 };
 
 /**
- * @brief MPT200 / RPT200 Gauge implementation inheriting from the PfiefferDevice CRTP template.
+ * @brief MPT200 / RPT200 Gauge implementation inheriting from the PfeifferDevice CRTP template.
  */
-class MPT200 : public PfiefferDevice<MPT200>
+class MPT200 : public PfeifferDevice<MPT200>
 {
   public:
-    explicit MPT200(uint8_t address = 1) : PfiefferDevice<MPT200>(address) {}
+    explicit MPT200(uint8_t address = 1) : PfeifferDevice<MPT200>(address) {}
 
     /**
      * @brief Constexpr array mapping all known MPT200 Parameters to definitions.
      */
-    static constexpr PfiefferParamDef DICT[] = {
+    static constexpr PfeifferParamDef DICT[] = {
         // {ParamID, "Name", DataType, AccessType, MinVal, MaxVal, DefaultVal, NonVolatile}
 
         // Settings
@@ -66,7 +66,7 @@ class MPT200 : public PfiefferDevice<MPT200>
     /**
      * @brief Inherited CRTP static callback to fetch a parameter bound array entry.
      */
-    static const PfiefferParamDef *getParamDef(uint16_t parameterNumber)
+    static const PfeifferParamDef *getParamDef(uint16_t parameterNumber)
     {
         for (const auto &def : DICT)
         {
@@ -79,4 +79,4 @@ class MPT200 : public PfiefferDevice<MPT200>
     }
 };
 
-} // namespace Pfieffer
+} // namespace Pfeiffer

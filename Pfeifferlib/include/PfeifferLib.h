@@ -1,10 +1,10 @@
-#ifndef PFIEFFERLIB_H
-#define PFIEFFERLIB_H
+#ifndef PFEIFFERLIB_H
+#define PFEIFFERLIB_H
 /**
- * @file PfiefferLib.h
+ * @file PfeifferLib.h
  * @brief Utility library for formatting and parsing Pfeiffer Vacuum protocol commands.
  *
- * Defines the PfiefferCommand structure and provides static methods for
+ * Defines the PfeifferCommand structure and provides static methods for
  * checksum calculation and protocol serialization.
  *
  * @author Ryan Massie (rmassie)
@@ -17,13 +17,13 @@
 /**
  * API Variables
  */
-#define PFIEFFER_ADDRESS_LENGTH 3
-#define PFIEFFER_ACTION_LENGTH 2
-#define PFIEFFER_PARAMNUM_LENGTH 3
-#define PFIEFFER_DATALEN_LENGTH 3
-#define PFIEFFER_CHECKSUM_LENGTH 2
-#define PFIEFFER_LOGIC_SIZE                                                                                            \
-    (PFIEFFER_ADDRESS_LENGTH + PFIEFFER_ACTION_LENGTH + PFIEFFER_PARAMNUM_LENGTH + PFIEFFER_DATALEN_LENGTH +           \
+#define PFEIFFER_ADDRESS_LENGTH 3
+#define PFEIFFER_ACTION_LENGTH 2
+#define PFEIFFER_PARAMNUM_LENGTH 3
+#define PFEIFFER_DATALEN_LENGTH 3
+#define PFEIFFER_CHECKSUM_LENGTH 2
+#define PFEIFFER_LOGIC_SIZE                                                                                            \
+    (PFEIFFER_ADDRESS_LENGTH + PFEIFFER_ACTION_LENGTH + PFEIFFER_PARAMNUM_LENGTH + PFEIFFER_DATALEN_LENGTH +           \
      1) // Minimum size of a valid command/response (without data + carraige
         // return)
 inline const std::string READ_PARAMETER = "00";
@@ -32,9 +32,9 @@ inline const std::string ERROR_RESPONSE = "20";
 inline const std::string QUERY_DATA_STR = "=?";
 
 /**
- * PfiefferCommand Struct
+ * PfeifferCommand Struct
  */
-struct PfiefferCommand
+struct PfeifferCommand
 {
     std::string address{""};  // 3 characters
     std::string action{""};   // 2 characters
@@ -44,17 +44,17 @@ struct PfiefferCommand
     std::string checksum{""}; // Checksum (2 characters)
 };
 
-class PfieifferLib
+class PfeifferLib
 {
     /**
      * @brief Calculate the checksum for a given command based on its fields.
      * The checksum is the sum of the ASCII values of all characters in the
      * command fields modulo 256.
-     * @param command Pointer to the PfiefferCommand struct to calculate the
+     * @param command Pointer to the PfeifferCommand struct to calculate the
      * checksum for.
      * @return The calculated checksum as an unsigned integer.
      */
-    static unsigned int calculateChecksum(const PfiefferCommand *command)
+    static unsigned int calculateChecksum(const PfeifferCommand *command)
     {
         if (command == nullptr)
         {
@@ -82,15 +82,15 @@ class PfieifferLib
 
   public:
     /**
-     * @brief Format a PfiefferCommand struct into a properly structured command
+     * @brief Format a PfeifferCommand struct into a properly structured command
      * string to send to the device. This function calculates the checksum and
      * data length fields automatically based on the command contents.
-     * @param command Pointer to the PfiefferCommand struct to format.
+     * @param command Pointer to the PfeifferCommand struct to format.
      * @param valid Optional pointer to a boolean that will be set to true if the
      * command is valid, false otherwise.
      * @return The formatted command string.
      */
-    static std::string formatCommand(PfiefferCommand *command, bool *valid = nullptr)
+    static std::string formatCommand(PfeifferCommand *command, bool *valid = nullptr)
     {
         if (command == nullptr)
         {
@@ -115,15 +115,15 @@ class PfieifferLib
 
     /**
      * @brief Parse a response string received from the device and populate a
-     * PfiefferCommand struct with the extracted fields. This function also
+     * PfeifferCommand struct with the extracted fields. This function also
      * performs validation checks on the response format and checksum.
      * @param response The raw response string received from the device.
-     * @param command Pointer to the PfiefferCommand struct to populate with the
+     * @param command Pointer to the PfeifferCommand struct to populate with the
      * parsed data
      * @param valid Optional pointer to a boolean that will be set to true if the
      * response is valid and parsed successfully, false otherwise.
      */
-    static void decryptResponse(std::string response, PfiefferCommand *command, bool *valid = nullptr)
+    static void decryptResponse(std::string response, PfeifferCommand *command, bool *valid = nullptr)
     {
         if (valid)
             *valid = false; // Default to false until fully validated
@@ -134,7 +134,7 @@ class PfieifferLib
             return;
         }
 
-        if (response.size() < PFIEFFER_LOGIC_SIZE)
+        if (response.size() < PFEIFFER_LOGIC_SIZE)
         {
             printf("Error: Response string too short to parse.\nReceived response: %s\n", response.c_str());
             return;
@@ -162,9 +162,9 @@ class PfieifferLib
         { printf("Error: Invalid character or formatting in response.\nReceived response: %s\n", response.c_str()); };
 
         // Extract fixed-length header fields
-        if (!extract(PFIEFFER_ADDRESS_LENGTH, command->address) || !extract(PFIEFFER_ACTION_LENGTH, command->action) ||
-            !extract(PFIEFFER_PARAMNUM_LENGTH, command->paramNum) ||
-            !extract(PFIEFFER_DATALEN_LENGTH, command->dataLen))
+        if (!extract(PFEIFFER_ADDRESS_LENGTH, command->address) || !extract(PFEIFFER_ACTION_LENGTH, command->action) ||
+            !extract(PFEIFFER_PARAMNUM_LENGTH, command->paramNum) ||
+            !extract(PFEIFFER_DATALEN_LENGTH, command->dataLen))
         {
             return parseError();
         }
@@ -177,7 +177,7 @@ class PfieifferLib
         }
 
         // Extract checksum
-        if (!extract(PFIEFFER_CHECKSUM_LENGTH, command->checksum))
+        if (!extract(PFEIFFER_CHECKSUM_LENGTH, command->checksum))
         {
             return parseError();
         }
@@ -203,12 +203,12 @@ class PfieifferLib
     /**
      * @brief Utility function to check if a given command is a read command based
      * on its action field.
-     * @param command Pointer to the PfiefferCommand struct to check.
+     * @param command Pointer to the PfeifferCommand struct to check.
      * @param valid Optional pointer to a boolean that will be set to true if the
      * command is valid, false otherwise.
      * @return True if the command is a read command, false otherwise.
      */
-    static bool isRead(PfiefferCommand *command, bool *valid = nullptr)
+    static bool isRead(PfeifferCommand *command, bool *valid = nullptr)
     {
         if (command == nullptr)
         {
@@ -222,13 +222,13 @@ class PfieifferLib
     }
 
     /**
-     * @brief Utility function to print the contents of a PfiefferCommand struct
+     * @brief Utility function to print the contents of a PfeifferCommand struct
      * for debugging purposes.
-     * @param command Pointer to the PfiefferCommand struct to print.
+     * @param command Pointer to the PfeifferCommand struct to print.
      * @param valid Optional pointer to a boolean that will be set to true if the
      * command is valid, false otherwise.
      */
-    static void printCommand(PfiefferCommand *command, bool *valid = nullptr)
+    static void printCommand(PfeifferCommand *command, bool *valid = nullptr)
     {
         if (command == nullptr)
         {
@@ -247,4 +247,4 @@ class PfieifferLib
     }
 };
 
-#endif // PFIEFFERLIB_H
+#endif // PFEIFFERLIB_H
