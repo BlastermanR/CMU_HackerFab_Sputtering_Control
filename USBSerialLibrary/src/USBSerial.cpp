@@ -181,6 +181,16 @@ bool USBSerial::parseCommand(const std::string &input, CommandMessage &msg)
         msg.id = Cmd_StopProcess;
         return true;
     }
+    if (input == "CLEAN")
+    {
+        msg.id = Cmd_StartCleaning;
+        return true;
+    }
+    if (input == "STOPCLEAN")
+    {
+        msg.id = Cmd_StopCleaning;
+        return true;
+    }
     if (input == "PRESSURIZE")
     {
         msg.id = Cmd_PressurizeChamber;

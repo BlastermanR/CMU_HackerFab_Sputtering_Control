@@ -34,6 +34,8 @@ enum CommandId : uint8_t
     Cmd_None = 0,
     Cmd_StartProcess,
     Cmd_StopProcess,
+    Cmd_StartCleaning,
+    Cmd_StopCleaning,
     Cmd_PressurizeChamber,
     Cmd_VentChamber,
     Cmd_ShutOffGas,

@@ -101,7 +101,7 @@ int main()
                 setStatus(Status_Core1Err);
                 break;
             }
-            sleep_ms(1);
+            tight_loop_contents();
         }
     }
 
@@ -133,6 +133,14 @@ int main()
                     USBSerial::log(Source_Core0, "Entering control loop (Not Implemented)", V_INFO);
                     clearStatus(ExecuteSputteringProcess);
                     USBSerial::log(Source_Core0, "Exited control loop", V_INFO);
+                    break;
+                }
+
+                case ExecuteCleaningProcess:
+                {
+                    USBSerial::log(Source_Core0, "Entering cleaning loop (Not Implemented)", V_INFO);
+                    clearStatus(ExecuteCleaningProcess);
+                    USBSerial::log(Source_Core0, "Exited cleaning loop", V_INFO);
                     break;
                 }
 
@@ -172,6 +180,7 @@ int main()
                 case PollArgon:
                 {
                     USBSerial::log(Source_Core0, "Polling Argon MFC (Not Implemented)", V_INFO);
+                    mfc2.pollData();
                     clearStatus(PollArgon);
                     break;
                 }
@@ -179,6 +188,7 @@ int main()
                 case PollOxygen:
                 {
                     USBSerial::log(Source_Core0, "Polling Oxygen MFC (Not Implemented)", V_INFO);
+                    mfc1.pollData();
                     clearStatus(PollOxygen);
                     break;
                 }
@@ -186,6 +196,7 @@ int main()
                 case PollPump:
                 {
                     USBSerial::log(Source_Core0, "Polling Pump (Not Implemented)", V_INFO);
+                    pump.pollDevice();
                     clearStatus(PollPump);
                     break;
                 }
@@ -193,6 +204,7 @@ int main()
                 case PollGauge:
                 {
                     USBSerial::log(Source_Core0, "Polling Gauge (Not Implemented)", V_INFO);
+                    gauge.pollDevice();
                     clearStatus(PollGauge);
                     break;
                 }

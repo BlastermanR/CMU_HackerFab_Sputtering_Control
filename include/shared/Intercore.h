@@ -34,20 +34,21 @@ enum StatusMask : uint32_t
 
     // Core 0 Instructions
     ExecuteSputteringProcess = (1U << 7),
-    PressurizeChamber        = (1U << 8),
-    VentChamber              = (1U << 9),
-    ShutOffGasFlow           = (1U << 10),
-    PollDevices              = (1U << 11), // Manually Polls Devices for latest values
+    ExecuteCleaningProcess   = (1U << 8),
+    PressurizeChamber        = (1U << 9),
+    VentChamber              = (1U << 10),
+    ShutOffGasFlow           = (1U << 11),
+    PollDevices              = (1U << 12),
 
-    SetArgonFlow  = (1U << 12),
-    SetOxygenFlow = (1U << 13),
-    SetPumpSpeed  = (1U << 14),
-    EnablePump    = (1U << 15),
-    DisablePump   = (1U << 16),
-    PollArgon     = (1U << 17),
-    PollOxygen    = (1U << 18),
-    PollPump      = (1U << 19),
-    PollGauge     = (1U << 20),
+    SetArgonFlow  = (1U << 13),
+    SetOxygenFlow = (1U << 14),
+    SetPumpSpeed  = (1U << 15),
+    EnablePump    = (1U << 16),
+    DisablePump   = (1U << 17),
+    PollArgon     = (1U << 18),
+    PollOxygen    = (1U << 19),
+    PollPump      = (1U << 20),
+    PollGauge     = (1U << 21),
 
     // Startup
     Core0_Begin = (1U << 30),
@@ -129,9 +130,9 @@ inline StatusMask getError()
  */
 inline StatusMask isCommand()
 {
-    const uint32_t COMMAND_MASK = ExecuteSputteringProcess | PressurizeChamber | VentChamber | ShutOffGasFlow |
-                                  PollDevices | PollArgon | PollOxygen | PollPump | PollGauge | SetArgonFlow |
-                                  SetOxygenFlow | SetPumpSpeed | EnablePump | DisablePump;
+    const uint32_t COMMAND_MASK = ExecuteSputteringProcess | ExecuteCleaningProcess | PressurizeChamber |
+                                  VentChamber | ShutOffGasFlow | PollDevices | PollArgon | PollOxygen | PollPump |
+                                  PollGauge | SetArgonFlow | SetOxygenFlow | SetPumpSpeed | EnablePump | DisablePump;
 
     uint32_t commandBits = statusReg.load(std::memory_order_acquire) & COMMAND_MASK;
     if (commandBits)

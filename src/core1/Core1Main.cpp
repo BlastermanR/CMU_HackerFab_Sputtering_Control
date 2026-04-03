@@ -36,6 +36,18 @@ static void dispatchCommand(const CommandMessage &cmd)
         USBSerial::log(Source_Core1, "Stopping sputtering process");
         break;
     }
+    case Cmd_StartCleaning:
+    {
+        setStatus(ExecuteCleaningProcess);
+        USBSerial::log(Source_Core1, "Starting cleaning process");
+        break;
+    }
+    case Cmd_StopCleaning:
+    {
+        clearStatus(ExecuteCleaningProcess);
+        USBSerial::log(Source_Core1, "Stopping cleaning process");
+        break;
+    }
     case Cmd_PressurizeChamber:
     {
         setStatus(PressurizeChamber);
@@ -172,6 +184,7 @@ void core1_entry()
 
     bool run{true};
 
+    // Command Loop
     while (run)
     {
         // Read USB input and push parsed commands to commandQueue
@@ -181,6 +194,20 @@ void core1_entry()
         CommandMessage cmd;
         while (queue_try_remove(&commandQueue, &cmd))
         {
+            // Allow StopProcess or StopCleaning even if another command is active
+            if (cmd.id == Cmd_StopProcess || cmd.id == Cmd_StopCleaning)
+            {
+                dispatchCommand(cmd);
+                continue;
+            }
+
+            // Block all other commands if a signal is already active
+            if (isCommand())
+            {
+                USBSerial::log(Source_Core1, "Command rejected: Previous command still active");
+                continue;
+            }
+
             dispatchCommand(cmd);
         }
 
@@ -192,7 +219,7 @@ void core1_entry()
 
         if (!run)
         {
-            USBSerial::log(Source_Core1, "Core 1 exiting main loop", V_STATUS);
+            USBSerial::log(Source_Core1, "Core 1 exiting main loop");
             pcTerminal.drainOutputQueues();
         }
 
