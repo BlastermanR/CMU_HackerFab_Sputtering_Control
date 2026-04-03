@@ -115,86 +115,120 @@ int main()
                 switch (activeCmd)
                 {
                 case ExecuteSputteringProcess:
+                {
                     USBSerial::log(Source_Core0, "Entering control loop", V_INFO);
                     SputteringManagement::controlLoop();
                     clearStatus(ExecuteSputteringProcess);
                     USBSerial::log(Source_Core0, "Exited control loop", V_INFO);
                     break;
+                }
 
                 case PressurizeChamber:
+                {
                     USBSerial::log(Source_Core0, "Activating pump", V_INFO);
                     pump.activatePump();
                     clearStatus(PressurizeChamber);
                     break;
+                }
 
                 case VentChamber:
+                {
                     USBSerial::log(Source_Core0, "Venting chamber", V_INFO);
                     pump.deactivatePump();
                     pump.ventPump();
                     clearStatus(VentChamber);
                     break;
+                }
 
                 case ShutOffGasFlow:
+                {
                     USBSerial::log(Source_Core0, "Shutting off gas flow", V_INFO);
                     mfc1.setSetpoint(0);
                     mfc2.setSetpoint(0);
                     clearStatus(ShutOffGasFlow);
                     break;
+                }
 
                 case PollDevices:
+                {
                     USBSerial::log(Source_Core0, "Polling devices", V_INFO);
                     SputteringManagement::executePollDevices();
                     clearStatus(PollDevices);
                     break;
+                }
 
                 case PollArgon:
+                {
                     USBSerial::log(Source_Core0, "Polling Argon MFC", V_INFO);
                     SputteringManagement::executePollArgon();
                     clearStatus(PollArgon);
                     break;
+                }
 
                 case PollOxygen:
+                {
                     USBSerial::log(Source_Core0, "Polling Oxygen MFC", V_INFO);
                     SputteringManagement::executePollOxygen();
                     clearStatus(PollOxygen);
                     break;
+                }
 
                 case PollPump:
+                {
                     USBSerial::log(Source_Core0, "Polling Pump", V_INFO);
                     SputteringManagement::executePollPump();
                     clearStatus(PollPump);
                     break;
+                }
 
                 case PollGauge:
+                {
                     USBSerial::log(Source_Core0, "Polling Gauge", V_INFO);
                     SputteringManagement::executePollGauge();
                     clearStatus(PollGauge);
                     break;
+                }
 
                 case SetArgonFlow:
-                    USBSerial::log(Source_Core0, "SetArgonFlow command received (Not implemented)", V_INFO);
+                {
+                    char buf[64];
+                    snprintf(buf, sizeof(buf), "Set Argon Flow to %.2f", sharedData.Core1Out.setArgonFlow);
+                    USBSerial::log(Source_Core0, buf, V_INFO);
+                    mfc2.setSetpoint(sharedData.Core1Out.setArgonFlow);
                     clearStatus(SetArgonFlow);
                     break;
+                }
 
                 case SetOxygenFlow:
-                    USBSerial::log(Source_Core0, "SetOxygenFlow command received (Not implemented)", V_INFO);
+                {
+                    char buf[64];
+                    snprintf(buf, sizeof(buf), "Set Oxygen Flow to %.2f", sharedData.Core1Out.setOxygenFlow);
+                    USBSerial::log(Source_Core0, buf, V_INFO);
+                    mfc1.setSetpoint(sharedData.Core1Out.setOxygenFlow);
                     clearStatus(SetOxygenFlow);
                     break;
+                }
 
                 case SetPumpSpeed:
+                {
                     USBSerial::log(Source_Core0, "SetPumpSpeed command received (Not implemented)", V_INFO);
                     clearStatus(SetPumpSpeed);
                     break;
+                }
 
                 case EnablePump:
+                {
                     USBSerial::log(Source_Core0, "EnablePump command received (Not implemented)", V_INFO);
                     clearStatus(EnablePump);
                     break;
+                }
 
                 case DisablePump:
+                {
                     USBSerial::log(Source_Core0, "DisablePump command received (Not implemented)", V_INFO);
                     clearStatus(DisablePump);
                     break;
+                }
 
                 default:
                     break;

@@ -16,6 +16,9 @@ queue_t commandQueue;
 queue_t core0OutQueue;
 queue_t core1OutQueue;
 
+// Shared data structure
+volatile intercoreData sharedData;
+
 void initQueues()
 {
     queue_init(&commandQueue, sizeof(CommandMessage), COMMAND_QUEUE_SIZE);

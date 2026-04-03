@@ -86,9 +86,14 @@ class AlicatLib
             return "";
         }
 
-        // Compile string (e.g., 'A', 'S', '5.0' -> "AS5.0\r")
+        // Compile string (e.g., 'A', 'S', '5.0' -> "AS 5.0\r")
         // Polls are simply the ID: (e.g., 'A' -> "A\r")
-        std::string formattedCommand = std::string(1, command->id) + command->action + command->data + "\r";
+        std::string formattedCommand = std::string(1, command->id) + command->action;
+        if (!command->data.empty())
+        {
+            formattedCommand += " " + command->data;
+        }
+        formattedCommand += "\r";
 
         if (valid)
             *valid = true;

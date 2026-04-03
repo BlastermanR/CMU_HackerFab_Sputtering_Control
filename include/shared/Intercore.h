@@ -177,10 +177,10 @@ struct intercoreData
 };
 
 /**
- * @brief Volatile static structure for inter-core data sharing.
+ * @brief Volatile structure for inter-core data sharing.
  * Marking as volatile to prevent compiler optimizations that could
  * cache values across cores.
  */
-static volatile intercoreData sharedData;
+extern volatile intercoreData sharedData;
 
 #endif
