@@ -78,6 +78,7 @@ void PfeifferGauge::update()
                     const int exponent = std::strtol(command.data.substr(4, 2).c_str(), &endPtr, 10) - EXPONENT_BIAS;
 
                     chamberPressure_hPa = static_cast<double>(mantissa) * pow(10, exponent);
+                    newDataFlag = true;
 
                     {
                         char _dbg[OUTPUT_MSG_TEXT_LEN];
@@ -121,6 +122,13 @@ void PfeifferGauge::pollDevice()
     {
         sendMessage(formattedCmd.c_str());
     }
+}
+
+bool PfeifferGauge::hasNewData()
+{
+    bool ret = newDataFlag;
+    newDataFlag = false;
+    return ret;
 }
 
 void PfeifferGauge::sendMessage(const char *message)

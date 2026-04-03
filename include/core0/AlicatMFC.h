@@ -23,6 +23,7 @@ class AlicatMFC : public IDevice
     // Device state
     char            deviceId{'A'};
     AlicatDataFrame lastData;
+    bool            newDataFlag{false};
 
     /**
      * @brief Helper function to format and send a command to the device
@@ -86,6 +87,12 @@ class AlicatMFC : public IDevice
     void tareFlow();
 
     // --- Data Getters ---
+
+    /**
+     * @brief Checks if a new data frame has been successfully parsed since last check.
+     * @return True if new data has arrived and hasn't been checked yet.
+     */
+    bool hasNewData();
 
     /**
      * @brief Get the most recently parsed data frame.

@@ -39,6 +39,9 @@ class PfeifferGauge : public IDevice
     // Variable to store the latest chamber pressure reading
     double chamberPressure_hPa = 0.0;
 
+    // Flag to indicate new data has arrived
+    bool newDataFlag = false;
+
     /**
      * @brief Utilizes UART port to send message to device
      * @param message Null terminating message to send to device.
@@ -91,6 +94,12 @@ class PfeifferGauge : public IDevice
      * @brief Polls device for up to date pressure
      */
     void pollDevice();
+
+    /**
+     * @brief Returns whether a new valid pressure reading was received
+     * @return True if new data is available
+     */
+    bool hasNewData();
 
     /***************** Gauge *****************/
 

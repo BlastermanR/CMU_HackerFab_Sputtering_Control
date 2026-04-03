@@ -31,7 +31,7 @@ void PfeifferPump::init() { serialPort->begin(); }
 
 void PfeifferPump::update()
 {
-    // 1. Time to poll?
+    // 1. Check if it's time to poll the device based on the polling interval
     uint32_t currentTime = to_ms_since_boot(get_absolute_time());
     if (currentTime - lastPollTime >= pollingInterval_ms)
     {
@@ -39,7 +39,7 @@ void PfeifferPump::update()
         pollDevice();
     }
 
-    // 2. Process incoming serial data
+    // 2. Process all messages currently in the serial device's incoming buffer
     while (serialPort->hasMessage())
     {
         std::string response = serialPort->popMessage();
@@ -55,21 +55,27 @@ void PfeifferPump::update()
             USBSerial::log(Source_Core0, _dbg, V_DEBUG);
         }
 
+        // Parse and validate the Pfeiffer protocol frame
         bool            valid = false;
         PfeifferCommand command;
         PfeifferLib::decryptResponse(response, &command, &valid);
 
+        // Define the parameter ID for actual speed (Hz) for comparison
         std::string speedHzParamStr = std::to_string(static_cast<uint16_t>(Pfeiffer::TC110Cmd::ActualSpd_Hz));
 
+        // If the response is valid and contains data, check if it's the speed parameter we requested
         if (valid && command.action == DATA_RESPONSE)
         {
             if (command.paramNum == speedHzParamStr)
             {
                 char  *endPtr;
                 double speed = std::strtod(command.data.c_str(), &endPtr);
+                
+                // If conversion was successful, update the internal state and set the new data flag
                 if (endPtr != command.data.c_str())
                 {
                     actualPumpSpeed_hz = speed;
+                    newDataFlag = true;
                     {
                         char _dbg[OUTPUT_MSG_TEXT_LEN];
                         snprintf(_dbg, sizeof(_dbg), "Pump speed: %.2f Hz", actualPumpSpeed_hz);
@@ -95,6 +101,13 @@ void PfeifferPump::pollDevice()
             sendMessage(formattedCmd.c_str());
         }
     }
+}
+
+bool PfeifferPump::hasNewSpeedData()
+{
+    bool ret = newDataFlag;
+    newDataFlag = false;
+    return ret;
 }
 
 void PfeifferPump::signalPumpOn()

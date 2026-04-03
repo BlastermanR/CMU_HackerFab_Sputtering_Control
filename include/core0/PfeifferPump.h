@@ -43,6 +43,9 @@ class PfeifferPump : public IDevice
     // Bool set when pump signal activation
     bool pumpActivated{false};
 
+    // Flag to indicate new data has arrived
+    bool newDataFlag = false;
+
     /**
      * @brief Utilizes UART port to send message to device
      * @param message Null terminating message to send to device.
@@ -93,6 +96,18 @@ class PfeifferPump : public IDevice
      * @brief Polls device for up to date pressure
      */
     void pollDevice();
+
+    /**
+     * @brief Returns whether a new valid pump speed reading was received
+     * @return True if new speed data is available
+     */
+    bool hasNewSpeedData();
+
+    /**
+     * @brief Get actual pump speed in Hz
+     * @return Speed in Hz
+     */
+    double getActualPumpSpeed_hz() { return actualPumpSpeed_hz; }
 
     /***************** Pump *****************/
 

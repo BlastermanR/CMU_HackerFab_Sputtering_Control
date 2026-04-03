@@ -16,16 +16,25 @@
 #include "PfeifferPump.h"
 #include "RS232Device.h"
 #include "RS485Device.h"
-#include "SputteringManagement.h"
 #include "USBSerial.h"
 #include "pico/multicore.h"
 #include "pico/stdlib.h"
+#include "pico/time.h"
 #include "picoDefinitions.h"
 #include <cstring>
 #include <stdio.h>
 
 // Enable for serial testing
 #define SERIAL_DEBUG
+
+volatile bool processUpdateFlag = false;
+
+// Interrupt based timer callback
+bool update_timer_callback(struct repeating_timer *t)
+{
+    processUpdateFlag = true;
+    return true; // Return true to keep the timer repeating
+}
 
 int main()
 {
@@ -98,11 +107,16 @@ int main()
 
     if (isError())
     {
-        SputteringManagement::executeEmergencyShutdown();
+        USBSerial::log(Source_Core0, "Core 1 error, emergency shutdown (Not implemented)[]", V_CRITICAL);
         return 1;
     }
 
     USBSerial::log(Source_Core0, "Core 1 ready, entering main loop", V_INFO);
+
+    // Setup an interrupt based timer update for non-sleep polling (5ms)
+    struct repeating_timer timer;
+    add_repeating_timer_ms(5, update_timer_callback, NULL, &timer);
+
     {
         bool run{true};
 
@@ -116,8 +130,7 @@ int main()
                 {
                 case ExecuteSputteringProcess:
                 {
-                    USBSerial::log(Source_Core0, "Entering control loop", V_INFO);
-                    SputteringManagement::controlLoop();
+                    USBSerial::log(Source_Core0, "Entering control loop (Not Implemented)", V_INFO);
                     clearStatus(ExecuteSputteringProcess);
                     USBSerial::log(Source_Core0, "Exited control loop", V_INFO);
                     break;
@@ -125,7 +138,7 @@ int main()
 
                 case PressurizeChamber:
                 {
-                    USBSerial::log(Source_Core0, "Activating pump", V_INFO);
+                    USBSerial::log(Source_Core0, "Activating pump (Not Implemented)", V_INFO);
                     pump.activatePump();
                     clearStatus(PressurizeChamber);
                     break;
@@ -151,40 +164,35 @@ int main()
 
                 case PollDevices:
                 {
-                    USBSerial::log(Source_Core0, "Polling devices", V_INFO);
-                    SputteringManagement::executePollDevices();
+                    USBSerial::log(Source_Core0, "Polling devices (Not Implemented)", V_INFO);
                     clearStatus(PollDevices);
                     break;
                 }
 
                 case PollArgon:
                 {
-                    USBSerial::log(Source_Core0, "Polling Argon MFC", V_INFO);
-                    SputteringManagement::executePollArgon();
+                    USBSerial::log(Source_Core0, "Polling Argon MFC (Not Implemented)", V_INFO);
                     clearStatus(PollArgon);
                     break;
                 }
 
                 case PollOxygen:
                 {
-                    USBSerial::log(Source_Core0, "Polling Oxygen MFC", V_INFO);
-                    SputteringManagement::executePollOxygen();
+                    USBSerial::log(Source_Core0, "Polling Oxygen MFC (Not Implemented)", V_INFO);
                     clearStatus(PollOxygen);
                     break;
                 }
 
                 case PollPump:
                 {
-                    USBSerial::log(Source_Core0, "Polling Pump", V_INFO);
-                    SputteringManagement::executePollPump();
+                    USBSerial::log(Source_Core0, "Polling Pump (Not Implemented)", V_INFO);
                     clearStatus(PollPump);
                     break;
                 }
 
                 case PollGauge:
                 {
-                    USBSerial::log(Source_Core0, "Polling Gauge", V_INFO);
-                    SputteringManagement::executePollGauge();
+                    USBSerial::log(Source_Core0, "Polling Gauge (Not Implemented)", V_INFO);
                     clearStatus(PollGauge);
                     break;
                 }
@@ -238,7 +246,42 @@ int main()
             // Check for exit
             run = !(getStatus(Status_Core1Err) || getStatus(Status_Exit));
 
-            sleep_ms(5); // Short delay to wait for something to change
+            if (processUpdateFlag)
+            {
+                processUpdateFlag = false;
+
+                // Continually process incoming hardware serial bytes and send telemetry
+                mfc1.update();
+                if (mfc1.hasNewData())
+                {
+                    sharedData.Core0Out.oxygenFlow = (float)mfc1.getMassFlow();
+                    USBSerial::sendData(Source_Core0, Data_OxygenFlow, (float)mfc1.getMassFlow(), V_INFO);
+                }
+                
+                mfc2.update();
+                if (mfc2.hasNewData())
+                {
+                    sharedData.Core0Out.argonFlow = (float)mfc2.getMassFlow();
+                    USBSerial::sendData(Source_Core0, Data_ArgonFlow, (float)mfc2.getMassFlow(), V_INFO);
+                }
+
+                gauge.update();
+                if (gauge.hasNewData())
+                {
+                    sharedData.Core0Out.chamberPressure = (float)gauge.getPressure();
+                    USBSerial::sendData(Source_Core0, Data_ChamberPressure, (float)gauge.getPressure(), V_INFO);
+                }
+
+                pump.update();
+                if (pump.hasNewSpeedData())
+                {
+                    sharedData.Core0Out.actualPumpSpeed = (float)pump.getActualPumpSpeed_hz();
+                    USBSerial::sendData(Source_Core0, Data_PumpSpeed, (float)pump.getActualPumpSpeed_hz(), V_INFO);
+                }
+            }
+
+            // Yield slightly without sleeping the core, allowing interrupts to process
+            tight_loop_contents();
         }
     }
 
@@ -248,12 +291,10 @@ int main()
 
     if (getStatus(Status_Core1Err))
     {
-        USBSerial::log(Source_Core0, "Core 1 error, emergency shutdown", V_CRITICAL);
-        SputteringManagement::executeEmergencyShutdown();
+        USBSerial::log(Source_Core0, "Core 1 error, emergency shutdown (Not implemented)[]", V_CRITICAL);
     }
     else
     {
-        USBSerial::log(Source_Core0, "Normal shutdown initiated", V_STATUS);
-        SputteringManagement::executeNormalShutdown();
+        USBSerial::log(Source_Core0, "Normal shutdown initiated (Not implemented)", V_STATUS);
     }
 }

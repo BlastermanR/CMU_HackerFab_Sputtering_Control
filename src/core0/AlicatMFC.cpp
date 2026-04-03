@@ -52,6 +52,7 @@ void AlicatMFC::update()
         if (isValid && frame.id == deviceId)
         {
             lastData = frame;
+            newDataFlag = true;
 
             // Log any status/error codes present in the frame
             for (const std::string &code : frame.statusCodes)
@@ -143,6 +144,13 @@ void AlicatMFC::tareFlow()
     cmd.id     = deviceId;
     cmd.action = ALICAT_TARE_FLOW;
     sendCommand(cmd);
+}
+
+bool AlicatMFC::hasNewData()
+{
+    bool ret = newDataFlag;
+    newDataFlag = false;
+    return ret;
 }
 
 const AlicatDataFrame &AlicatMFC::getLastData() const { return lastData; }
