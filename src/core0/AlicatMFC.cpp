@@ -38,7 +38,6 @@ void AlicatMFC::update()
     while (serialPort->hasMessage())
     {
         std::string msg = serialPort->popMessage();
-
         {
             char _dbg[OUTPUT_MSG_TEXT_LEN];
             snprintf(_dbg, sizeof(_dbg), "MFC RX: %s", msg.c_str());
