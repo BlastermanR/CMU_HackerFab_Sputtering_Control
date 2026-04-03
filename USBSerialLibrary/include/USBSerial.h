@@ -67,9 +67,8 @@ class USBSerial
      * @param source Which core is sending.
      * @param id     The telemetry data identifier.
      * @param value  The telemetry value.
-     * @param level  Verbosity level (default V_STATUS).
      */
-    static void sendData(MessageSource source, DataId id, float value, Verbosity level = V_STATUS);
+    static void sendData(MessageSource source, DataId id, float value);
 };
 
 #endif // USB_SERIAL

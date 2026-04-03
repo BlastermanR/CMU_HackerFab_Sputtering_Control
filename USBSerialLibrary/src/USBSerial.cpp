@@ -46,11 +46,12 @@ static const char *dataIdToString(DataId id)
     }
 }
 
-void USBSerial::sendData(MessageSource source, DataId id, float value, Verbosity level)
+void USBSerial::sendData(MessageSource source, DataId id, float value)
 {
     OutputMessage msg{};
+    msg.timestamp  = to_ms_since_boot(get_absolute_time());
     msg.source     = source;
-    msg.level      = level;
+    msg.level      = V_STATUS;
     msg.type       = Msg_Data;
     msg.data.id    = id;
     msg.data.value = value;
@@ -148,7 +149,7 @@ void USBSerial::drainOutputQueues()
             msgToPrint = &msg1;
         }
 
-        if (msgToPrint->level <= currentVerbosity)
+        if (msgToPrint->type == Msg_Data || msgToPrint->level <= currentVerbosity)
         {
             if (msgToPrint->type == Msg_Data)
                 printf("[%lu] $%s:%.4f\n", (unsigned long)msgToPrint->timestamp, dataIdToString(msgToPrint->data.id),

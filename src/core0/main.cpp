@@ -255,28 +255,28 @@ int main()
                 if (mfc1.hasNewData())
                 {
                     sharedData.Core0Out.oxygenFlow = (float)mfc1.getMassFlow();
-                    USBSerial::sendData(Source_Core0, Data_OxygenFlow, (float)mfc1.getMassFlow(), V_INFO);
+                    USBSerial::sendData(Source_Core0, Data_OxygenFlow, (float)mfc1.getMassFlow());
                 }
                 
                 mfc2.update();
                 if (mfc2.hasNewData())
                 {
                     sharedData.Core0Out.argonFlow = (float)mfc2.getMassFlow();
-                    USBSerial::sendData(Source_Core0, Data_ArgonFlow, (float)mfc2.getMassFlow(), V_INFO);
+                    USBSerial::sendData(Source_Core0, Data_ArgonFlow, (float)mfc2.getMassFlow());
                 }
 
                 gauge.update();
                 if (gauge.hasNewData())
                 {
                     sharedData.Core0Out.chamberPressure = (float)gauge.getPressure();
-                    USBSerial::sendData(Source_Core0, Data_ChamberPressure, (float)gauge.getPressure(), V_INFO);
+                    USBSerial::sendData(Source_Core0, Data_ChamberPressure, (float)gauge.getPressure());
                 }
 
                 pump.update();
                 if (pump.hasNewSpeedData())
                 {
                     sharedData.Core0Out.actualPumpSpeed = (float)pump.getActualPumpSpeed_hz();
-                    USBSerial::sendData(Source_Core0, Data_PumpSpeed, (float)pump.getActualPumpSpeed_hz(), V_INFO);
+                    USBSerial::sendData(Source_Core0, Data_PumpSpeed, (float)pump.getActualPumpSpeed_hz());
                 }
             }
 
