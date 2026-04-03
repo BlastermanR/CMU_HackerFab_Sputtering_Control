@@ -15,7 +15,11 @@
 
 void PfeifferPump::sendMessage(const char *message)
 {
-    { char _dbg[OUTPUT_MSG_TEXT_LEN]; snprintf(_dbg, sizeof(_dbg), "Pump TX: %s", message); USBSerial::log(Source_Core0, _dbg, V_DEBUG); }
+    {
+        char _dbg[OUTPUT_MSG_TEXT_LEN];
+        snprintf(_dbg, sizeof(_dbg), "Pump TX: %s", message);
+        USBSerial::log(Source_Core0, _dbg, V_DEBUG);
+    }
     serialPort->send(message);
 }
 
@@ -45,7 +49,11 @@ void PfeifferPump::update()
             continue;
         }
 
-        { char _dbg[OUTPUT_MSG_TEXT_LEN]; snprintf(_dbg, sizeof(_dbg), "Pump RX: %s", response.c_str()); USBSerial::log(Source_Core0, _dbg, V_DEBUG); }
+        {
+            char _dbg[OUTPUT_MSG_TEXT_LEN];
+            snprintf(_dbg, sizeof(_dbg), "Pump RX: %s", response.c_str());
+            USBSerial::log(Source_Core0, _dbg, V_DEBUG);
+        }
 
         bool            valid = false;
         PfeifferCommand command;
@@ -62,7 +70,11 @@ void PfeifferPump::update()
                 if (endPtr != command.data.c_str())
                 {
                     actualPumpSpeed_hz = speed;
-                    { char _dbg[OUTPUT_MSG_TEXT_LEN]; snprintf(_dbg, sizeof(_dbg), "Pump speed: %.2f Hz", actualPumpSpeed_hz); USBSerial::log(Source_Core0, _dbg, V_DEBUG); }
+                    {
+                        char _dbg[OUTPUT_MSG_TEXT_LEN];
+                        snprintf(_dbg, sizeof(_dbg), "Pump speed: %.2f Hz", actualPumpSpeed_hz);
+                        USBSerial::log(Source_Core0, _dbg, V_DEBUG);
+                    }
                 }
             }
         }

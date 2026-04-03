@@ -11,8 +11,8 @@
 #include <gtest/gtest.h>
 
 // Pull in the stubs so that pico/util/queue.h resolves
-#include "pico_stubs.h"
 #include "Intercore.h"
+#include "pico_stubs.h"
 
 class IntercoreTest : public ::testing::Test
 {
@@ -60,10 +60,7 @@ TEST_F(IntercoreTest, ClearAlreadyClearedBit)
 
 // ── isError ─────────────────────────────────────────────────────────────────
 
-TEST_F(IntercoreTest, IsErrorWhenNoErrors)
-{
-    EXPECT_FALSE(isError());
-}
+TEST_F(IntercoreTest, IsErrorWhenNoErrors) { EXPECT_FALSE(isError()); }
 
 TEST_F(IntercoreTest, IsErrorWithCoreError)
 {
@@ -80,10 +77,7 @@ TEST_F(IntercoreTest, IsErrorIgnoresNonErrorBits)
 
 // ── getError ────────────────────────────────────────────────────────────────
 
-TEST_F(IntercoreTest, GetErrorReturnsNoneWhenClean)
-{
-    EXPECT_EQ(getError(), Status_None);
-}
+TEST_F(IntercoreTest, GetErrorReturnsNoneWhenClean) { EXPECT_EQ(getError(), Status_None); }
 
 TEST_F(IntercoreTest, GetErrorReturnsPrioritized)
 {
@@ -101,10 +95,7 @@ TEST_F(IntercoreTest, GetErrorReturnsLowPriorityAlone)
 }
 // ── isCommand ───────────────────────────────────────────────────────────────
 
-TEST_F(IntercoreTest, IsCommandReturnsNoneWhenNone)
-{
-    EXPECT_EQ(isCommand(), Status_None);
-}
+TEST_F(IntercoreTest, IsCommandReturnsNoneWhenNone) { EXPECT_EQ(isCommand(), Status_None); }
 
 TEST_F(IntercoreTest, IsCommandReturnsLowestBit)
 {

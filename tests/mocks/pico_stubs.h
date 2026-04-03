@@ -25,7 +25,11 @@ typedef uint64_t absolute_time_t;
 /// Tests can set this to control what to_ms_since_boot() returns.
 extern uint32_t fake_time_ms;
 
-inline uint32_t to_ms_since_boot(absolute_time_t t) { (void)t; return fake_time_ms; }
+inline uint32_t to_ms_since_boot(absolute_time_t t)
+{
+    (void)t;
+    return fake_time_ms;
+}
 inline absolute_time_t get_absolute_time() { return static_cast<absolute_time_t>(fake_time_ms) * 1000; }
 
 /* ── pico/stdlib.h stubs ─────────────────────────────────────────────── */
@@ -37,14 +41,26 @@ inline void stdio_init_all() {}
 /* ── hardware/gpio.h stubs ───────────────────────────────────────────── */
 
 #define GPIO_OUT 1
-#define GPIO_IN  0
+#define GPIO_IN 0
 #define GPIO_FUNC_GPIO 0
 #define GPIO_FUNC_UART 0
 
 inline void gpio_init(unsigned int pin) { (void)pin; }
-inline void gpio_set_dir(unsigned int pin, bool out) { (void)pin; (void)out; }
-inline void gpio_put(unsigned int pin, bool value) { (void)pin; (void)value; }
-inline void gpio_set_function(unsigned int pin, unsigned int fn) { (void)pin; (void)fn; }
+inline void gpio_set_dir(unsigned int pin, bool out)
+{
+    (void)pin;
+    (void)out;
+}
+inline void gpio_put(unsigned int pin, bool value)
+{
+    (void)pin;
+    (void)value;
+}
+inline void gpio_set_function(unsigned int pin, unsigned int fn)
+{
+    (void)pin;
+    (void)fn;
+}
 
 /* ── pico/util/queue.h stubs ─────────────────────────────────────────── */
 
@@ -66,7 +82,9 @@ bool queue_is_empty(queue_t *q);
 
 /* ── hardware/pio.h stubs (minimal — just the types) ─────────────────── */
 
-typedef struct pio_hw {} *PIO;
+typedef struct pio_hw
+{
+} *PIO;
 
 // Provide placeholder PIO instances referenced by picoDefinitions.h
 extern PIO pio0;

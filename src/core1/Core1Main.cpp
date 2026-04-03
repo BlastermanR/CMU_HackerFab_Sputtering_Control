@@ -24,71 +24,88 @@ static void dispatchCommand(const CommandMessage &cmd)
 {
     switch (cmd.id)
     {
-        case Cmd_StartProcess:
-            setStatus(ExecuteSputteringProcess);
-            USBSerial::log(Source_Core1, "Starting sputtering process");
-            break;
-        case Cmd_StopProcess:
-            clearStatus(ExecuteSputteringProcess);
-            USBSerial::log(Source_Core1, "Stopping sputtering process");
-            break;
-        case Cmd_PressurizeChamber:
-            setStatus(PressurizeChamber);
-            USBSerial::log(Source_Core1, "Pressurizing chamber");
-            break;
-        case Cmd_VentChamber:
-            setStatus(VentChamber);
-            USBSerial::log(Source_Core1, "Venting chamber");
-            break;
-        case Cmd_ShutOffGas:
-            setStatus(ShutOffGasFlow);
-            USBSerial::log(Source_Core1, "Shutting off gas flow");
-            break;
-        case Cmd_PollDevices:
-            setStatus(PollDevices);
-            USBSerial::log(Source_Core1, "Polling devices");
-            break;
-        case Cmd_SetArgonFlow:
-            sharedData.Core1Out.setArgonFlow = cmd.param1;
-            setStatus(SetArgonFlow);
-            USBSerial::log(Source_Core1, "Argon flow setpoint updated");
-            break;
-        case Cmd_SetOxygenFlow:
-            sharedData.Core1Out.setOxygenFlow = cmd.param1;
-            setStatus(SetOxygenFlow);
-            USBSerial::log(Source_Core1, "Oxygen flow setpoint updated");
-            break;
-        case Cmd_SetPumpSpeed:
-            sharedData.Core1Out.setPumpSpeed = cmd.param1;
-            setStatus(SetPumpSpeed);
-            USBSerial::log(Source_Core1, "Pump speed setpoint updated");
-            break;
-        case Cmd_EnablePump:
-            sharedData.Core1Out.enablePump = true;
-            setStatus(EnablePump);
-            USBSerial::log(Source_Core1, "Pump enabled");
-            break;
-        case Cmd_DisablePump:
-            sharedData.Core1Out.enablePump = false;
-            setStatus(DisablePump);
-            USBSerial::log(Source_Core1, "Pump disabled");
-            break;
-        case Cmd_Exit:
-            setStatus(Status_Exit);
-            USBSerial::log(Source_Core1, "Exit requested", V_CRITICAL);
-            break;
-        case Cmd_SetVerbosity:
-        {
-            uint8_t v = (uint8_t)cmd.param1;
-            if (v > V_DEBUG) v = V_DEBUG;
-            verbosityLevel.store(v, std::memory_order_release);
-            char buf[OUTPUT_MSG_TEXT_LEN];
-            snprintf(buf, sizeof(buf), "Verbosity set to %u", v);
-            USBSerial::log(Source_Core1, buf, V_CRITICAL);
-            break;
-        }
-        default:
-            break;
+    case Cmd_StartProcess:
+        setStatus(ExecuteSputteringProcess);
+        USBSerial::log(Source_Core1, "Starting sputtering process");
+        break;
+    case Cmd_StopProcess:
+        clearStatus(ExecuteSputteringProcess);
+        USBSerial::log(Source_Core1, "Stopping sputtering process");
+        break;
+    case Cmd_PressurizeChamber:
+        setStatus(PressurizeChamber);
+        USBSerial::log(Source_Core1, "Pressurizing chamber");
+        break;
+    case Cmd_VentChamber:
+        setStatus(VentChamber);
+        USBSerial::log(Source_Core1, "Venting chamber");
+        break;
+    case Cmd_ShutOffGas:
+        setStatus(ShutOffGasFlow);
+        USBSerial::log(Source_Core1, "Shutting off gas flow");
+        break;
+    case Cmd_PollDevices:
+        setStatus(PollDevices);
+        USBSerial::log(Source_Core1, "Polling devices");
+        break;
+    case Cmd_PollArgon:
+        setStatus(PollArgon);
+        USBSerial::log(Source_Core1, "Polling Argon MFC");
+        break;
+    case Cmd_PollOxygen:
+        setStatus(PollOxygen);
+        USBSerial::log(Source_Core1, "Polling Oxygen MFC");
+        break;
+    case Cmd_PollPump:
+        setStatus(PollPump);
+        USBSerial::log(Source_Core1, "Polling Pump");
+        break;
+    case Cmd_PollGauge:
+        setStatus(PollGauge);
+        USBSerial::log(Source_Core1, "Polling Gauge");
+        break;
+    case Cmd_SetArgonFlow:
+        sharedData.Core1Out.setArgonFlow = cmd.param1;
+        setStatus(SetArgonFlow);
+        USBSerial::log(Source_Core1, "Argon flow setpoint updated");
+        break;
+    case Cmd_SetOxygenFlow:
+        sharedData.Core1Out.setOxygenFlow = cmd.param1;
+        setStatus(SetOxygenFlow);
+        USBSerial::log(Source_Core1, "Oxygen flow setpoint updated");
+        break;
+    case Cmd_SetPumpSpeed:
+        sharedData.Core1Out.setPumpSpeed = cmd.param1;
+        setStatus(SetPumpSpeed);
+        USBSerial::log(Source_Core1, "Pump speed setpoint updated");
+        break;
+    case Cmd_EnablePump:
+        sharedData.Core1Out.enablePump = true;
+        setStatus(EnablePump);
+        USBSerial::log(Source_Core1, "Pump enabled");
+        break;
+    case Cmd_DisablePump:
+        sharedData.Core1Out.enablePump = false;
+        setStatus(DisablePump);
+        USBSerial::log(Source_Core1, "Pump disabled");
+        break;
+    case Cmd_Exit:
+        setStatus(Status_Exit);
+        USBSerial::log(Source_Core1, "Exit requested", V_CRITICAL);
+        break;
+    case Cmd_SetVerbosity:
+    {
+        uint8_t v = (uint8_t)cmd.param1;
+        if (v > V_DEBUG)
+            v = V_DEBUG;
+        verbosityLevel.store(v, std::memory_order_release);
+        char buf[OUTPUT_MSG_TEXT_LEN];
+        snprintf(buf, sizeof(buf), "Verbosity set to %u", v);
+        USBSerial::log(Source_Core1, buf, V_CRITICAL);
+        break;
+    }
+    default:
+        break;
     }
 }
 

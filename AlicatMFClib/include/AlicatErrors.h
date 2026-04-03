@@ -35,21 +35,20 @@ struct AlicatStatusDef
  * Use lookupAlicatStatusByCode() rather than indexing directly.
  */
 inline constexpr AlicatStatusDef ALICAT_STATUS_TABLE[] = {
-    { "ADC", "ADC internal communication error"                                  },
-    { "EXH", "Manual exhaust valve override is enabled (max downstream opening)" },
-    { "HLD", "Valve drive hold enabled (bypass active loop control)"             },
-    { "LCK", "Display buttons are disabled"                                      },
-    { "MOV", "Mass flow rate overage (outside measurable range)"                 },
-    { "OPL", "Overpressure limit is enabled"                                     },
-    { "OVR", "Totalizer has rolled over or frozen at max value"                  },
-    { "POV", "Pressure reading overage (outside measurable range)"               },
-    { "TMF", "Totalizer missed flow data (due to MOV or VOV error)"              },
-    { "TOV", "Temperature reading overage (outside measurable range)"            },
-    { "VOV", "Volumetric flow rate overage (outside measurable range)"           },
+    {"ADC", "ADC internal communication error"},
+    {"EXH", "Manual exhaust valve override is enabled (max downstream opening)"},
+    {"HLD", "Valve drive hold enabled (bypass active loop control)"},
+    {"LCK", "Display buttons are disabled"},
+    {"MOV", "Mass flow rate overage (outside measurable range)"},
+    {"OPL", "Overpressure limit is enabled"},
+    {"OVR", "Totalizer has rolled over or frozen at max value"},
+    {"POV", "Pressure reading overage (outside measurable range)"},
+    {"TMF", "Totalizer missed flow data (due to MOV or VOV error)"},
+    {"TOV", "Temperature reading overage (outside measurable range)"},
+    {"VOV", "Volumetric flow rate overage (outside measurable range)"},
 };
 
-inline constexpr std::size_t ALICAT_STATUS_TABLE_SIZE =
-    sizeof(ALICAT_STATUS_TABLE) / sizeof(ALICAT_STATUS_TABLE[0]);
+inline constexpr std::size_t ALICAT_STATUS_TABLE_SIZE = sizeof(ALICAT_STATUS_TABLE) / sizeof(ALICAT_STATUS_TABLE[0]);
 
 /**
  * @brief Look up a status definition by its 3-character code.

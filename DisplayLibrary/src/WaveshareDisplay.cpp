@@ -3,12 +3,12 @@
  * @brief Implementation of ST7789VW display operations.
  */
 #include "WaveshareDisplay.h"
+#include "font5x7.h"
 #include "hardware/gpio.h"
 #include "hardware/pwm.h"
 #include "pico/time.h"
 #include <cstdio>
 #include <cstring>
-#include "font5x7.h"
 
 /** @name ST7789 Commands
  *  @brief ST7789 controller specific command set.
@@ -187,26 +187,33 @@ void WaveshareDisplay::drawFastHLine(uint16_t x, uint16_t y, uint16_t w, uint16_
 
 void WaveshareDisplay::drawChar(uint16_t x, uint16_t y, char c, uint16_t color, uint16_t bg, uint8_t size)
 {
-    if((x >= width)            || // Clip right
-       (y >= height)           || // Clip bottom
-       ((x + 6 * size - 1) < 0) || // Clip left
-       ((y + 8 * size - 1) < 0))   // Clip top
+    if ((x >= width) ||             // Clip right
+        (y >= height) ||            // Clip bottom
+        ((x + 6 * size - 1) < 0) || // Clip left
+        ((y + 8 * size - 1) < 0))   // Clip top
         return;
 
-    for (int8_t i=0; i<5; i++ ) { // Char bitmap = 5 columns
+    for (int8_t i = 0; i < 5; i++)
+    { // Char bitmap = 5 columns
         uint8_t line = font[c * 5 + i];
-        for (int8_t j = 0; j<8; j++) {
-            if (line & 0x1) {
+        for (int8_t j = 0; j < 8; j++)
+        {
+            if (line & 0x1)
+            {
                 if (size == 1) // default size
-                    drawPixel(x+i, y+j, color);
-                else {  // big size
-                    fillRect(x+(i*size), y+(j*size), size, size, color);
-                } 
-            } else if (bg != color) {
+                    drawPixel(x + i, y + j, color);
+                else
+                { // big size
+                    fillRect(x + (i * size), y + (j * size), size, size, color);
+                }
+            }
+            else if (bg != color)
+            {
                 if (size == 1) // default size
-                    drawPixel(x+i, y+j, bg);
-                else {  // big size
-                    fillRect(x+i*size, y+j*size, size, size, bg);
+                    drawPixel(x + i, y + j, bg);
+                else
+                { // big size
+                    fillRect(x + i * size, y + j * size, size, size, bg);
                 }
             }
             line >>= 1;

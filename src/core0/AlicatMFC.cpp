@@ -39,7 +39,11 @@ void AlicatMFC::update()
     {
         std::string msg = serialPort->popMessage();
 
-        { char _dbg[OUTPUT_MSG_TEXT_LEN]; snprintf(_dbg, sizeof(_dbg), "MFC RX: %s", msg.c_str()); USBSerial::log(Source_Core0, _dbg, V_DEBUG); }
+        {
+            char _dbg[OUTPUT_MSG_TEXT_LEN];
+            snprintf(_dbg, sizeof(_dbg), "MFC RX: %s", msg.c_str());
+            USBSerial::log(Source_Core0, _dbg, V_DEBUG);
+        }
 
         // Handle message here
         bool            isValid = false;
@@ -54,8 +58,8 @@ void AlicatMFC::update()
             for (const std::string &code : frame.statusCodes)
             {
                 char _dbg[OUTPUT_MSG_TEXT_LEN];
-                snprintf(_dbg, sizeof(_dbg), "MFC status: %s - %s",
-                         code.c_str(), AlicatLib::getStatusDescription(code.c_str()));
+                snprintf(_dbg, sizeof(_dbg), "MFC status: %s - %s", code.c_str(),
+                         AlicatLib::getStatusDescription(code.c_str()));
                 USBSerial::log(Source_Core0, _dbg, V_STATUS);
             }
         }
@@ -79,7 +83,11 @@ void AlicatMFC::sendCommand(const AlicatCommand &cmd)
 
 void AlicatMFC::sendMessage(const char *message)
 {
-    { char _dbg[OUTPUT_MSG_TEXT_LEN]; snprintf(_dbg, sizeof(_dbg), "MFC TX: %s", message); USBSerial::log(Source_Core0, _dbg, V_DEBUG); }
+    {
+        char _dbg[OUTPUT_MSG_TEXT_LEN];
+        snprintf(_dbg, sizeof(_dbg), "MFC TX: %s", message);
+        USBSerial::log(Source_Core0, _dbg, V_DEBUG);
+    }
     serialPort->send(message);
 }
 
@@ -116,7 +124,12 @@ void AlicatMFC::setGas(uint8_t gasId)
         return;
     }
 
-    { char _dbg[OUTPUT_MSG_TEXT_LEN]; snprintf(_dbg, sizeof(_dbg), "MFC: Setting gas %u - %s (%s)", static_cast<unsigned>(gasId), AlicatLib::getGasShortName(gasId), AlicatLib::getGasLongName(gasId)); USBSerial::log(Source_Core0, _dbg, V_STATUS); }
+    {
+        char _dbg[OUTPUT_MSG_TEXT_LEN];
+        snprintf(_dbg, sizeof(_dbg), "MFC: Setting gas %u - %s (%s)", static_cast<unsigned>(gasId),
+                 AlicatLib::getGasShortName(gasId), AlicatLib::getGasLongName(gasId));
+        USBSerial::log(Source_Core0, _dbg, V_STATUS);
+    }
 
     AlicatCommand cmd;
     cmd.id     = deviceId;

@@ -5,10 +5,10 @@
  * @author Ryan Massie (rmassie)
  * @date 3/31/26
  */
-#include <gtest/gtest.h>
-#include "PfeifferDevice.h"
 #include "Devices/MPT200.h"
 #include "Devices/TC110DriveUnit.h"
+#include "PfeifferDevice.h"
+#include <gtest/gtest.h>
 
 using namespace Pfeiffer;
 
@@ -39,7 +39,7 @@ TEST_F(MPT200Test, GetParamDefInvalidParam)
 TEST_F(MPT200Test, CreateReadCommandPressure)
 {
     PfeifferCommand cmd;
-    bool result = gauge.createReadCommand(static_cast<uint16_t>(MPT200Cmd::Pressure), cmd);
+    bool            result = gauge.createReadCommand(static_cast<uint16_t>(MPT200Cmd::Pressure), cmd);
 
     EXPECT_TRUE(result);
     EXPECT_EQ(cmd.address, "001");
@@ -60,7 +60,7 @@ TEST_F(MPT200Test, CreateReadCommandRefusesWriteOnly)
 TEST_F(MPT200Test, CreateReadCommandUnknownParam)
 {
     PfeifferCommand cmd;
-    bool result = gauge.createReadCommand(9999, cmd);
+    bool            result = gauge.createReadCommand(9999, cmd);
 
     EXPECT_FALSE(result);
 }
@@ -135,7 +135,7 @@ TEST_F(TC110Test, GetParamDefStatusReadOnly)
 TEST_F(TC110Test, CreateReadCommandActualSpeed)
 {
     PfeifferCommand cmd;
-    bool result = pump.createReadCommand(static_cast<uint16_t>(TC110Cmd::ActualSpd_Hz), cmd);
+    bool            result = pump.createReadCommand(static_cast<uint16_t>(TC110Cmd::ActualSpd_Hz), cmd);
 
     EXPECT_TRUE(result);
     EXPECT_EQ(cmd.paramNum, "309");
@@ -156,7 +156,7 @@ TEST_F(TC110Test, CreateWriteCommandBoundsCheck)
     PfeifferCommand cmd;
     // RUTimeSVal (700): range 1-120
     EXPECT_TRUE(pump.createWriteCommand(static_cast<uint16_t>(TC110Cmd::RUTimeSVal), 60.0, cmd));
-    EXPECT_FALSE(pump.createWriteCommand(static_cast<uint16_t>(TC110Cmd::RUTimeSVal), 0.0, cmd));  // below min
+    EXPECT_FALSE(pump.createWriteCommand(static_cast<uint16_t>(TC110Cmd::RUTimeSVal), 0.0, cmd));   // below min
     EXPECT_FALSE(pump.createWriteCommand(static_cast<uint16_t>(TC110Cmd::RUTimeSVal), 200.0, cmd)); // above max
 }
 
@@ -169,7 +169,4 @@ TEST_F(TC110Test, CreateWriteCommandRefusesReadOnly)
     EXPECT_FALSE(result);
 }
 
-TEST_F(TC110Test, GetParamDefUnknown)
-{
-    EXPECT_EQ(TC110DriveUnit::getParamDef(5555), nullptr);
-}
+TEST_F(TC110Test, GetParamDefUnknown) { EXPECT_EQ(TC110DriveUnit::getParamDef(5555), nullptr); }

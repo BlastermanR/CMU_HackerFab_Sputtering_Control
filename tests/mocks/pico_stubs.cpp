@@ -16,9 +16,9 @@ uint32_t fake_time_ms = 0;
 static pio_hw pio0_hw_stub;
 static pio_hw pio1_hw_stub;
 static pio_hw pio2_hw_stub;
-PIO pio0 = &pio0_hw_stub;
-PIO pio1 = &pio1_hw_stub;
-PIO pio2 = &pio2_hw_stub;
+PIO           pio0 = &pio0_hw_stub;
+PIO           pio1 = &pio1_hw_stub;
+PIO           pio2 = &pio2_hw_stub;
 
 /* ── Queue stubs (simple ring buffer) ────────────────────────────────── */
 
@@ -26,9 +26,9 @@ void queue_init(queue_t *q, unsigned int element_size, unsigned int element_coun
 {
     q->element_size  = static_cast<uint16_t>(element_size);
     q->element_count = static_cast<uint16_t>(element_count);
-    q->wptr = 0;
-    q->rptr = 0;
-    q->buffer = static_cast<uint8_t *>(calloc(element_count, element_size));
+    q->wptr          = 0;
+    q->rptr          = 0;
+    q->buffer        = static_cast<uint8_t *>(calloc(element_count, element_size));
 }
 
 void queue_free(queue_t *q)
@@ -64,7 +64,4 @@ bool queue_try_peek(queue_t *q, void *data)
     return true;
 }
 
-bool queue_is_empty(queue_t *q)
-{
-    return q->rptr == q->wptr;
-}
+bool queue_is_empty(queue_t *q) { return q->rptr == q->wptr; }

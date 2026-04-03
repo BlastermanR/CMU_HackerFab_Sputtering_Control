@@ -48,7 +48,11 @@ void PfeifferGauge::update()
             continue;
         }
 
-        { char _dbg[OUTPUT_MSG_TEXT_LEN]; snprintf(_dbg, sizeof(_dbg), "Gauge RX: %s", response.c_str()); USBSerial::log(Source_Core0, _dbg, V_DEBUG); }
+        {
+            char _dbg[OUTPUT_MSG_TEXT_LEN];
+            snprintf(_dbg, sizeof(_dbg), "Gauge RX: %s", response.c_str());
+            USBSerial::log(Source_Core0, _dbg, V_DEBUG);
+        }
 
         bool            valid = false;
         PfeifferCommand command;
@@ -75,11 +79,19 @@ void PfeifferGauge::update()
 
                     chamberPressure_hPa = static_cast<double>(mantissa) * pow(10, exponent);
 
-                    { char _dbg[OUTPUT_MSG_TEXT_LEN]; snprintf(_dbg, sizeof(_dbg), "Gauge pressure: %.4e hPa", chamberPressure_hPa); USBSerial::log(Source_Core0, _dbg, V_DEBUG); }
+                    {
+                        char _dbg[OUTPUT_MSG_TEXT_LEN];
+                        snprintf(_dbg, sizeof(_dbg), "Gauge pressure: %.4e hPa", chamberPressure_hPa);
+                        USBSerial::log(Source_Core0, _dbg, V_DEBUG);
+                    }
                 }
                 else
                 {
-                    { char _dbg[OUTPUT_MSG_TEXT_LEN]; snprintf(_dbg, sizeof(_dbg), "Gauge: Bad pressure data: %s", command.data.c_str()); USBSerial::log(Source_Core0, _dbg, V_DEBUG); }
+                    {
+                        char _dbg[OUTPUT_MSG_TEXT_LEN];
+                        snprintf(_dbg, sizeof(_dbg), "Gauge: Bad pressure data: %s", command.data.c_str());
+                        USBSerial::log(Source_Core0, _dbg, V_DEBUG);
+                    }
                 }
             }
         }
@@ -113,6 +125,10 @@ void PfeifferGauge::pollDevice()
 
 void PfeifferGauge::sendMessage(const char *message)
 {
-    { char _dbg[OUTPUT_MSG_TEXT_LEN]; snprintf(_dbg, sizeof(_dbg), "Gauge TX: %s", message); USBSerial::log(Source_Core0, _dbg, V_DEBUG); }
+    {
+        char _dbg[OUTPUT_MSG_TEXT_LEN];
+        snprintf(_dbg, sizeof(_dbg), "Gauge TX: %s", message);
+        USBSerial::log(Source_Core0, _dbg, V_DEBUG);
+    }
     serialPort->send(message);
 }

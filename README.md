@@ -15,6 +15,10 @@ The system is controlled via the USB Serial interface (115200 baud). Commands ar
 | `VENT` | Triggers the chamber venting sequence. |
 | `GASOFF` | Immediately shuts off all gas flow (Argon and Oxygen). |
 | `POLL` | Manually triggers a one-time poll of all connected hardware devices. |
+| `POLLARGON` | Triggers a one-time poll of the Argon MFC. |
+| `POLLOXYGEN` | Triggers a one-time poll of the Oxygen MFC. |
+| `POLLPUMP` | Triggers a one-time poll of the Vacuum Pump. |
+| `POLLGAUGE` | Triggers a one-time poll of the Pressure Gauge. |
 | `EXIT` | Signals an emergency stop and sets the system to an exit state. |
 
 ### Manual Hardware Control

@@ -6,23 +6,23 @@
  * @date 3/4/26
  */
 
-#include <stdio.h>
-#include <cstring>
 #include "AlicatMFC.h"
 #include "Core1Main.h"
+#include "GlobalDevices.h"
+#include "HardwareUART.h"
 #include "Intercore.h"
 #include "PIO_UART.h"
 #include "PfeifferGauge.h"
 #include "PfeifferPump.h"
 #include "RS232Device.h"
 #include "RS485Device.h"
-#include "HardwareUART.h"
-#include "USBSerial.h"
 #include "SputteringManagement.h"
+#include "USBSerial.h"
 #include "pico/multicore.h"
 #include "pico/stdlib.h"
 #include "picoDefinitions.h"
-#include "GlobalDevices.h"
+#include <cstring>
+#include <stdio.h>
 
 // Enable for serial testing
 #define SERIAL_DEBUG
@@ -30,16 +30,17 @@
 int main()
 {
     /*********** Initialzation Space ***********/
-    
+
     // Enable IO
     stdio_init_all();
 
     // Wait for USB connection to be active before printing
     // This ensures the user sees the banner in the terminal
-    while (!stdio_usb_connected()) {
+    while (!stdio_usb_connected())
+    {
         sleep_ms(100);
     }
-    
+
     printf("========================================\n");
     printf("  CMU HackerFab Sputtering Control v0.1\n");
     printf("========================================\n");
@@ -105,7 +106,7 @@ int main()
     {
         bool run{true};
 
-        while(run)
+        while (run)
         {
             StatusMask activeCmd = isCommand();
 
@@ -113,66 +114,90 @@ int main()
             {
                 switch (activeCmd)
                 {
-                    case ExecuteSputteringProcess:
-                        USBSerial::log(Source_Core0, "Entering control loop", V_INFO);
-                        SputteringManagement::controlLoop();
-                        clearStatus(ExecuteSputteringProcess);
-                        USBSerial::log(Source_Core0, "Exited control loop", V_INFO);
-                        break;
-                        
-                    case PressurizeChamber:
-                        USBSerial::log(Source_Core0, "Activating pump", V_INFO);
-                        pump.activatePump();
-                        clearStatus(PressurizeChamber);
-                        break;
-                        
-                    case VentChamber:
-                        USBSerial::log(Source_Core0, "Venting chamber", V_INFO);
-                        pump.deactivatePump();
-                        pump.ventPump();
-                        clearStatus(VentChamber);
-                        break;
-                        
-                    case ShutOffGasFlow:
-                        USBSerial::log(Source_Core0, "Shutting off gas flow", V_INFO);
-                        mfc1.setSetpoint(0);
-                        mfc2.setSetpoint(0);
-                        clearStatus(ShutOffGasFlow);
-                        break;
-                        
-                    case PollDevices:
-                        USBSerial::log(Source_Core0, "Polling devices", V_INFO);
-                        SputteringManagement::executePollDevices();
-                        clearStatus(PollDevices);
-                        break;
+                case ExecuteSputteringProcess:
+                    USBSerial::log(Source_Core0, "Entering control loop", V_INFO);
+                    SputteringManagement::controlLoop();
+                    clearStatus(ExecuteSputteringProcess);
+                    USBSerial::log(Source_Core0, "Exited control loop", V_INFO);
+                    break;
 
-                    case SetArgonFlow:
-                        USBSerial::log(Source_Core0, "SetArgonFlow command received (Not implemented)", V_INFO);
-                        clearStatus(SetArgonFlow);
-                        break;
+                case PressurizeChamber:
+                    USBSerial::log(Source_Core0, "Activating pump", V_INFO);
+                    pump.activatePump();
+                    clearStatus(PressurizeChamber);
+                    break;
 
-                    case SetOxygenFlow:
-                        USBSerial::log(Source_Core0, "SetOxygenFlow command received (Not implemented)", V_INFO);
-                        clearStatus(SetOxygenFlow);
-                        break;
+                case VentChamber:
+                    USBSerial::log(Source_Core0, "Venting chamber", V_INFO);
+                    pump.deactivatePump();
+                    pump.ventPump();
+                    clearStatus(VentChamber);
+                    break;
 
-                    case SetPumpSpeed:
-                        USBSerial::log(Source_Core0, "SetPumpSpeed command received (Not implemented)", V_INFO);
-                        clearStatus(SetPumpSpeed);
-                        break;
+                case ShutOffGasFlow:
+                    USBSerial::log(Source_Core0, "Shutting off gas flow", V_INFO);
+                    mfc1.setSetpoint(0);
+                    mfc2.setSetpoint(0);
+                    clearStatus(ShutOffGasFlow);
+                    break;
 
-                    case EnablePump:
-                        USBSerial::log(Source_Core0, "EnablePump command received (Not implemented)", V_INFO);
-                        clearStatus(EnablePump);
-                        break;
+                case PollDevices:
+                    USBSerial::log(Source_Core0, "Polling devices", V_INFO);
+                    SputteringManagement::executePollDevices();
+                    clearStatus(PollDevices);
+                    break;
 
-                    case DisablePump:
-                        USBSerial::log(Source_Core0, "DisablePump command received (Not implemented)", V_INFO);
-                        clearStatus(DisablePump);
-                        break;
+                case PollArgon:
+                    USBSerial::log(Source_Core0, "Polling Argon MFC", V_INFO);
+                    SputteringManagement::executePollArgon();
+                    clearStatus(PollArgon);
+                    break;
 
-                    default:
-                        break;
+                case PollOxygen:
+                    USBSerial::log(Source_Core0, "Polling Oxygen MFC", V_INFO);
+                    SputteringManagement::executePollOxygen();
+                    clearStatus(PollOxygen);
+                    break;
+
+                case PollPump:
+                    USBSerial::log(Source_Core0, "Polling Pump", V_INFO);
+                    SputteringManagement::executePollPump();
+                    clearStatus(PollPump);
+                    break;
+
+                case PollGauge:
+                    USBSerial::log(Source_Core0, "Polling Gauge", V_INFO);
+                    SputteringManagement::executePollGauge();
+                    clearStatus(PollGauge);
+                    break;
+
+                case SetArgonFlow:
+                    USBSerial::log(Source_Core0, "SetArgonFlow command received (Not implemented)", V_INFO);
+                    clearStatus(SetArgonFlow);
+                    break;
+
+                case SetOxygenFlow:
+                    USBSerial::log(Source_Core0, "SetOxygenFlow command received (Not implemented)", V_INFO);
+                    clearStatus(SetOxygenFlow);
+                    break;
+
+                case SetPumpSpeed:
+                    USBSerial::log(Source_Core0, "SetPumpSpeed command received (Not implemented)", V_INFO);
+                    clearStatus(SetPumpSpeed);
+                    break;
+
+                case EnablePump:
+                    USBSerial::log(Source_Core0, "EnablePump command received (Not implemented)", V_INFO);
+                    clearStatus(EnablePump);
+                    break;
+
+                case DisablePump:
+                    USBSerial::log(Source_Core0, "DisablePump command received (Not implemented)", V_INFO);
+                    clearStatus(DisablePump);
+                    break;
+
+                default:
+                    break;
                 }
             }
 
@@ -198,4 +223,3 @@ int main()
         SputteringManagement::executeNormalShutdown();
     }
 }
-

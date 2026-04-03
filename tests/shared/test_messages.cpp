@@ -5,9 +5,9 @@
  * @author Ryan Massie (rmassie)
  * @date 3/31/26
  */
-#include <gtest/gtest.h>
 #include "Messages.h"
 #include <cstring>
+#include <gtest/gtest.h>
 
 // ── Verbosity enum ──────────────────────────────────────────────────────────
 
@@ -20,20 +20,14 @@ TEST(MessagesVerbosity, LevelOrder)
 
 // ── CommandId enum ──────────────────────────────────────────────────────────
 
-TEST(MessagesCommandId, NoneIsZero)
-{
-    EXPECT_EQ(Cmd_None, 0);
-}
+TEST(MessagesCommandId, NoneIsZero) { EXPECT_EQ(Cmd_None, 0); }
 
 TEST(MessagesCommandId, AllUnique)
 {
     // Ensure no accidental duplicates in the enum
-    uint8_t ids[] = {
-        Cmd_None, Cmd_StartProcess, Cmd_StopProcess, Cmd_PressurizeChamber,
-        Cmd_VentChamber, Cmd_ShutOffGas, Cmd_PollDevices, Cmd_SetArgonFlow,
-        Cmd_SetOxygenFlow, Cmd_SetPumpSpeed, Cmd_EnablePump, Cmd_DisablePump,
-        Cmd_Exit, Cmd_SetVerbosity
-    };
+    uint8_t ids[]      = {Cmd_None,       Cmd_StartProcess, Cmd_StopProcess,  Cmd_PressurizeChamber, Cmd_VentChamber,
+                          Cmd_ShutOffGas, Cmd_PollDevices,  Cmd_SetArgonFlow, Cmd_SetOxygenFlow,     Cmd_SetPumpSpeed,
+                          Cmd_EnablePump, Cmd_DisablePump,  Cmd_Exit,         Cmd_SetVerbosity};
     constexpr size_t N = sizeof(ids) / sizeof(ids[0]);
 
     for (size_t i = 0; i < N; ++i)

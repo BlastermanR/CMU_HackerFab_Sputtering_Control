@@ -1,9 +1,9 @@
 #include "USBSerial.h"
 #include "Intercore.h"
 #include "pico/stdlib.h"
-#include <stdio.h>
-#include <cstring>
 #include <cstdlib>
+#include <cstring>
+#include <stdio.h>
 
 USBSerial::USBSerial() : inputBuffer("") {}
 
@@ -19,9 +19,9 @@ void USBSerial::log(MessageSource source, const char *text, Verbosity level)
 {
     OutputMessage msg{};
     msg.timestamp = to_ms_since_boot(get_absolute_time());
-    msg.source = source;
-    msg.level  = level;
-    msg.type   = Msg_Log;
+    msg.source    = source;
+    msg.level     = level;
+    msg.type      = Msg_Log;
     strncpy(msg.text, text, OUTPUT_MSG_TEXT_LEN - 1);
     msg.text[OUTPUT_MSG_TEXT_LEN - 1] = '\0';
 
@@ -33,20 +33,25 @@ static const char *dataIdToString(DataId id)
 {
     switch (id)
     {
-        case Data_PumpSpeed:       return "PumpSpeed";
-        case Data_ChamberPressure: return "Pressure";
-        case Data_ArgonFlow:       return "ArgonFlow";
-        case Data_OxygenFlow:      return "OxygenFlow";
-        default:                   return "Unknown";
+    case Data_PumpSpeed:
+        return "PumpSpeed";
+    case Data_ChamberPressure:
+        return "Pressure";
+    case Data_ArgonFlow:
+        return "ArgonFlow";
+    case Data_OxygenFlow:
+        return "OxygenFlow";
+    default:
+        return "Unknown";
     }
 }
 
 void USBSerial::sendData(MessageSource source, DataId id, float value, Verbosity level)
 {
     OutputMessage msg{};
-    msg.source   = source;
-    msg.level    = level;
-    msg.type     = Msg_Data;
+    msg.source     = source;
+    msg.level      = level;
+    msg.type       = Msg_Data;
     msg.data.id    = id;
     msg.data.value = value;
 
@@ -58,10 +63,15 @@ void USBSerial::sendData(MessageSource source, DataId id, float value, Verbosity
 
 void USBSerial::readInput()
 {
-    int c = getchar_timeout_us(0);
-
-    if (c != PICO_ERROR_TIMEOUT)
+    while (true)
     {
+        int c = getchar_timeout_us(0);
+
+        if (c == PICO_ERROR_TIMEOUT)
+        {
+            break;
+        }
+
         if (c == '\n' || c == '\r')
         {
             if (!inputBuffer.empty())
@@ -82,6 +92,13 @@ void USBSerial::readInput()
                 inputBuffer.clear();
             }
         }
+        else if (c == '\b' || c == 127) // Handle backspace
+        {
+            if (!inputBuffer.empty())
+            {
+                inputBuffer.pop_back();
+            }
+        }
         else if (c >= 32 && c <= 126)
         {
             inputBuffer += (char)c;
@@ -92,8 +109,8 @@ void USBSerial::readInput()
 void USBSerial::drainOutputQueues()
 {
     OutputMessage msg0, msg1;
-    bool hasMsg0, hasMsg1;
-    uint8_t currentVerbosity = verbosityLevel.load(std::memory_order_acquire);
+    bool          hasMsg0, hasMsg1;
+    uint8_t       currentVerbosity = verbosityLevel.load(std::memory_order_acquire);
 
     while (true)
     {
@@ -105,7 +122,7 @@ void USBSerial::drainOutputQueues()
             break;
         }
 
-        OutputMessage* msgToPrint = nullptr;
+        OutputMessage *msgToPrint = nullptr;
 
         if (hasMsg0 && hasMsg1)
         {
@@ -134,15 +151,22 @@ void USBSerial::drainOutputQueues()
         if (msgToPrint->level <= currentVerbosity)
         {
             if (msgToPrint->type == Msg_Data)
-                printf("[%7lu] $%s:%.4f\n", msgToPrint->timestamp, dataIdToString(msgToPrint->data.id), msgToPrint->data.value);
+                printf("[%lu] $%s:%.4f\n", (unsigned long)msgToPrint->timestamp, dataIdToString(msgToPrint->data.id),
+                       msgToPrint->data.value);
             else
-                printf("[%7lu] [Core%u] %s\n", msgToPrint->timestamp, msgToPrint->source, msgToPrint->text);
+                printf("[%lu] [Core%u] %s\n", (unsigned long)msgToPrint->timestamp, msgToPrint->source,
+                       msgToPrint->text);
         }
     }
 }
 
 bool USBSerial::parseCommand(const std::string &input, CommandMessage &msg)
 {
+    // Echo the exact string being parsed for debugging
+    char debugBuf[128];
+    snprintf(debugBuf, sizeof(debugBuf), "DEBUG parseCommand received: '%s'", input.c_str());
+    USBSerial::log(Source_Core1, debugBuf, V_DEBUG);
+
     // Simple prefix-based command parsing
     // Commands are case-sensitive, space-separated: COMMAND [param1] [param2]
 
@@ -174,6 +198,26 @@ bool USBSerial::parseCommand(const std::string &input, CommandMessage &msg)
     if (input == "POLL")
     {
         msg.id = Cmd_PollDevices;
+        return true;
+    }
+    if (input == "POLLARGON" || input == "POLL ARGON")
+    {
+        msg.id = Cmd_PollArgon;
+        return true;
+    }
+    if (input == "POLLOXYGEN" || input == "POLL OXYGEN")
+    {
+        msg.id = Cmd_PollOxygen;
+        return true;
+    }
+    if (input == "POLLPUMP" || input == "POLL PUMP")
+    {
+        msg.id = Cmd_PollPump;
+        return true;
+    }
+    if (input == "POLLGAUGE" || input == "POLL GAUGE")
+    {
+        msg.id = Cmd_PollGauge;
         return true;
     }
     if (input == "EXIT")

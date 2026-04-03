@@ -3,12 +3,12 @@
 #define GLOBALDEVICES_H
 
 #include "AlicatMFC.h"
+#include "HardwareUART.h"
+#include "PIO_UART.h"
 #include "PfeifferGauge.h"
 #include "PfeifferPump.h"
 #include "RS232Device.h"
 #include "RS485Device.h"
-#include "PIO_UART.h"
-#include "HardwareUART.h"
 #include "picoDefinitions.h"
 
 // ALICAT 1 Devices

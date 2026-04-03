@@ -11,14 +11,14 @@
  * @date 3/25/26
  */
 
+#include "AlicatErrors.h"
+#include "AlicatGases.h"
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <sstream>
 #include <string>
 #include <vector>
-#include "AlicatErrors.h"
-#include "AlicatGases.h"
 
 /**
  * Primary Alicat Command Actions
@@ -55,12 +55,12 @@ struct AlicatCommand
  */
 struct AlicatDataFrame
 {
-    char        id{'A'};
-    double      pressure{0.0};
-    double      temperature{0.0};
-    double      volumetricFlow{0.0};
-    double      massFlow{0.0};
-    double      setpoint{0.0};
+    char                     id{'A'};
+    double                   pressure{0.0};
+    double                   temperature{0.0};
+    double                   volumetricFlow{0.0};
+    double                   massFlow{0.0};
+    double                   setpoint{0.0};
     std::string              gasType{""};
     std::vector<std::string> statusCodes{}; // Status/error codes present in the frame (e.g. "MOV", "POV")
 };
@@ -109,10 +109,7 @@ class AlicatLib
      * @param gasId Gas number to check (use ALICAT_GAS_* defines).
      * @return true if the ID is a known Alicat gas, false otherwise.
      */
-    static bool isValidGasId(uint8_t gasId)
-    {
-        return lookupAlicatGasById(gasId) != nullptr;
-    }
+    static bool isValidGasId(uint8_t gasId) { return lookupAlicatGasById(gasId) != nullptr; }
 
     /**
      * @brief Get the short name for a gas ID (e.g. "Ar" for Argon).
@@ -141,10 +138,7 @@ class AlicatLib
      * @param code Null-terminated string to check (e.g. "MOV").
      * @return true if the string matches a known status code.
      */
-    static bool isStatusCode(const char *code)
-    {
-        return lookupAlicatStatusByCode(code) != nullptr;
-    }
+    static bool isStatusCode(const char *code) { return lookupAlicatStatusByCode(code) != nullptr; }
 
     /**
      * @brief Get the human-readable description for a status code.

@@ -5,15 +5,15 @@
  * @author Ryan Massie (rmassie)
  * @date 3/31/26
  */
-#include <gtest/gtest.h>
 #include "PfeifferLib.h"
+#include <gtest/gtest.h>
 
 // ── Helper: Build a valid Pfeiffer response string ──────────────────────────
 // Frame: [address 3][action 2][paramNum 3][dataLen 3][data N][checksum 2]\r
 // Checksum = (sum of ASCII of all fields except checksum) % 256
 
-static std::string buildPfeifferFrame(const std::string &addr, const std::string &action,
-                                      const std::string &paramNum, const std::string &data)
+static std::string buildPfeifferFrame(const std::string &addr, const std::string &action, const std::string &paramNum,
+                                      const std::string &data)
 {
     // dataLen is the string length of data, zero-padded to 3 chars
     char dataLenStr[4];
@@ -22,11 +22,16 @@ static std::string buildPfeifferFrame(const std::string &addr, const std::string
 
     // Compute checksum
     unsigned int sum = 0;
-    for (char c : addr)     sum += static_cast<unsigned char>(c);
-    for (char c : action)   sum += static_cast<unsigned char>(c);
-    for (char c : paramNum) sum += static_cast<unsigned char>(c);
-    for (char c : dataLen)  sum += static_cast<unsigned char>(c);
-    for (char c : data)     sum += static_cast<unsigned char>(c);
+    for (char c : addr)
+        sum += static_cast<unsigned char>(c);
+    for (char c : action)
+        sum += static_cast<unsigned char>(c);
+    for (char c : paramNum)
+        sum += static_cast<unsigned char>(c);
+    for (char c : dataLen)
+        sum += static_cast<unsigned char>(c);
+    for (char c : data)
+        sum += static_cast<unsigned char>(c);
     unsigned int checksum = sum % 256;
 
     char csStr[4];
@@ -45,7 +50,7 @@ TEST(PfeifferLibFormat, ReadCommand)
     cmd.paramNum = "740";
     cmd.data     = QUERY_DATA_STR; // "=?"
 
-    bool valid = false;
+    bool        valid  = false;
     std::string result = PfeifferLib::formatCommand(&cmd, &valid);
 
     // Should contain the address, action, paramNum, dataLen, data, checksum, \r
@@ -60,7 +65,7 @@ TEST(PfeifferLibFormat, ReadCommand)
 
 TEST(PfeifferLibFormat, NullPointer)
 {
-    bool valid = true;
+    bool        valid  = true;
     std::string result = PfeifferLib::formatCommand(nullptr, &valid);
 
     EXPECT_FALSE(valid);
@@ -89,7 +94,7 @@ TEST(PfeifferLibDecrypt, ValidResponse)
     std::string frame = buildPfeifferFrame("001", "10", "309", "001500");
 
     PfeifferCommand cmd;
-    bool valid = false;
+    bool            valid = false;
     PfeifferLib::decryptResponse(frame, &cmd, &valid);
 
     EXPECT_TRUE(valid);
@@ -107,7 +112,7 @@ TEST(PfeifferLibDecrypt, ChecksumMismatch)
     frame[frame.size() - 3] = '0';
 
     PfeifferCommand cmd;
-    bool valid = true;
+    bool            valid = true;
     PfeifferLib::decryptResponse(frame, &cmd, &valid);
 
     EXPECT_FALSE(valid);
@@ -116,7 +121,7 @@ TEST(PfeifferLibDecrypt, ChecksumMismatch)
 TEST(PfeifferLibDecrypt, TooShort)
 {
     PfeifferCommand cmd;
-    bool valid = true;
+    bool            valid = true;
     PfeifferLib::decryptResponse("001", &cmd, &valid);
 
     EXPECT_FALSE(valid);
@@ -137,7 +142,7 @@ TEST(PfeifferLibDecrypt, MissingCarriageReturn)
     frame.pop_back();
 
     PfeifferCommand cmd;
-    bool valid = true;
+    bool            valid = true;
     PfeifferLib::decryptResponse(frame, &cmd, &valid);
 
     EXPECT_FALSE(valid);

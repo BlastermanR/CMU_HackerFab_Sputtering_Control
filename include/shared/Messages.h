@@ -11,8 +11,8 @@
 #include <stdint.h>
 
 #define OUTPUT_MSG_TEXT_LEN 64
-#define COMMAND_QUEUE_SIZE  16
-#define OUTPUT_QUEUE_SIZE   32
+#define COMMAND_QUEUE_SIZE 16
+#define OUTPUT_QUEUE_SIZE 32
 
 /**
  * @brief Runtime verbosity levels for output filtering.
@@ -38,6 +38,10 @@ enum CommandId : uint8_t
     Cmd_VentChamber,
     Cmd_ShutOffGas,
     Cmd_PollDevices,
+    Cmd_PollArgon,
+    Cmd_PollOxygen,
+    Cmd_PollPump,
+    Cmd_PollGauge,
     Cmd_SetArgonFlow,
     Cmd_SetOxygenFlow,
     Cmd_SetPumpSpeed,
@@ -80,10 +84,10 @@ enum MessageType : uint8_t
  */
 enum DataId : uint8_t
 {
-    Data_PumpSpeed        = 0,
-    Data_ChamberPressure  = 1,
-    Data_ArgonFlow        = 2,
-    Data_OxygenFlow       = 3,
+    Data_PumpSpeed       = 0,
+    Data_ChamberPressure = 1,
+    Data_ArgonFlow       = 2,
+    Data_OxygenFlow      = 3,
 };
 
 /**

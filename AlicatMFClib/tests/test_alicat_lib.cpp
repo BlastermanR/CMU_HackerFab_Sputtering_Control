@@ -5,10 +5,10 @@
  * @author Ryan Massie (rmassie)
  * @date 3/31/26
  */
-#include <gtest/gtest.h>
 #include "AlicatErrors.h"
 #include "AlicatGases.h"
 #include "AlicatLib.h"
+#include <gtest/gtest.h>
 
 // ── formatCommand tests ─────────────────────────────────────────────────────
 
@@ -19,7 +19,7 @@ TEST(AlicatLibFormat, PollCommand)
     cmd.action = ALICAT_POLL;
     cmd.data   = "";
 
-    bool valid = false;
+    bool        valid  = false;
     std::string result = AlicatLib::formatCommand(&cmd, &valid);
 
     EXPECT_TRUE(valid);
@@ -33,7 +33,7 @@ TEST(AlicatLibFormat, SetpointCommand)
     cmd.action = ALICAT_CHANGE_SETPOINT;
     cmd.data   = "5.0";
 
-    bool valid = false;
+    bool        valid  = false;
     std::string result = AlicatLib::formatCommand(&cmd, &valid);
 
     EXPECT_TRUE(valid);
@@ -47,7 +47,7 @@ TEST(AlicatLibFormat, SetGasCommand)
     cmd.action = ALICAT_SET_GAS;
     cmd.data   = "3";
 
-    bool valid = false;
+    bool        valid  = false;
     std::string result = AlicatLib::formatCommand(&cmd, &valid);
 
     EXPECT_TRUE(valid);
@@ -61,13 +61,13 @@ TEST(AlicatLibFormat, SetGasArgon)
     cmd.action = ALICAT_SET_GAS;
     cmd.data   = std::to_string(ALICAT_GAS_AR);
 
-    bool valid = false;
+    bool        valid  = false;
     std::string result = AlicatLib::formatCommand(&cmd, &valid);
 
     EXPECT_TRUE(valid);
     EXPECT_EQ(result, "AG1\r");
     EXPECT_STREQ(AlicatLib::getGasShortName(ALICAT_GAS_AR), "Ar");
-    EXPECT_STREQ(AlicatLib::getGasLongName(ALICAT_GAS_AR),  "Argon");
+    EXPECT_STREQ(AlicatLib::getGasLongName(ALICAT_GAS_AR), "Argon");
     EXPECT_TRUE(AlicatLib::isValidGasId(ALICAT_GAS_AR));
 }
 
@@ -78,7 +78,7 @@ TEST(AlicatLibFormat, TareFlowCommand)
     cmd.action = ALICAT_TARE_FLOW;
     cmd.data   = "";
 
-    bool valid = false;
+    bool        valid  = false;
     std::string result = AlicatLib::formatCommand(&cmd, &valid);
 
     EXPECT_TRUE(valid);
@@ -87,7 +87,7 @@ TEST(AlicatLibFormat, TareFlowCommand)
 
 TEST(AlicatLibFormat, NullCommandPointer)
 {
-    bool valid = true;
+    bool        valid  = true;
     std::string result = AlicatLib::formatCommand(nullptr, &valid);
 
     EXPECT_FALSE(valid);
@@ -114,7 +114,7 @@ TEST(AlicatLibParse, StandardDataFrame)
     std::string response = "A 14.70 25.00 0.50 0.48 1.00 Air";
 
     AlicatDataFrame frame;
-    bool valid = false;
+    bool            valid = false;
     AlicatLib::parseResponse(response, &frame, &valid);
 
     EXPECT_TRUE(valid);
@@ -132,7 +132,7 @@ TEST(AlicatLibParse, ZeroValues)
     std::string response = "B 0.00 0.00 0.00 0.00 0.00 Ar";
 
     AlicatDataFrame frame;
-    bool valid = false;
+    bool            valid = false;
     AlicatLib::parseResponse(response, &frame, &valid);
 
     EXPECT_TRUE(valid);
@@ -147,7 +147,7 @@ TEST(AlicatLibParse, NegativeValues)
     std::string response = "A -0.10 22.50 -0.01 -0.005 0.00 N2";
 
     AlicatDataFrame frame;
-    bool valid = false;
+    bool            valid = false;
     AlicatLib::parseResponse(response, &frame, &valid);
 
     EXPECT_TRUE(valid);
@@ -161,7 +161,7 @@ TEST(AlicatLibParse, TooFewTokens)
     std::string response = "A 14.70 25.00";
 
     AlicatDataFrame frame;
-    bool valid = true; // start true to verify it gets cleared
+    bool            valid = true; // start true to verify it gets cleared
     AlicatLib::parseResponse(response, &frame, &valid);
 
     EXPECT_FALSE(valid);
@@ -170,7 +170,7 @@ TEST(AlicatLibParse, TooFewTokens)
 TEST(AlicatLibParse, EmptyResponse)
 {
     AlicatDataFrame frame;
-    bool valid = true;
+    bool            valid = true;
     AlicatLib::parseResponse("", &frame, &valid);
 
     EXPECT_FALSE(valid);
@@ -201,11 +201,11 @@ TEST(AlicatGasValidation, AllTableEntriesValid)
     for (std::size_t i = 0; i < ALICAT_GAS_TABLE_SIZE; ++i)
     {
         const uint8_t id = ALICAT_GAS_TABLE[i].id;
-        SCOPED_TRACE(::testing::Message() << "gas id=" << static_cast<unsigned>(id)
-                                         << " (" << ALICAT_GAS_TABLE[i].shortName << ")");
+        SCOPED_TRACE(::testing::Message()
+                     << "gas id=" << static_cast<unsigned>(id) << " (" << ALICAT_GAS_TABLE[i].shortName << ")");
         EXPECT_TRUE(AlicatLib::isValidGasId(id));
         EXPECT_STREQ(AlicatLib::getGasShortName(id), ALICAT_GAS_TABLE[i].shortName);
-        EXPECT_STREQ(AlicatLib::getGasLongName(id),  ALICAT_GAS_TABLE[i].longName);
+        EXPECT_STREQ(AlicatLib::getGasLongName(id), ALICAT_GAS_TABLE[i].longName);
     }
 }
 
@@ -218,7 +218,7 @@ TEST(AlicatGasValidation, GapIdsAreInvalid)
         SCOPED_TRACE(::testing::Message() << "id=" << static_cast<unsigned>(id));
         EXPECT_FALSE(AlicatLib::isValidGasId(id));
         EXPECT_EQ(AlicatLib::getGasShortName(id), nullptr);
-        EXPECT_EQ(AlicatLib::getGasLongName(id),  nullptr);
+        EXPECT_EQ(AlicatLib::getGasLongName(id), nullptr);
     }
     // Gap 87-99
     for (uint8_t id = 87; id <= 99; ++id)
@@ -249,35 +249,35 @@ TEST(AlicatGasValidation, GapIdsAreInvalid)
 // Spot-check well-known gases by their ALICAT_GAS_* defines.
 TEST(AlicatGasValidation, KnownGasNames)
 {
-    EXPECT_STREQ(AlicatLib::getGasShortName(ALICAT_GAS_AIR),  "Air");
-    EXPECT_STREQ(AlicatLib::getGasLongName(ALICAT_GAS_AIR),   "Air (Clean Dry)");
+    EXPECT_STREQ(AlicatLib::getGasShortName(ALICAT_GAS_AIR), "Air");
+    EXPECT_STREQ(AlicatLib::getGasLongName(ALICAT_GAS_AIR), "Air (Clean Dry)");
 
-    EXPECT_STREQ(AlicatLib::getGasShortName(ALICAT_GAS_AR),   "Ar");
-    EXPECT_STREQ(AlicatLib::getGasLongName(ALICAT_GAS_AR),    "Argon");
+    EXPECT_STREQ(AlicatLib::getGasShortName(ALICAT_GAS_AR), "Ar");
+    EXPECT_STREQ(AlicatLib::getGasLongName(ALICAT_GAS_AR), "Argon");
 
-    EXPECT_STREQ(AlicatLib::getGasShortName(ALICAT_GAS_N2),   "N2");
-    EXPECT_STREQ(AlicatLib::getGasLongName(ALICAT_GAS_N2),    "Nitrogen");
+    EXPECT_STREQ(AlicatLib::getGasShortName(ALICAT_GAS_N2), "N2");
+    EXPECT_STREQ(AlicatLib::getGasLongName(ALICAT_GAS_N2), "Nitrogen");
 
-    EXPECT_STREQ(AlicatLib::getGasShortName(ALICAT_GAS_HE),   "He");
-    EXPECT_STREQ(AlicatLib::getGasLongName(ALICAT_GAS_HE),    "Helium");
+    EXPECT_STREQ(AlicatLib::getGasShortName(ALICAT_GAS_HE), "He");
+    EXPECT_STREQ(AlicatLib::getGasLongName(ALICAT_GAS_HE), "Helium");
 
-    EXPECT_STREQ(AlicatLib::getGasShortName(ALICAT_GAS_O2),   "O2");
-    EXPECT_STREQ(AlicatLib::getGasLongName(ALICAT_GAS_O2),    "Oxygen");
+    EXPECT_STREQ(AlicatLib::getGasShortName(ALICAT_GAS_O2), "O2");
+    EXPECT_STREQ(AlicatLib::getGasLongName(ALICAT_GAS_O2), "Oxygen");
 
-    EXPECT_STREQ(AlicatLib::getGasShortName(ALICAT_GAS_SF6),  "SF6");
-    EXPECT_STREQ(AlicatLib::getGasLongName(ALICAT_GAS_SF6),   "Sulfur Hexafluoride");
+    EXPECT_STREQ(AlicatLib::getGasShortName(ALICAT_GAS_SF6), "SF6");
+    EXPECT_STREQ(AlicatLib::getGasLongName(ALICAT_GAS_SF6), "Sulfur Hexafluoride");
 
-    EXPECT_STREQ(AlicatLib::getGasShortName(ALICAT_GAS_D_2),  "D-2");
-    EXPECT_STREQ(AlicatLib::getGasLongName(ALICAT_GAS_D_2),   "Deuterium");
+    EXPECT_STREQ(AlicatLib::getGasShortName(ALICAT_GAS_D_2), "D-2");
+    EXPECT_STREQ(AlicatLib::getGasLongName(ALICAT_GAS_D_2), "Deuterium");
 }
 
 // ── Status/error code tests ──────────────────────────────────────────────────
 
 TEST(AlicatStatusCodes, NoStatusInCleanFrame)
 {
-    std::string response = "A 14.70 25.00 0.50 0.48 1.00 Ar";
+    std::string     response = "A 14.70 25.00 0.50 0.48 1.00 Ar";
     AlicatDataFrame frame;
-    bool valid = false;
+    bool            valid = false;
     AlicatLib::parseResponse(response, &frame, &valid);
 
     EXPECT_TRUE(valid);
@@ -286,9 +286,9 @@ TEST(AlicatStatusCodes, NoStatusInCleanFrame)
 
 TEST(AlicatStatusCodes, SingleStatusCode)
 {
-    std::string response = "A 14.70 25.00 0.50 0.48 1.00 Ar MOV";
+    std::string     response = "A 14.70 25.00 0.50 0.48 1.00 Ar MOV";
     AlicatDataFrame frame;
-    bool valid = false;
+    bool            valid = false;
     AlicatLib::parseResponse(response, &frame, &valid);
 
     EXPECT_TRUE(valid);
@@ -298,9 +298,9 @@ TEST(AlicatStatusCodes, SingleStatusCode)
 
 TEST(AlicatStatusCodes, MultipleStatusCodes)
 {
-    std::string response = "A 14.70 25.00 0.50 0.48 1.00 Ar POV TOV MOV";
+    std::string     response = "A 14.70 25.00 0.50 0.48 1.00 Ar POV TOV MOV";
     AlicatDataFrame frame;
-    bool valid = false;
+    bool            valid = false;
     AlicatLib::parseResponse(response, &frame, &valid);
 
     EXPECT_TRUE(valid);
@@ -313,9 +313,9 @@ TEST(AlicatStatusCodes, MultipleStatusCodes)
 TEST(AlicatStatusCodes, UnknownTrailingTokenIgnored)
 {
     // "XYZ" is not a known status code and should be silently ignored
-    std::string response = "A 14.70 25.00 0.50 0.48 1.00 Ar XYZ";
+    std::string     response = "A 14.70 25.00 0.50 0.48 1.00 Ar XYZ";
     AlicatDataFrame frame;
-    bool valid = false;
+    bool            valid = false;
     AlicatLib::parseResponse(response, &frame, &valid);
 
     EXPECT_TRUE(valid);

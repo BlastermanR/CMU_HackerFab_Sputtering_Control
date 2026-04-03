@@ -16,8 +16,8 @@
  * @date 3/4/26
  */
 
-#include <string>
 #include "Messages.h"
+#include <string>
 
 class USBSerial
 {
