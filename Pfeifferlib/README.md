@@ -121,7 +121,7 @@ public:
 Pfeiffer devices communicate over RS-485 using a fixed-field binary-ASCII frame terminated by a carriage return (`\r`). Every frame — command or response — follows the same layout:
 
 ```
-<address(3)><action(2)><paramNum(3)><dataLen(3)><data><checksum(2)>\r
+<address(3)><action(2)><paramNum(3)><dataLen(2)><data><checksum(3)>\r
 ```
 
 | Field | Length | Description |
@@ -129,9 +129,9 @@ Pfeiffer devices communicate over RS-485 using a fixed-field binary-ASCII frame 
 | `address` | 3 chars | RS-485 device address, zero-padded (e.g. `001`) |
 | `action` | 2 chars | `00` = read request, `10` = data response, `20` = error response |
 | `paramNum` | 3 chars | Parameter number, zero-padded (e.g. `309`) |
-| `dataLen` | 3 chars | Length of the data field in characters, zero-padded |
+| `dataLen` | 2 chars | Length of the data field in characters, zero-padded |
 | `data` | variable | Parameter value or query string (`=?` for read requests) |
-| `checksum` | 2 chars | Modulo-256 sum of all preceding ASCII characters, zero-padded |
+| `checksum` | 3 chars | Modulo-256 sum of all preceding ASCII characters, zero-padded |
 
 Known action codes:
 

@@ -146,7 +146,7 @@ int main()
 
                 case PressurizeChamber:
                 {
-                    USBSerial::log(Source_Core0, "Activating pump (Not Implemented)", V_INFO);
+                    USBSerial::log(Source_Core0, "Activating pump", V_INFO);
                     pump.activatePump();
                     clearStatus(PressurizeChamber);
                     break;
@@ -238,14 +238,16 @@ int main()
 
                 case EnablePump:
                 {
-                    USBSerial::log(Source_Core0, "EnablePump command received (Not implemented)", V_INFO);
+                    USBSerial::log(Source_Core0, "EnablePump command received", V_INFO);
+                    pump.activatePump();
                     clearStatus(EnablePump);
                     break;
                 }
 
                 case DisablePump:
                 {
-                    USBSerial::log(Source_Core0, "DisablePump command received (Not implemented)", V_INFO);
+                    USBSerial::log(Source_Core0, "DisablePump command received", V_INFO);
+                    pump.deactivatePump();
                     clearStatus(DisablePump);
                     break;
                 }

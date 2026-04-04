@@ -114,16 +114,73 @@ template <typename Derived> class PfeifferDevice
         char paramStr[4];
         snprintf(paramStr, sizeof(paramStr), "%03d", paramNumber);
 
-        // Typical Write command data is a 6-digit zero-padded string
-        // Data Types might vary in protocol size in the future but 0-padded int works for primary limits
-        char dataStr[32];
-        snprintf(dataStr, sizeof(dataStr), "%06d", static_cast<int>(value));
+        std::string encodedData = PfeifferLib::encodeValue(def->dataType, value);
+        if (encodedData.empty())
+        {
+            return false; // Unsupported data type for numeric encoding
+        }
 
         outCmd.address  = addrStr;
-        outCmd.action   = DATA_RESPONSE; // Write action block
+        outCmd.action   = DATA_RESPONSE; // Write action
         outCmd.paramNum = paramStr;
-        outCmd.data     = dataStr;
+        outCmd.data     = encodedData;
 
+        return true;
+    }
+
+    /**
+     * @brief Creates a validated Write Command with a string value (for string-type parameters).
+     *
+     * @param paramNumber The parameter to overwrite.
+     * @param value The string value to send (will be padded/truncated to the data type length).
+     * @param outCmd Reference to a PfeifferCommand struct to be populated.
+     * @return true on success, false if access denied or parameter missing.
+     */
+    bool createWriteCommand(uint16_t paramNumber, const std::string &value, PfeifferCommand &outCmd) const
+    {
+        const PfeifferParamDef *def = Derived::getParamDef(paramNumber);
+        if (!def || def->access == AccessType::READ_ONLY)
+        {
+            return false;
+        }
+
+        uint8_t     expectedLen = PfeifferLib::getDataLength(def->dataType);
+        std::string paddedValue = value;
+        while (paddedValue.size() < expectedLen)
+            paddedValue += ' ';
+        if (paddedValue.size() > expectedLen)
+            paddedValue = paddedValue.substr(0, expectedLen);
+
+        char addrStr[4];
+        snprintf(addrStr, sizeof(addrStr), "%03d", m_address);
+        char paramStr[4];
+        snprintf(paramStr, sizeof(paramStr), "%03d", paramNumber);
+
+        outCmd.address  = addrStr;
+        outCmd.action   = DATA_RESPONSE;
+        outCmd.paramNum = paramStr;
+        outCmd.data     = paddedValue;
+
+        return true;
+    }
+
+    /**
+     * @brief Decodes the data field of a response into a numeric value using the parameter's data type.
+     *
+     * @param paramNumber The parameter number to look up the data type.
+     * @param response The PfeifferCommand containing the response data to decode.
+     * @param outValue Reference to a double to store the decoded value.
+     * @return true if the parameter exists, false if parameter is unknown.
+     */
+    bool parseResponseValue(uint16_t paramNumber, const PfeifferCommand &response, double &outValue) const
+    {
+        const PfeifferParamDef *def = Derived::getParamDef(paramNumber);
+        if (!def)
+        {
+            return false;
+        }
+
+        outValue = PfeifferLib::decodeValue(def->dataType, response.data);
         return true;
     }
 

@@ -32,12 +32,14 @@ void PfeifferPump::init() { serialPort->begin(); }
 void PfeifferPump::update()
 {
     // 1. Check if it's time to poll the device based on the polling interval
+    /*
     uint32_t currentTime = to_ms_since_boot(get_absolute_time());
     if (currentTime - lastPollTime >= pollingInterval_ms)
     {
         lastPollTime = currentTime;
         pollDevice();
     }
+    */
 
     // 2. Process all messages currently in the serial device's incoming buffer
     while (serialPort->hasMessage())
@@ -59,6 +61,24 @@ void PfeifferPump::update()
         bool            valid = false;
         PfeifferCommand command;
         PfeifferLib::decryptResponse(response, &command, &valid);
+
+        if (!valid)
+        {
+            char _dbg[OUTPUT_MSG_TEXT_LEN];
+            snprintf(_dbg, sizeof(_dbg), "Pump RX parse failed: %s", response.c_str());
+            USBSerial::log(Source_Core0, _dbg, V_DEBUG);
+            continue;
+        }
+
+        // Log error responses from the pump (e.g., _RANGE, _LOGIC, NO_DEF)
+        if (command.action == ERROR_RESPONSE || (command.action == DATA_RESPONSE && command.data.size() == 6 &&
+            (command.data == "NO_DEF" || command.data == "_RANGE" || command.data == "_LOGIC")))
+        {
+            char _dbg[OUTPUT_MSG_TEXT_LEN];
+            snprintf(_dbg, sizeof(_dbg), "Pump RX error (param %s): %s", command.paramNum.c_str(), command.data.c_str());
+            USBSerial::log(Source_Core0, _dbg, V_DEBUG);
+            continue;
+        }
 
         // Define the parameter ID for actual speed (Hz) for comparison
         std::string speedHzParamStr = std::to_string(static_cast<uint16_t>(Pfeiffer::TC110Cmd::ActualSpd_Hz));

@@ -9,15 +9,15 @@
 #include <gtest/gtest.h>
 
 // ── Helper: Build a valid Pfeiffer response string ──────────────────────────
-// Frame: [address 3][action 2][paramNum 3][dataLen 3][data N][checksum 2]\r
+// Frame: [address 3][action 2][paramNum 3][dataLen 2][data N][checksum 3]\r
 // Checksum = (sum of ASCII of all fields except checksum) % 256
 
 static std::string buildPfeifferFrame(const std::string &addr, const std::string &action, const std::string &paramNum,
                                       const std::string &data)
 {
-    // dataLen is the string length of data, zero-padded to 3 chars
-    char dataLenStr[4];
-    snprintf(dataLenStr, sizeof(dataLenStr), "%03d", static_cast<int>(data.size()));
+    // dataLen is the string length of data, zero-padded to 2 chars
+    char dataLenStr[3];
+    snprintf(dataLenStr, sizeof(dataLenStr), "%02d", static_cast<int>(data.size()));
     std::string dataLen(dataLenStr);
 
     // Compute checksum
@@ -35,7 +35,7 @@ static std::string buildPfeifferFrame(const std::string &addr, const std::string
     unsigned int checksum = sum % 256;
 
     char csStr[4];
-    snprintf(csStr, sizeof(csStr), "%02d", checksum);
+    snprintf(csStr, sizeof(csStr), "%03d", checksum);
 
     return addr + action + paramNum + dataLen + data + std::string(csStr) + "\r";
 }
@@ -82,8 +82,8 @@ TEST(PfeifferLibFormat, DataLengthCalculated)
 
     PfeifferLib::formatCommand(&cmd, nullptr);
 
-    // After formatting, dataLen should be set to "6"
-    EXPECT_EQ(cmd.dataLen, "6");
+    // After formatting, dataLen should be set to "06"
+    EXPECT_EQ(cmd.dataLen, "06");
 }
 
 // ── decryptResponse tests ───────────────────────────────────────────────────
@@ -107,9 +107,10 @@ TEST(PfeifferLibDecrypt, ValidResponse)
 TEST(PfeifferLibDecrypt, ChecksumMismatch)
 {
     std::string frame = buildPfeifferFrame("001", "10", "309", "001500");
-    // Corrupt the checksum (last 3 chars before \r are checksum + \r)
+    // Corrupt the checksum (last 4 chars are checksum + \r)
     frame[frame.size() - 2] = '0';
     frame[frame.size() - 3] = '0';
+    frame[frame.size() - 4] = '0';
 
     PfeifferCommand cmd;
     bool            valid = true;
@@ -171,4 +172,122 @@ TEST(PfeifferLibIsRead, NullPointer)
     bool valid = true;
     EXPECT_FALSE(PfeifferLib::isRead(nullptr, &valid));
     EXPECT_FALSE(valid);
+}
+
+// ── Data type utility tests ─────────────────────────────────────────────────
+
+TEST(PfeifferLibDataType, GetDataLengthAllTypes)
+{
+    EXPECT_EQ(PfeifferLib::getDataLength(PfeifferDataType::BOOLEAN), 6);
+    EXPECT_EQ(PfeifferLib::getDataLength(PfeifferDataType::U_INTEGER), 6);
+    EXPECT_EQ(PfeifferLib::getDataLength(PfeifferDataType::U_REAL), 6);
+    EXPECT_EQ(PfeifferLib::getDataLength(PfeifferDataType::STRING_SHORT), 6);
+    EXPECT_EQ(PfeifferLib::getDataLength(PfeifferDataType::BOOLEAN_NEW), 7);
+    EXPECT_EQ(PfeifferLib::getDataLength(PfeifferDataType::U_SHORT_INT), 3);
+    EXPECT_EQ(PfeifferLib::getDataLength(PfeifferDataType::U_EXPO_NEW), 6);
+    EXPECT_EQ(PfeifferLib::getDataLength(PfeifferDataType::STRING_LONG), 16);
+}
+
+TEST(PfeifferLibDataType, EncodeBooleanTrue)
+{
+    EXPECT_EQ(PfeifferLib::encodeValue(PfeifferDataType::BOOLEAN, 1.0), "111111");
+}
+
+TEST(PfeifferLibDataType, EncodeBooleanFalse)
+{
+    EXPECT_EQ(PfeifferLib::encodeValue(PfeifferDataType::BOOLEAN, 0.0), "000000");
+}
+
+TEST(PfeifferLibDataType, EncodeUInteger)
+{
+    EXPECT_EQ(PfeifferLib::encodeValue(PfeifferDataType::U_INTEGER, 633.0), "000633");
+}
+
+TEST(PfeifferLibDataType, EncodeUReal)
+{
+    EXPECT_EQ(PfeifferLib::encodeValue(PfeifferDataType::U_REAL, 15.71), "001571");
+}
+
+TEST(PfeifferLibDataType, EncodeBooleanNewTrue)
+{
+    EXPECT_EQ(PfeifferLib::encodeValue(PfeifferDataType::BOOLEAN_NEW, 1.0), "ON     ");
+}
+
+TEST(PfeifferLibDataType, EncodeBooleanNewFalse)
+{
+    EXPECT_EQ(PfeifferLib::encodeValue(PfeifferDataType::BOOLEAN_NEW, 0.0), "OFF    ");
+}
+
+TEST(PfeifferLibDataType, EncodeUShortInt)
+{
+    EXPECT_EQ(PfeifferLib::encodeValue(PfeifferDataType::U_SHORT_INT, 42.0), "042");
+}
+
+TEST(PfeifferLibDataType, EncodeUnsupportedTypeReturnsEmpty)
+{
+    EXPECT_EQ(PfeifferLib::encodeValue(PfeifferDataType::STRING_SHORT, 0.0), "");
+    EXPECT_EQ(PfeifferLib::encodeValue(PfeifferDataType::U_EXPO_NEW, 0.0), "");
+}
+
+TEST(PfeifferLibDataType, DecodeBooleanTrue)
+{
+    EXPECT_DOUBLE_EQ(PfeifferLib::decodeValue(PfeifferDataType::BOOLEAN, "111111"), 1.0);
+}
+
+TEST(PfeifferLibDataType, DecodeBooleanFalse)
+{
+    EXPECT_DOUBLE_EQ(PfeifferLib::decodeValue(PfeifferDataType::BOOLEAN, "000000"), 0.0);
+}
+
+TEST(PfeifferLibDataType, DecodeUInteger)
+{
+    EXPECT_DOUBLE_EQ(PfeifferLib::decodeValue(PfeifferDataType::U_INTEGER, "000633"), 633.0);
+}
+
+TEST(PfeifferLibDataType, DecodeUReal)
+{
+    EXPECT_DOUBLE_EQ(PfeifferLib::decodeValue(PfeifferDataType::U_REAL, "001571"), 15.71);
+}
+
+TEST(PfeifferLibDataType, DecodeBooleanNewTrue)
+{
+    EXPECT_DOUBLE_EQ(PfeifferLib::decodeValue(PfeifferDataType::BOOLEAN_NEW, "ON     "), 1.0);
+}
+
+TEST(PfeifferLibDataType, DecodeBooleanNewFalse)
+{
+    EXPECT_DOUBLE_EQ(PfeifferLib::decodeValue(PfeifferDataType::BOOLEAN_NEW, "OFF    "), 0.0);
+}
+
+TEST(PfeifferLibDataType, DecodeUShortInt)
+{
+    EXPECT_DOUBLE_EQ(PfeifferLib::decodeValue(PfeifferDataType::U_SHORT_INT, "042"), 42.0);
+}
+
+// ── Response parsing edge cases ─────────────────────────────────────────────
+
+TEST(PfeifferLibDecrypt, ErrorResponseWithUnderscore)
+{
+    // Error response data contains underscores (e.g., NO_DEF, _RANGE, _LOGIC)
+    std::string frame = buildPfeifferFrame("001", "10", "999", "NO_DEF");
+
+    PfeifferCommand cmd;
+    bool            valid = false;
+    PfeifferLib::decryptResponse(frame, &cmd, &valid);
+
+    EXPECT_TRUE(valid);
+    EXPECT_EQ(cmd.data, "NO_DEF");
+}
+
+TEST(PfeifferLibDecrypt, BooleanNewResponseWithSpaces)
+{
+    // Boolean_new response contains spaces
+    std::string frame = buildPfeifferFrame("001", "10", "041", "ON     ");
+
+    PfeifferCommand cmd;
+    bool            valid = false;
+    PfeifferLib::decryptResponse(frame, &cmd, &valid);
+
+    EXPECT_TRUE(valid);
+    EXPECT_EQ(cmd.data, "ON     ");
 }
