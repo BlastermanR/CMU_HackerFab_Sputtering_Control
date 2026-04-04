@@ -32,7 +32,7 @@ class PfeifferPump : public IDevice
     bool newResponse = false;
 
     // Polling Interval to send command
-    uint64_t pollingInterval_ms = 1000;
+    uint64_t pollingInterval_ms = 50;
 
     // Speed read from pump
     double actualPumpSpeed_hz{0};

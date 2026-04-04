@@ -30,11 +30,11 @@ class PfeifferGauge : public IDevice
     // Time tracking
     uint32_t lastPollTime = 0;
 
+    // Polling Interval to send command
+    uint32_t pollingInterval_ms = 50;
+
     // Flag to indicate a new response has been received for state logic
     bool newResponse = false;
-
-    // Polling Interval to send command
-    uint64_t pollingInterval_ms = 1000;
 
     // Variable to store the latest chamber pressure reading
     double chamberPressure_hPa = 0.0;
@@ -82,13 +82,13 @@ class PfeifferGauge : public IDevice
      * @brief Sets the interval for the poll command.
      * @param ms Interval in ms
      */
-    void setPollingInterval_ms(uint64_t ms) { pollingInterval_ms = ms; }
+    void setPollingInterval_ms(uint32_t ms) { pollingInterval_ms = ms; }
 
     /**
      *  @brief Returns the polling interval in ms
      *  @return Polling Interval
      */
-    uint64_t getPollingInterval_ms() { return pollingInterval_ms; }
+    uint32_t getPollingInterval_ms() { return pollingInterval_ms; }
 
     /**
      * @brief Polls device for up to date pressure

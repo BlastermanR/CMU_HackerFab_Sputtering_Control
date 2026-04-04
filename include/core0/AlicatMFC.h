@@ -25,6 +25,12 @@ class AlicatMFC : public IDevice
     AlicatDataFrame lastData;
     bool            newDataFlag{false};
 
+    // Time tracking
+    uint32_t lastPollTime = 0;
+
+    // Polling Interval to send command
+    uint32_t pollingInterval_ms = 50;
+
     /**
      * @brief Helper function to format and send a command to the device
      * @param cmd Command structure to format and send
@@ -60,12 +66,26 @@ class AlicatMFC : public IDevice
      */
     void sendMessage(const char *message) override;
 
-    // --- MFC Specific Commands ---
+    /***************** Polling *****************/
+
+    /**
+     * @brief Sets the interval for the poll command.
+     * @param ms Interval in ms
+     */
+    void setPollingInterval_ms(uint32_t ms) { pollingInterval_ms = ms; }
+
+    /**
+     *  @brief Returns the polling interval in ms
+     *  @return Polling Interval
+     */
+    uint32_t getPollingInterval_ms() { return pollingInterval_ms; }
 
     /**
      * @brief Polls current data from the MFC. Populates lastData on response.
      */
     void pollData();
+
+    /***************** MFC Specific Commands *****************/
 
     /**
      * @brief Sets the target flow rate (setpoint).

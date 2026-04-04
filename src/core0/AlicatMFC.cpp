@@ -35,6 +35,13 @@ void AlicatMFC::init()
 
 void AlicatMFC::update()
 {
+    uint32_t currentTime = to_ms_since_boot(get_absolute_time());
+    if (currentTime - lastPollTime >= pollingInterval_ms)
+    {
+        lastPollTime = currentTime;
+        pollData();
+    }
+
     while (serialPort->hasMessage())
     {
         std::string msg = serialPort->popMessage();

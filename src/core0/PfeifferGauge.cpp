@@ -28,14 +28,12 @@ void PfeifferGauge::init() { serialPort->begin(); }
 void PfeifferGauge::update()
 {
     // 1. Time to poll?
-    /*
     uint32_t currentTime = to_ms_since_boot(get_absolute_time());
     if (currentTime - lastPollTime >= pollingInterval_ms)
     {
         lastPollTime = currentTime;
         pollDevice();
     }
-    */
 
     // 2. Process incoming serial data
     while (serialPort->hasMessage())
