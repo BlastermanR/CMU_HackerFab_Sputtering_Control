@@ -206,31 +206,6 @@ bool USBSerial::parseCommand(const std::string &input, CommandMessage &msg)
         msg.id = Cmd_ShutOffGas;
         return true;
     }
-    if (input == "POLL")
-    {
-        msg.id = Cmd_PollDevices;
-        return true;
-    }
-    if (input == "POLLARGON" || input == "POLL ARGON")
-    {
-        msg.id = Cmd_PollArgon;
-        return true;
-    }
-    if (input == "POLLOXYGEN" || input == "POLL OXYGEN")
-    {
-        msg.id = Cmd_PollOxygen;
-        return true;
-    }
-    if (input == "POLLPUMP" || input == "POLL PUMP")
-    {
-        msg.id = Cmd_PollPump;
-        return true;
-    }
-    if (input == "POLLGAUGE" || input == "POLL GAUGE")
-    {
-        msg.id = Cmd_PollGauge;
-        return true;
-    }
     if (input == "EXIT")
     {
         msg.id = Cmd_Exit;

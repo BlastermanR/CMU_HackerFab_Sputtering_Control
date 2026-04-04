@@ -170,45 +170,6 @@ int main()
                     break;
                 }
 
-                case PollDevices:
-                {
-                    USBSerial::log(Source_Core0, "Polling devices (Not Implemented)", V_INFO);
-                    clearStatus(PollDevices);
-                    break;
-                }
-
-                case PollArgon:
-                {
-                    USBSerial::log(Source_Core0, "Polling Argon MFC (Not Implemented)", V_INFO);
-                    mfc2.pollData();
-                    clearStatus(PollArgon);
-                    break;
-                }
-
-                case PollOxygen:
-                {
-                    USBSerial::log(Source_Core0, "Polling Oxygen MFC (Not Implemented)", V_INFO);
-                    mfc1.pollData();
-                    clearStatus(PollOxygen);
-                    break;
-                }
-
-                case PollPump:
-                {
-                    USBSerial::log(Source_Core0, "Polling Pump (Not Implemented)", V_INFO);
-                    pump.pollDevice();
-                    clearStatus(PollPump);
-                    break;
-                }
-
-                case PollGauge:
-                {
-                    USBSerial::log(Source_Core0, "Polling Gauge (Not Implemented)", V_INFO);
-                    gauge.pollDevice();
-                    clearStatus(PollGauge);
-                    break;
-                }
-
                 case SetArgonFlow:
                 {
                     char buf[64];

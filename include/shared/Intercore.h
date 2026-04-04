@@ -38,17 +38,12 @@ enum StatusMask : uint32_t
     PressurizeChamber        = (1U << 9),
     VentChamber              = (1U << 10),
     ShutOffGasFlow           = (1U << 11),
-    PollDevices              = (1U << 12),
 
-    SetArgonFlow  = (1U << 13),
-    SetOxygenFlow = (1U << 14),
-    SetPumpSpeed  = (1U << 15),
-    EnablePump    = (1U << 16),
-    DisablePump   = (1U << 17),
-    PollArgon     = (1U << 18),
-    PollOxygen    = (1U << 19),
-    PollPump      = (1U << 20),
-    PollGauge     = (1U << 21),
+    SetArgonFlow  = (1U << 12),
+    SetOxygenFlow = (1U << 13),
+    SetPumpSpeed  = (1U << 14),
+    EnablePump    = (1U << 15),
+    DisablePump   = (1U << 16),
 
     // Startup
     Core0_Begin = (1U << 30),
@@ -131,8 +126,8 @@ inline StatusMask getError()
 inline StatusMask isCommand()
 {
     const uint32_t COMMAND_MASK = ExecuteSputteringProcess | ExecuteCleaningProcess | PressurizeChamber |
-                                  VentChamber | ShutOffGasFlow | PollDevices | PollArgon | PollOxygen | PollPump |
-                                  PollGauge | SetArgonFlow | SetOxygenFlow | SetPumpSpeed | EnablePump | DisablePump;
+                                  VentChamber | ShutOffGasFlow | SetArgonFlow | SetOxygenFlow | SetPumpSpeed |
+                                  EnablePump | DisablePump;
 
     uint32_t commandBits = statusReg.load(std::memory_order_acquire) & COMMAND_MASK;
     if (commandBits)

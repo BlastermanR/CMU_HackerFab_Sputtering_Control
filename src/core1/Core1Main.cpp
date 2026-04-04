@@ -66,36 +66,6 @@ static void dispatchCommand(const CommandMessage &cmd)
         USBSerial::log(Source_Core1, "Shutting off gas flow");
         break;
     }
-    case Cmd_PollDevices:
-    {
-        setStatus(PollDevices);
-        USBSerial::log(Source_Core1, "Polling devices");
-        break;
-    }
-    case Cmd_PollArgon:
-    {
-        setStatus(PollArgon);
-        USBSerial::log(Source_Core1, "Polling Argon MFC");
-        break;
-    }
-    case Cmd_PollOxygen:
-    {
-        setStatus(PollOxygen);
-        USBSerial::log(Source_Core1, "Polling Oxygen MFC");
-        break;
-    }
-    case Cmd_PollPump:
-    {
-        setStatus(PollPump);
-        USBSerial::log(Source_Core1, "Polling Pump");
-        break;
-    }
-    case Cmd_PollGauge:
-    {
-        setStatus(PollGauge);
-        USBSerial::log(Source_Core1, "Polling Gauge");
-        break;
-    }
     case Cmd_SetArgonFlow:
     {
         sharedData.Core1Out.setArgonFlow = cmd.param1;
