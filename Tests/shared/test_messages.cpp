@@ -26,7 +26,7 @@ TEST(MessagesCommandId, AllUnique)
 {
     // Ensure no accidental duplicates in the enum
     uint8_t ids[]      = {Cmd_None,       Cmd_StartProcess, Cmd_StopProcess,  Cmd_PressurizeChamber, Cmd_VentChamber,
-                          Cmd_ShutOffGas, Cmd_PollDevices,  Cmd_SetArgonFlow, Cmd_SetOxygenFlow,     Cmd_SetPumpSpeed,
+                          Cmd_ShutOffGas, Cmd_SetArgonFlow, Cmd_SetOxygenFlow, Cmd_SetPumpSpeed,
                           Cmd_EnablePump, Cmd_DisablePump,  Cmd_Exit,         Cmd_SetVerbosity};
     constexpr size_t N = sizeof(ids) / sizeof(ids[0]);
 

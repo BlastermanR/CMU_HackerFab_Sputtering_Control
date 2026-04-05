@@ -75,11 +75,17 @@ clean:
 	@rm -rf $(TEST_BUILD_DIR)
 
 # 6. Test: Builds and runs the Google Test unit test suite on the host
-.PHONY: test
-test:
-	@if [ ! -d "$(TEST_BUILD_DIR)" ]; then cmake -B $(TEST_BUILD_DIR) -S tests -G Ninja; fi
+# Usage:
+#   make test        => run the test suite
+.PHONY: test memory-usage
+test: compile
+	@if [ ! -d "$(TEST_BUILD_DIR)" ]; then cmake -B $(TEST_BUILD_DIR) -S Tests -G Ninja; fi
 	ninja -C $(TEST_BUILD_DIR)
 	cd $(TEST_BUILD_DIR) && ctest --output-on-failure
+
+# 7. Memory usage: Runs the Pico memory usage script against the current build.
+memory-usage: compile
+	python Tools/pico_memory_usage.py $(BUILD_DIR)/$(BIN_TARGET)
 
 # 7. Helper: Rescue Reset
 .PHONY: rescue

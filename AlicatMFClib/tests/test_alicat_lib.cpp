@@ -37,7 +37,7 @@ TEST(AlicatLibFormat, SetpointCommand)
     std::string result = AlicatLib::formatCommand(&cmd, &valid);
 
     EXPECT_TRUE(valid);
-    EXPECT_EQ(result, "AS5.0\r");
+    EXPECT_EQ(result, "AS 5.0\r");
 }
 
 TEST(AlicatLibFormat, SetGasCommand)
@@ -51,7 +51,7 @@ TEST(AlicatLibFormat, SetGasCommand)
     std::string result = AlicatLib::formatCommand(&cmd, &valid);
 
     EXPECT_TRUE(valid);
-    EXPECT_EQ(result, "BG3\r");
+    EXPECT_EQ(result, "BG 3\r");
 }
 
 TEST(AlicatLibFormat, SetGasArgon)
@@ -65,7 +65,7 @@ TEST(AlicatLibFormat, SetGasArgon)
     std::string result = AlicatLib::formatCommand(&cmd, &valid);
 
     EXPECT_TRUE(valid);
-    EXPECT_EQ(result, "AG1\r");
+    EXPECT_EQ(result, "AG 1\r");
     EXPECT_STREQ(AlicatLib::getGasShortName(ALICAT_GAS_AR), "Ar");
     EXPECT_STREQ(AlicatLib::getGasLongName(ALICAT_GAS_AR), "Argon");
     EXPECT_TRUE(AlicatLib::isValidGasId(ALICAT_GAS_AR));

@@ -5,7 +5,7 @@
 # @date 3/31/26
 #
 # Usage:
-#   cmake -B build_tests -S tests -G Ninja
+#   cmake -B build_tests -S Tests -G Ninja
 #   ninja -C build_tests
 #   ctest --test-dir build_tests --output-on-failure
 
@@ -14,6 +14,8 @@ project(SputteringACS_Tests CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+find_package(Python3 COMPONENTS Interpreter REQUIRED)
 
 # Signal that we are building for unit testing on the host (no Pico hardware)
 add_compile_definitions(PICO_TESTING)
@@ -59,3 +61,8 @@ target_include_directories(pico_stubs PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/mocks)
 add_subdirectory(${PROJECT_ROOT}/AlicatMFClib/tests  ${CMAKE_BINARY_DIR}/AlicatMFClib_tests)
 add_subdirectory(${PROJECT_ROOT}/Pfeifferlib/tests    ${CMAKE_BINARY_DIR}/Pfeifferlib_tests)
 add_subdirectory(shared)
+
+add_test(
+    NAME pico_memory_usage
+    COMMAND ${Python3_EXECUTABLE} ${PROJECT_ROOT}/Tools/pico_memory_usage.py ${PROJECT_ROOT}/build/SputteringACS.elf --min-heap-bytes 2048
+)

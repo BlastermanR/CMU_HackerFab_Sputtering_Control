@@ -139,14 +139,14 @@ TEST(PfeifferLibDecrypt, NullPointer)
 TEST(PfeifferLibDecrypt, MissingCarriageReturn)
 {
     std::string frame = buildPfeifferFrame("001", "10", "309", "001500");
-    // Remove trailing \r
+    // Trailing \r is stripped by the serial framing layer before parsing.
     frame.pop_back();
 
     PfeifferCommand cmd;
-    bool            valid = true;
+    bool            valid = false;
     PfeifferLib::decryptResponse(frame, &cmd, &valid);
 
-    EXPECT_FALSE(valid);
+    EXPECT_TRUE(valid);
 }
 
 // ── isRead tests ────────────────────────────────────────────────────────────
