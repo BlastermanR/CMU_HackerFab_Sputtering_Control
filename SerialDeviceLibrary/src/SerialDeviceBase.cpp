@@ -1,3 +1,11 @@
+/**
+ * @file SerialDeviceBase.cpp
+ * @brief Implementation for the SerialDeviceBase component.
+ *
+ * @author Ryan Massie (rmassie)
+ * @date 4/4/26
+ */
+
 #include "SerialDeviceBase.h"
 #include <algorithm>
 

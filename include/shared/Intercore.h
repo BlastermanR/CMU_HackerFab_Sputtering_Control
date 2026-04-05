@@ -1,5 +1,5 @@
 /**
- * Intercore.h
+ * @file Intercore.h
  * @brief Definitions for inter-core shared memory and atomic variables.
  *
  * @author Ryan Massie (rmassie)

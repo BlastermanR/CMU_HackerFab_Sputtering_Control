@@ -1,5 +1,5 @@
 /**
- * PfeifferGauge.h
+ * @file PfeifferGauge.h
  * @brief Defines the Pfeiffer pressure gauge communication interface.
  *
  * @author Ryan Massie (rmassie)

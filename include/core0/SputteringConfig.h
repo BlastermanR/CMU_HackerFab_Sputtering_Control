@@ -1,5 +1,5 @@
 /**
- * SputteringConfig.h
+ * @file SputteringConfig.h
  * @brief Defines values for controlling CMUs Sputtering Process
  * 
  * Note: Modify to match individual chamber.

@@ -1,5 +1,5 @@
 /**
- * Intercore.cpp
+ * @file Intercore.cpp
  * @brief Implementation of inter-core shared variables.
  *
  * @author Ryan Massie (rmassie)

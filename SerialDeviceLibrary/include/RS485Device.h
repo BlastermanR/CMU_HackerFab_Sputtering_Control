@@ -1,3 +1,11 @@
+/**
+ * @file RS485Device.h
+ * @brief Declarations for the RS485Device component.
+ *
+ * @author Ryan Massie (rmassie)
+ * @date 4/4/26
+ */
+
 #ifndef RS485_DEVICE_H
 #define RS485_DEVICE_H
 

@@ -1,5 +1,5 @@
 /**
- * Core1Main.h
+ * @file Core1Main.h
  * @brief Header file for the entry point of the second core (Core 1).
  *
  * @author Ryan Massie (rmassie)

@@ -1,3 +1,11 @@
+/**
+ * @file HardwareUART.h
+ * @brief Declarations for the HardwareUART component.
+ *
+ * @author Ryan Massie (rmassie)
+ * @date 4/4/26
+ */
+
 #ifndef HARD_UART_CLASS_H
 #define HARD_UART_CLASS_H
 

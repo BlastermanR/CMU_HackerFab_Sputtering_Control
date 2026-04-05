@@ -1,5 +1,5 @@
 /**
- * AlicatMFC.cpp
+ * @file AlicatMFC.cpp
  * @brief Implementation of the Alicat Mass Flow Controller (MFC).
  *
  * @author Ryan Massie (rmassie)

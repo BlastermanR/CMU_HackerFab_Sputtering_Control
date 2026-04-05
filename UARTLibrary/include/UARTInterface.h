@@ -1,3 +1,11 @@
+/**
+ * @file UARTInterface.h
+ * @brief Declarations for the UARTInterface component.
+ *
+ * @author Ryan Massie (rmassie)
+ * @date 4/4/26
+ */
+
 #ifndef UARTI
 #define UARTI
 

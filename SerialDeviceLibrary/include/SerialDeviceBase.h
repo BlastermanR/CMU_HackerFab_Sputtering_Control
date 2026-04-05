@@ -1,3 +1,11 @@
+/**
+ * @file SerialDeviceBase.h
+ * @brief Declarations for the SerialDeviceBase component.
+ *
+ * @author Ryan Massie (rmassie)
+ * @date 4/4/26
+ */
+
 #ifndef SERIAL_DEVICE_BASE_H
 #define SERIAL_DEVICE_BASE_H
 

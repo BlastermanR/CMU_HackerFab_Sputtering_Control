@@ -1,3 +1,11 @@
+/**
+ * @file ISerialDevice.h
+ * @brief Declarations for the ISerialDevice component.
+ *
+ * @author Ryan Massie (rmassie)
+ * @date 4/4/26
+ */
+
 #ifndef ISERIALDEVICE_H
 #define ISERIALDEVICE_H
 

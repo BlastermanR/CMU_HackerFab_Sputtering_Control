@@ -1,5 +1,5 @@
 /**
- * picoDefinitions.h
+ * @file picoDefinitions.h
  * @brief Defines values related to implementation of the Raspberry Pi Pico 2.
  *
  * @author Ryan Massie (rmassie)

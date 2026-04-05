@@ -1,4 +1,11 @@
-// GlobalDevices.cpp
+/**
+ * @file GlobalDevices.cpp
+ * @brief Implementation for the GlobalDevices component.
+ *
+ * @author Ryan Massie (rmassie)
+ * @date 4/4/26
+ */
+
 #include "GlobalDevices.h"
 #include "picoDefinitions.h"
 

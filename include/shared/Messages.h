@@ -1,5 +1,5 @@
 /**
- * Messages.h
+ * @file Messages.h
  * @brief Shared message types for inter-core queue communication.
  *
  * @author Ryan Massie (rmassie)

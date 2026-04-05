@@ -1,3 +1,11 @@
+/**
+ * @file USBSerial.cpp
+ * @brief Implementation for the USBSerial component.
+ *
+ * @author Ryan Massie (rmassie)
+ * @date 4/4/26
+ */
+
 #include "USBSerial.h"
 #include "Intercore.h"
 #include "pico/stdlib.h"

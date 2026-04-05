@@ -1,5 +1,5 @@
 /**
- * Core1Main.cpp
+ * @file Core1Main.cpp
  * @brief Implementation of the main loop for Core 1.
  *
  * Core 1 owns the USB serial interface. It reads incoming commands,

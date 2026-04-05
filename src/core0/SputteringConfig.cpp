@@ -1,3 +1,11 @@
+/**
+ * @file SputteringConfig.cpp
+ * @brief Implementation for the SputteringConfig component.
+ *
+ * @author Ryan Massie (rmassie)
+ * @date 4/4/26
+ */
+
 #include "core0/SputteringConfig.h"
 #include "USBSerial.h"
 

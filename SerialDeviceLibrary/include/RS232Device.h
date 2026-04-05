@@ -1,3 +1,11 @@
+/**
+ * @file RS232Device.h
+ * @brief Declarations for the RS232Device component.
+ *
+ * @author Ryan Massie (rmassie)
+ * @date 4/4/26
+ */
+
 #ifndef RS232_DEVICE_H
 #define RS232_DEVICE_H
 

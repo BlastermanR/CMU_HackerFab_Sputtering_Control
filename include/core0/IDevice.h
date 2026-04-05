@@ -1,5 +1,5 @@
 /**
- * IDevice.h
+ * @file IDevice.h
  * @brief Interface definition for generic devices on the Sputtering automation system.
  *
  * @author Ryan Massie (rmassie)

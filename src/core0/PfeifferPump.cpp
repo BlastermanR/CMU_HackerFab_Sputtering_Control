@@ -1,5 +1,5 @@
 /**
- * PfeifferPump.cpp
+ * @file PfeifferPump.cpp
  * @brief Implementation of the Pfeiffer vacuum pump communication.
  *
  * @author Ryan Massie (rmassie)

@@ -1,5 +1,5 @@
 /**
- * PfeifferGauge.cpp
+ * @file PfeifferGauge.cpp
  * @brief Implementation of the Pfeiffer pressure gauge communication.
  *
  * @author Ryan Massie (rmassie)

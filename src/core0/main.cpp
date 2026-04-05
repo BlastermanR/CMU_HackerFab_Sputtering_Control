@@ -1,5 +1,5 @@
 /**
- * main.cpp
+ * @file main.cpp
  * @brief Main entry point for the Sputtering system on Core 0.
  *
  * @author Ryan Massie (rmassie)

@@ -1,3 +1,11 @@
+/**
+ * @file USBSerial.h
+ * @brief Declarations for the USBSerial component.
+ *
+ * @author Ryan Massie (rmassie)
+ * @date 4/4/26
+ */
+
 #ifndef USB_SERIAL
 #define USB_SERIAL
 

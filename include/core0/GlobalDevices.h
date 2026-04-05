@@ -1,4 +1,11 @@
-// GlobalDevices.h
+/**
+ * @file GlobalDevices.h
+ * @brief Declarations for the GlobalDevices component.
+ *
+ * @author Ryan Massie (rmassie)
+ * @date 4/4/26
+ */
+
 #ifndef GLOBALDEVICES_H
 #define GLOBALDEVICES_H
 

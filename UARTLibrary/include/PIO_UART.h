@@ -1,3 +1,11 @@
+/**
+ * @file PIO_UART.h
+ * @brief Declarations for the PIO_UART component.
+ *
+ * @author Ryan Massie (rmassie)
+ * @date 4/4/26
+ */
+
 #ifndef PIO_UART
 #define PIO_UART
 

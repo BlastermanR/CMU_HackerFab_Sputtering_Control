@@ -1,5 +1,5 @@
 /**
- * PfeifferPump.h
+ * @file PfeifferPump.h
  * @brief Defines the Pfeiffer vacuum pump communication interface.
  *
  * @author Ryan Massie (rmassie)

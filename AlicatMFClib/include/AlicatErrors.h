@@ -48,6 +48,9 @@ inline constexpr AlicatStatusDef ALICAT_STATUS_TABLE[] = {
     {"VOV", "Volumetric flow rate overage (outside measurable range)"},
 };
 
+/**
+ * @brief Number of entries in the Alicat status code table.
+ */
 inline constexpr std::size_t ALICAT_STATUS_TABLE_SIZE = sizeof(ALICAT_STATUS_TABLE) / sizeof(ALICAT_STATUS_TABLE[0]);
 
 /**

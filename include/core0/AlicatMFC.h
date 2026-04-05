@@ -1,5 +1,5 @@
 /**
- * AlicatMFC.h
+ * @file AlicatMFC.h
  * @brief Defines the Alicat Mass Flow Controller (MFC).
  *
  * @author Ryan Massie (rmassie)

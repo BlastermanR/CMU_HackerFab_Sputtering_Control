@@ -102,14 +102,6 @@ class AlicatLib
     }
 
     /**
-     * @brief Parse a response string received from the device and populate an
-     * AlicatDataFrame struct with the extracted fields.
-     * @param response The raw response string received from the device.
-     * @param frame Pointer to the AlicatDataFrame struct to populate.
-     * @param valid Optional pointer to a boolean that will be set to true if the
-     * response is valid and parsed successfully, false otherwise.
-     */
-    /**
      * @brief Validate that a gas ID exists in the Alicat gas table.
      * @param gasId Gas number to check (use ALICAT_GAS_* defines).
      * @return true if the ID is a known Alicat gas, false otherwise.
@@ -156,6 +148,14 @@ class AlicatLib
         return s ? s->description : nullptr;
     }
 
+    /**
+     * @brief Parse a response string received from the device and populate an
+     * AlicatDataFrame struct with the extracted fields.
+     * @param response The raw response string received from the device.
+     * @param frame Pointer to the AlicatDataFrame struct to populate.
+     * @param valid Optional pointer to a boolean that will be set to true if the
+     * response is valid and parsed successfully, false otherwise.
+     */
     static void parseResponse(const std::string &response, AlicatDataFrame *frame, bool *valid = nullptr)
     {
         if (valid)

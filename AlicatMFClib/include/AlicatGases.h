@@ -162,6 +162,9 @@ inline constexpr AlicatGasDef ALICAT_GAS_TABLE[] = {
     {210, "D-2", "Deuterium"},
 };
 
+/**
+ * @brief Number of entries in the Alicat gas definition table.
+ */
 inline constexpr std::size_t ALICAT_GAS_TABLE_SIZE = sizeof(ALICAT_GAS_TABLE) / sizeof(ALICAT_GAS_TABLE[0]);
 
 /**
