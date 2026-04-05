@@ -10,7 +10,7 @@ add_library(${LIBRARY_NAME} STATIC ${${LIBRARY_NAME}_SOURCES})
 # Header Files
 target_include_directories(${LIBRARY_NAME} PUBLIC 
     ${CMAKE_CURRENT_LIST_DIR}/include
-    ${CMAKE_SOURCE_DIR}/include/shared
+    "${CMAKE_SOURCE_DIR}/include/shared"
 )
 
 # Required Libraries

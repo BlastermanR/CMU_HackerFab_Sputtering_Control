@@ -37,15 +37,15 @@ project(SputteringACS C CXX ASM)
 pico_sdk_init()
 
 # Include Libraries
-include(${CMAKE_SOURCE_DIR}/AlicatMFClib/AlicatMFClib.cmake)
+include(${CMAKE_SOURCE_DIR}/DeviceLibraries/AlicatMFClib/AlicatMFClib.cmake)
 include(${CMAKE_SOURCE_DIR}/UARTLibrary/UARTLibrary.cmake)
 include(${CMAKE_SOURCE_DIR}/USBSerialLibrary/USBSerialLibrary.cmake)
-include(${CMAKE_SOURCE_DIR}/Pfeifferlib/PfeifferLibrary.cmake)
+include(${CMAKE_SOURCE_DIR}/DeviceLibraries/Pfeifferlib/PfeifferLibrary.cmake)
 include(${CMAKE_SOURCE_DIR}/SerialDeviceLibrary/SerialDeviceLibrary.cmake)
 include(${CMAKE_SOURCE_DIR}/DisplayLibrary/WaveshareDisplayLibrary.cmake)
 
 # Use GLOB_RECURSE to gather files from subdirectories
-file(GLOB_RECURSE SOURCES "src/*.cpp")
+file(GLOB_RECURSE SOURCES "${CMAKE_SOURCE_DIR}/src/*.cpp")
 
 # Add executable.
 add_executable(SputteringACS ${SOURCES})
@@ -80,10 +80,10 @@ target_link_libraries(SputteringACS PRIVATE
 
 # Add the standard include files to the build
 target_include_directories(SputteringACS PRIVATE
-        ${CMAKE_SOURCE_DIR}/include
-        ${CMAKE_SOURCE_DIR}/include/core0
-        ${CMAKE_SOURCE_DIR}/include/core1
-        ${CMAKE_SOURCE_DIR}/include/shared
+        "${CMAKE_SOURCE_DIR}/include"
+        "${CMAKE_SOURCE_DIR}/include/core0"
+        "${CMAKE_SOURCE_DIR}/include/core1"
+        "${CMAKE_SOURCE_DIR}/include/shared"
 )
 
 pico_add_extra_outputs(SputteringACS)

@@ -4,7 +4,7 @@
 # @date 3/31/26
 
 # Compile Intercore.cpp from the main project (defines statusReg, queues)
-set(INTERCORE_SRC ${PROJECT_ROOT}/src/shared/Intercore.cpp)
+set(INTERCORE_SRC "${PROJECT_ROOT}/src/shared/Intercore.cpp")
 
 add_executable(test_intercore test_intercore.cpp ${INTERCORE_SRC})
 target_include_directories(test_intercore PRIVATE ${COMMON_INCLUDE_DIRS})

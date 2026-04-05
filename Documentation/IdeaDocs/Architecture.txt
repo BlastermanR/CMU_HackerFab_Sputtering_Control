@@ -1,0 +1,105 @@
+================================================================================
+                SputterOS v2 - SCALABLE SYSTEM ARCHITECTURE SPECIFICATION
+================================================================================
+TARGET HARDWARE: Architecture Agnostic (Designed for RP2350 Pico 2 @ 125MHz)
+EXECUTION MODEL: Task-Based N-Core (Scalable from Single-Core to Quad-Core/RTOS)
+DESIGN PATTERN:  Hardware Abstraction Layer (HAL) + OS Abstraction Layer (OSAL)
+================================================================================
+
+1. CORE ARCHITECTURAL PHILOSOPHY
+--------------------------------------------------------------------------------
+SputterOS operates on a strictly decoupled design. The core logic of the 
+sputtering machine (vacuum states, interlocks, gas flow) has zero knowledge of 
+the silicon it is running on. 
+- No direct hardware calls in the logic layer.
+- No hardcoded thread/core assignments in the task layer.
+- All hardware and system timing functions are injected as abstract interfaces 
+  via the HAL and OSAL.
+
+2. OS ABSTRACTION LAYER (OSAL)
+--------------------------------------------------------------------------------
+Purpose: Abstracts multitasking, memory protection, and inter-task communication.
+* IMessageQueue: Interface for passing `CommandStruct` packets between tasks.
+  -> Implementations: `PicoHardwareFIFO` (Dual-core), `RamQueue` (Single-core), 
+     or `FreeRTOSQueue` (RTOS).
+* IMutex: Interface for protecting shared state variables.
+  -> Implementations: `PicoSpinlock`, `InterruptDisable` (Single-core), or 
+     `FreeRTOSMutex`.
+* ITask: Base interface for all system loops. Requires `init()` and `tick()`.
+
+3. RUNNABLE TASKS (Replaces Core 0 / Core 1 concept)
+--------------------------------------------------------------------------------
+Tasks are independent while-loops that process specific domains. The System 
+Builder (`main.cpp`) assigns these tasks to physical cores or RTOS threads at 
+compile time.
+
+* CommsTask (External Communications): 
+  Listens to the `IStreamReader` (USB/UART/Network). Parses strings into typed 
+  commands, and pushes them to the shared `IMessageQueue`.
+* ControlTask (Hardware Control & State Machine): 
+  Pops commands from the `IMessageQueue`. Evaluates the Sputtering State 
+  Machine, updates PID loops, and toggles hardware via the HAL.
+* DiagnosticsTask (Watchdog & Logging): 
+  Monitors task execution times, maintains the Ring Buffer of system events, 
+  and handles safe-state defaulting if an unrecoverable error occurs.
+
+4. HARDWARE ABSTRACTION LAYER (HAL)
+--------------------------------------------------------------------------------
+Purpose: Wraps physical pins, ADCs, and I2C buses into logical interfaces.
+* IVacuumGauge -> Implementations: `AnalogPiraniGauge`, `I2CDigitalGauge`
+* IMassFlowController -> Implementations: `PWMMassFlow`, `SerialMFC`
+* IPowerSupply -> Implementations: `DCPowerSupply`, `RFPulseGenerator`
+* IRelay -> Implementations: `GPIOPneumaticValve`, `SolidStateRelay`
+
+5. SYSTEM LOGIC (State Machine & Interlocks)
+--------------------------------------------------------------------------------
+* InterlockManager [CRITICAL]: 
+  Injected with HAL sensor interfaces. Continuously polls bounds (e.g., Pressure 
+  < 5e-3 Torr). If a soft interlock trips, forces the State Machine to a safe 
+  phase and commands all `IRelay` devices to their fail-safe states.
+* Sputtering State Machine: 
+  A strictly defined phase sequence (IDLE -> ROUGH_PUMPING -> HIGH_VAC_PUMPING 
+  -> GAS_STABILIZATION -> IGNITE_PLASMA -> DEPOSITION -> VENTING). Governed 
+  by an absolute-time task scheduler to remain non-blocking.
+
+================================================================================
+                        PROJECT DIRECTORY STRUCTURE
+================================================================================
+
+SputterOS/
+├── CMakeLists.txt
+├── include/
+│   ├── config/
+│   │   ├── BoardConfig.h         # Pinouts and hardware limits (Target Specific)
+│   │   └── SystemConfig.h        # Command Enums, Event Structs
+│   │
+│   ├── osal/                     # OS Abstraction Layer
+│   │   ├── IMutex.h
+│   │   ├── IMessageQueue.h
+│   │   ├── ITask.h
+│   │   └── implementations/      # e.g., PicoHardwareFIFO.h, PicoSpinlock.h
+│   │
+│   ├── hal/                      # Hardware Abstraction Layer
+│   │   ├── interfaces/           # IVacuumGauge.h, IRelay.h, etc.
+│   │   └── implementations/      # AnalogPiraniGauge.h, GPIORelay.h
+│   │
+│   ├── tasks/                    # Runnable Task Logic
+│   │   ├── CommsTask.h           
+│   │   ├── ControlTask.h         
+│   │   └── DiagnosticsTask.h     
+│   │
+│   └── logic/                    # Core Sputtering Intelligence
+│       ├── StateMachine.h
+│       ├── InterlockManager.h
+│       └── CommandParser.h
+│
+└── src/
+    ├── main.cpp                  # System Builder: Maps Tasks to physical Cores
+    ├── osal/                     # OSAL implementations
+    ├── hal/                      # HAL implementations
+    ├── tasks/                    # Task implementations
+    └── logic/                    # State Machine and Interlock implementations
+
+================================================================================
+END OF SPECIFICATION
+================================================================================

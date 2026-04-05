@@ -79,7 +79,7 @@ clean:
 #   make test        => run the test suite
 .PHONY: test memory-usage
 test: compile
-	@if [ ! -d "$(TEST_BUILD_DIR)" ]; then cmake -B $(TEST_BUILD_DIR) -S Tests -G Ninja; fi
+	@if [ ! -f "$(TEST_BUILD_DIR)/build.ninja" ]; then cmake -B $(TEST_BUILD_DIR) -S Tests -G Ninja; fi
 	ninja -C $(TEST_BUILD_DIR)
 	cd $(TEST_BUILD_DIR) && ctest --output-on-failure
 

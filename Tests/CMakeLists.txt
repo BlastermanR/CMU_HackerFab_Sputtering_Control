@@ -38,13 +38,13 @@ set(PROJECT_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/..)
 
 set(COMMON_INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/mocks          # Pico stubs & GMock mocks
-    ${PROJECT_ROOT}/include                     # Project headers
-    ${PROJECT_ROOT}/include/core0
-    ${PROJECT_ROOT}/include/core1
-    ${PROJECT_ROOT}/include/shared
-    ${PROJECT_ROOT}/AlicatMFClib/include
-    ${PROJECT_ROOT}/Pfeifferlib/include
-    ${PROJECT_ROOT}/Pfeifferlib/include/Devices
+    "${PROJECT_ROOT}/include"                     # Project headers
+    "${PROJECT_ROOT}/include/core0"
+    "${PROJECT_ROOT}/include/core1"
+    "${PROJECT_ROOT}/include/shared"
+    ${PROJECT_ROOT}/DeviceLibraries/AlicatMFClib/include
+    ${PROJECT_ROOT}/DeviceLibraries/Pfeifferlib/include
+    ${PROJECT_ROOT}/DeviceLibraries/Pfeifferlib/include/Devices
     ${PROJECT_ROOT}/SerialDeviceLibrary/include
     ${PROJECT_ROOT}/UARTLibrary/include
     ${PROJECT_ROOT}/DisplayLibrary/include
@@ -58,8 +58,8 @@ target_include_directories(pico_stubs PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/mocks)
 # ── Test subdirectories ──────────────────────────────────────────────────────
 # Sub-library tests live alongside their library source code and support
 # standalone builds.  The top-level build pulls them in here.
-add_subdirectory(${PROJECT_ROOT}/AlicatMFClib/tests  ${CMAKE_BINARY_DIR}/AlicatMFClib_tests)
-add_subdirectory(${PROJECT_ROOT}/Pfeifferlib/tests    ${CMAKE_BINARY_DIR}/Pfeifferlib_tests)
+add_subdirectory(${PROJECT_ROOT}/DeviceLibraries/AlicatMFClib/tests  ${CMAKE_BINARY_DIR}/AlicatMFClib_tests)
+add_subdirectory(${PROJECT_ROOT}/DeviceLibraries/Pfeifferlib/tests    ${CMAKE_BINARY_DIR}/Pfeifferlib_tests)
 add_subdirectory(shared)
 
 add_test(

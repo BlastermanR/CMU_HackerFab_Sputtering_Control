@@ -166,11 +166,11 @@ def main() -> int:
     if total_ram_capacity is not None and total_ram_used is not None:
         print(f" SRAM Capacity:            {format_bytes(total_ram_capacity)}")
         print(f" SRAM Used:                {format_bytes(total_ram_used)}")
-        print(f"   ├─ Static / Globals:    {format_bytes(total_static_ram)}")
-        print(f"   │    ├─ .data:          {format_bytes(data_size)}")
-        print(f"   │    └─ .bss:           {format_bytes(bss_size)}")
+        print(f"   +-- Static / Globals:    {format_bytes(total_static_ram)}")
+        print(f"   |    +-- .data:          {format_bytes(data_size)}")
+        print(f"   |    `-- .bss:           {format_bytes(bss_size)}")
         if stack_top is not None and stack_bottom is not None:
-            print(f"   └─ Main Stack:          {format_bytes(stack_top - stack_bottom)}")
+            print(f"   `-- Main Stack:          {format_bytes(stack_top - stack_bottom)}")
         else:
             print("   └─ Stack symbols not found.")
         print(f" SRAM Remaining (Heap):    {format_bytes(sram_remaining)}")
