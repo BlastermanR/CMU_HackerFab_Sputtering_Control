@@ -16,6 +16,7 @@
 #include "PfeifferPump.h"
 #include "RS232Device.h"
 #include "RS485Device.h"
+#include "SputteringConfig.h"
 #include "USBSerial.h"
 #include "pico/multicore.h"
 #include "pico/stdlib.h"
@@ -63,6 +64,7 @@ int main()
 
     // Initialize inter-core queues before launching Core 1
     initQueues();
+    SputteringProcess::init();
     printf("Intercore Queues Initialized!\n");
 
     // Launch Core 1
