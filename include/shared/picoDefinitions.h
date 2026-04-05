@@ -10,8 +10,15 @@
 
 #include "hardware/pio.h"
 
+// Raspberry Pi Pico 2 memory constants
+#define PICO2_FLASH_BYTES 4194304
+#define PICO2_SRAM_BYTES  532480
+
 // Debug Status
 #define DEBUG // Enables debug functionality
+
+/* Hardware Values*/
+
 
 /* Port Definitions */
 // Display Definitions
