@@ -7,18 +7,19 @@
  */
 
 #include "PfeifferPump.h"
-#include "USBSerial.h"
 #include "pico/stdlib.h"
 #include "picoDefinitions.h"
+#include <cstdio>
 #include <cstdlib>
-#include <stdio.h>
+
+static constexpr int kDbgBufLen = 64;
 
 void PfeifferPump::sendMessage(const char *message)
 {
     {
-        char _dbg[OUTPUT_MSG_TEXT_LEN];
+        char _dbg[kDbgBufLen];
         snprintf(_dbg, sizeof(_dbg), "Pump TX: %s", message);
-        USBSerial::log(Source_Core0, _dbg, V_DEBUG);
+        printf("%s\n", _dbg);
     }
     serialPort->send(message);
 }
@@ -52,9 +53,9 @@ void PfeifferPump::update()
         }
 
         {
-            char _dbg[OUTPUT_MSG_TEXT_LEN];
+            char _dbg[kDbgBufLen];
             snprintf(_dbg, sizeof(_dbg), "Pump RX: %s", response.c_str());
-            USBSerial::log(Source_Core0, _dbg, V_DEBUG);
+            printf("%s\n", _dbg);
         }
 
         // Parse and validate the Pfeiffer protocol frame
@@ -64,9 +65,9 @@ void PfeifferPump::update()
 
         if (!valid)
         {
-            char _dbg[OUTPUT_MSG_TEXT_LEN];
+            char _dbg[kDbgBufLen];
             snprintf(_dbg, sizeof(_dbg), "Pump RX parse failed: %s", response.c_str());
-            USBSerial::log(Source_Core0, _dbg, V_DEBUG);
+            printf("%s\n", _dbg);
             continue;
         }
 
@@ -74,9 +75,9 @@ void PfeifferPump::update()
         if (command.action == ERROR_RESPONSE || (command.action == DATA_RESPONSE && command.data.size() == 6 &&
             (command.data == "NO_DEF" || command.data == "_RANGE" || command.data == "_LOGIC")))
         {
-            char _dbg[OUTPUT_MSG_TEXT_LEN];
+            char _dbg[kDbgBufLen];
             snprintf(_dbg, sizeof(_dbg), "Pump RX error (param %s): %s", command.paramNum.c_str(), command.data.c_str());
-            USBSerial::log(Source_Core0, _dbg, V_DEBUG);
+            printf("%s\n", _dbg);
             continue;
         }
 
@@ -97,9 +98,9 @@ void PfeifferPump::update()
                     actualPumpSpeed_hz = speed;
                     newDataFlag = true;
                     {
-                        char _dbg[OUTPUT_MSG_TEXT_LEN];
+                        char _dbg[kDbgBufLen];
                         snprintf(_dbg, sizeof(_dbg), "Pump speed: %.2f Hz", actualPumpSpeed_hz);
-                        USBSerial::log(Source_Core0, _dbg, V_DEBUG);
+                        printf("%s\n", _dbg);
                     }
                 }
             }

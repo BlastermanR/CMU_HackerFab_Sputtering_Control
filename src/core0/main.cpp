@@ -1,277 +1,129 @@
 /**
  * @file main.cpp
- * @brief Main entry point for the Sputtering system on Core 0.
+ * @brief SputterOS entry point for the CMU HackerFab sputtering system.
+ *
+ * Wires the SputterOS kernel using `SystemBuilder<SputteringCfg>` and
+ * launches the dual-core scheduler via `multicore_launch_core1` + `System::run`.
+ *
+ * Core 0 — `ScheduledControlTask`: safety monitors → device polling → process logic.
+ * Core 1 — `ScheduledCommsTask`: USB byte ingestion → command parsing → queue push.
+ *           `BackgroundDiagnosticsTask`: watchdog kick, timing budgets, memory profiling.
+ *
+ * Serial command wire format (TEXT mode):
+ *   `<CmdID> <targetDevice> <value>\n`
+ *
+ * CmdID values are defined in `SputteringCfg::CmdID`.
  *
  * @author Ryan Massie (rmassie)
- * @date 3/4/26
+ * @date 4/16/26
  */
 
-#include "AlicatMFC.h"
-#include "Core1Main.h"
 #include "GlobalDevices.h"
-#include "HardwareUART.h"
-#include "Intercore.h"
-#include "PIO_UART.h"
-#include "PfeifferGauge.h"
-#include "PfeifferPump.h"
-#include "RS232Device.h"
-#include "RS485Device.h"
-#include "SputteringConfig.h"
-#include "USBSerial.h"
+#include "SafetyMonitors.h"
+#include "SputteringApp.h"
+#include "SputteringCfg.h"
+#include "USBStream.h"
+#include "osal/PicoMutex.h"
+#include "sputteros/builder/SystemBuilder.h"
+#include "sputteros/kernel/System.h"
+#include "hardware/watchdog.h"
 #include "pico/multicore.h"
 #include "pico/stdlib.h"
 #include "pico/time.h"
-#include "picoDefinitions.h"
-#include <cstring>
-#include <stdio.h>
+#include <array>
+#include <cstdio>
 
-// Enable for serial testing
-#define SERIAL_DEBUG
+// ---------------------------------------------------------------------------
+// Telemetry drain — writes bytes from TelemetryLogger to USB stdout.
+// ---------------------------------------------------------------------------
 
-volatile bool processUpdateFlag = false;
-
-// Interrupt based timer callback
-bool update_timer_callback(struct repeating_timer *t)
+static void usbTelemetryWrite(const uint8_t *data, std::size_t len, void * /*ctx*/)
 {
-    processUpdateFlag = true;
-    return true; // Return true to keep the timer repeating
+    fwrite(data, 1, len, stdout);
 }
+
+// ---------------------------------------------------------------------------
+// Platform clock source
+// ---------------------------------------------------------------------------
+
+static uint64_t picoGetTimeMicros()
+{
+    return to_us_since_boot(get_absolute_time());
+}
+
+// ---------------------------------------------------------------------------
+// main
+// ---------------------------------------------------------------------------
 
 int main()
 {
-    /*********** Initialzation Space ***********/
+    /****** Platform Initialisation ******/
 
-    // Enable IO
     stdio_init_all();
 
-    // Wait for USB connection to be active before printing
-    // This ensures the user sees the banner in the terminal
+    // Wait for USB host to connect so the startup banner is visible.
     while (!stdio_usb_connected())
     {
         sleep_ms(100);
     }
 
     printf("========================================\n");
-    printf("  CMU HackerFab Sputtering Control v0.1\n");
+    printf("  CMU HackerFab Sputtering Control v0.2\n");
+    printf("         Powered by SputterOS\n");
     printf("========================================\n");
-    printf("   ____ __  __ _    _  _ \n");
-    printf("  / ___|  \\/  | |  | || |\n");
-    printf(" | |   | |\\/| | |  | || |\n");
-    printf(" | |___| |  | | |__| ||_|\n");
-    printf("  \\____|_|  |_|\\____/ (_) \n");
-    printf("========================================\n");
-    printf("System IO Intialiazed!\n");
 
-    // Initialize inter-core queues before launching Core 1
-    initQueues();
-    SputteringProcess::init();
-    printf("Intercore Queues Initialized!\n");
+    /****** Hardware Watchdog ******/
 
-    // Launch Core 1
-    printf("Launching Core 1; Handing off control. buh bye! \n");
+    // 2-second timeout, pause watchdog during debug.
+    watchdog_enable(2000, true);
 
-    /*********** Multicore Barrier ***********/
-    multicore_launch_core1(core1_entry);
+    /****** HAL Construction ******/
 
-    /**
-     * Initialize Devices
-     */
-    USBSerial::log(Source_Core0, "Initializing devices", V_INFO);
-    mfc1.init();
-    mfc1.setGas(ALICAT_GAS_O2);
-    USBSerial::log(Source_Core0, "MFC1 initialized to Oxygen", V_DEBUG);
-    mfc2.init();
-    mfc2.setGas(ALICAT_GAS_AR);
-    USBSerial::log(Source_Core0, "MFC2 initialized to Argon", V_DEBUG);
-    gauge.init();
-    USBSerial::log(Source_Core0, "Gauge initialized", V_DEBUG);
-    pump.init();
-    USBSerial::log(Source_Core0, "Pump initialized", V_DEBUG);
+    USBStream usbStream;
 
-    // Signal Core 0 initialization complete
-    setStatus(Core0_Begin);
-    USBSerial::log(Source_Core0, "Core 0 initialized, waiting for Core 1", V_INFO);
+    /****** Safety Monitor Construction ******/
 
-    // Wait for Core 1 to signal ready
+    // gauge and pump are the global device instances from GlobalDevices.cpp.
+    OverPressureMonitor pressureMonitor(&gauge);
+    PumpHealthMonitor   pumpMonitor(&pump);
+
+    std::array<SputterOS::ISafetyMonitor *, 2> monitors = {&pressureMonitor, &pumpMonitor};
+
+    /****** Application Construction ******/
+
+    SputteringApp app;
+
+    /****** OSAL Mutex for shared TelemetryLogger ******/
+
+    PicoMutex telemetryMutex;
+
+    /****** SystemBuilder Wiring ******/
+
+    SputterOS::SystemBuilder<SputteringCfg> builder(&app, monitors.data(), monitors.size());
+
+    builder.setStream(&usbStream);
+    builder.setWatchdogKick([]() { watchdog_update(); });
+    builder.setClockSource(picoGetTimeMicros);
+    builder.setTelemetryDrain(usbTelemetryWrite, nullptr);
+    builder.setTelemetryMutex(&telemetryMutex);
+
+    const SputterOS::BuildResult result = builder.build();
+    if (!result)
     {
-        uint64_t handshakeStart = get_absolute_time();
-        while (!getStatus(Core1_Begin))
+        printf("[FATAL] SputterOS build failed: %s\n", result.error);
+        while (true)
         {
-            if ((get_absolute_time() - handshakeStart) >= (uint64_t)HANDSHAKE_TIMEOUT_MS * 1000)
-            {
-                printf("Handshake Error: Core 1 handshake timeout!\n"); // Ensure Print to terminal
-                setStatus(Status_Core1Err);
-                break;
-            }
             tight_loop_contents();
         }
     }
 
-    if (isError())
-    {
-        USBSerial::log(Source_Core0, "Core 1 error, emergency shutdown (Not implemented)[]", V_CRITICAL);
-        return 1;
-    }
+    printf("SputterOS kernel built. Launching Core 1...\n");
 
-    USBSerial::log(Source_Core0, "Core 1 ready, entering main loop", V_INFO);
+    /****** Dual-Core Launch ******/
 
-    // Setup an interrupt based timer update for non-sleep polling (5ms)
-    struct repeating_timer timer;
-    add_repeating_timer_ms(5, update_timer_callback, NULL, &timer);
+    // Core 1: ScheduledCommsTask + BackgroundDiagnosticsTask.
+    multicore_launch_core1([]() { SputterOS::System<SputteringCfg>::run(1); });
 
-    {
-        bool run{true};
-
-        while (run)
-        {
-            StatusMask activeCmd = isCommand();
-
-            if (activeCmd != Status_None)
-            {
-                switch (activeCmd)
-                {
-                case ExecuteSputteringProcess:
-                {
-                    USBSerial::log(Source_Core0, "Entering control loop (Not Implemented)", V_INFO);
-                    clearStatus(ExecuteSputteringProcess);
-                    USBSerial::log(Source_Core0, "Exited control loop", V_INFO);
-                    break;
-                }
-
-                case ExecuteCleaningProcess:
-                {
-                    USBSerial::log(Source_Core0, "Entering cleaning loop (Not Implemented)", V_INFO);
-                    clearStatus(ExecuteCleaningProcess);
-                    USBSerial::log(Source_Core0, "Exited cleaning loop", V_INFO);
-                    break;
-                }
-
-                case PressurizeChamber:
-                {
-                    USBSerial::log(Source_Core0, "Activating pump", V_INFO);
-                    pump.activatePump();
-                    clearStatus(PressurizeChamber);
-                    break;
-                }
-
-                case VentChamber:
-                {
-                    USBSerial::log(Source_Core0, "Venting chamber", V_INFO);
-                    pump.deactivatePump();
-                    pump.ventPump();
-                    clearStatus(VentChamber);
-                    break;
-                }
-
-                case ShutOffGasFlow:
-                {
-                    USBSerial::log(Source_Core0, "Shutting off gas flow", V_INFO);
-                    mfc1.setSetpoint(0);
-                    mfc2.setSetpoint(0);
-                    clearStatus(ShutOffGasFlow);
-                    break;
-                }
-
-                case SetArgonFlow:
-                {
-                    char buf[64];
-                    snprintf(buf, sizeof(buf), "Set Argon Flow to %.2f", sharedData.Core1Out.setArgonFlow);
-                    USBSerial::log(Source_Core0, buf, V_INFO);
-                    mfc2.setSetpoint(sharedData.Core1Out.setArgonFlow);
-                    clearStatus(SetArgonFlow);
-                    break;
-                }
-
-                case SetOxygenFlow:
-                {
-                    char buf[64];
-                    snprintf(buf, sizeof(buf), "Set Oxygen Flow to %.2f", sharedData.Core1Out.setOxygenFlow);
-                    USBSerial::log(Source_Core0, buf, V_INFO);
-                    mfc1.setSetpoint(sharedData.Core1Out.setOxygenFlow);
-                    clearStatus(SetOxygenFlow);
-                    break;
-                }
-
-                case SetPumpSpeed:
-                {
-                    USBSerial::log(Source_Core0, "SetPumpSpeed command received (Not implemented)", V_INFO);
-                    clearStatus(SetPumpSpeed);
-                    break;
-                }
-
-                case EnablePump:
-                {
-                    USBSerial::log(Source_Core0, "EnablePump command received", V_INFO);
-                    pump.activatePump();
-                    clearStatus(EnablePump);
-                    break;
-                }
-
-                case DisablePump:
-                {
-                    USBSerial::log(Source_Core0, "DisablePump command received", V_INFO);
-                    pump.deactivatePump();
-                    clearStatus(DisablePump);
-                    break;
-                }
-
-                default:
-                    break;
-                }
-            }
-
-            // Check for exit
-            run = !(getStatus(Status_Core1Err) || getStatus(Status_Exit));
-
-            if (processUpdateFlag)
-            {
-                processUpdateFlag = false;
-
-                // Continually process incoming hardware serial bytes and send telemetry
-                mfc1.update();
-                if (mfc1.hasNewData())
-                {
-                    sharedData.Core0Out.oxygenFlow = (float)mfc1.getMassFlow();
-                    USBSerial::sendData(Source_Core0, Data_OxygenFlow, (float)mfc1.getMassFlow());
-                }
-                
-                mfc2.update();
-                if (mfc2.hasNewData())
-                {
-                    sharedData.Core0Out.argonFlow = (float)mfc2.getMassFlow();
-                    USBSerial::sendData(Source_Core0, Data_ArgonFlow, (float)mfc2.getMassFlow());
-                }
-
-                gauge.update();
-                if (gauge.hasNewData())
-                {
-                    sharedData.Core0Out.chamberPressure = (float)gauge.getPressure();
-                    USBSerial::sendData(Source_Core0, Data_ChamberPressure, (float)gauge.getPressure());
-                }
-
-                pump.update();
-                if (pump.hasNewSpeedData())
-                {
-                    sharedData.Core0Out.actualPumpSpeed = (float)pump.getActualPumpSpeed_hz();
-                    USBSerial::sendData(Source_Core0, Data_PumpSpeed, (float)pump.getActualPumpSpeed_hz());
-                }
-            }
-
-            // Yield slightly without sleeping the core, allowing interrupts to process
-            tight_loop_contents();
-        }
-    }
-
-    /**
-     * Shutdown Procedure
-     */
-
-    if (getStatus(Status_Core1Err))
-    {
-        USBSerial::log(Source_Core0, "Core 1 error, emergency shutdown (Not implemented)[]", V_CRITICAL);
-    }
-    else
-    {
-        USBSerial::log(Source_Core0, "Normal shutdown initiated (Not implemented)", V_STATUS);
-    }
+    // Core 0: ScheduledControlTask (blocks until a stop condition fires).
+    SputterOS::System<SputteringCfg>::run(0);
 }

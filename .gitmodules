@@ -1,0 +1,3 @@
+[submodule "lib/SputterOS"]
+	path = lib/SputterOS
+	url = https://github.com/BlastermanR/SputterOS

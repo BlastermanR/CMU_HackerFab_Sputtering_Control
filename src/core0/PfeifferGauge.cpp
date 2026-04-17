@@ -7,14 +7,15 @@
  */
 
 #include "PfeifferGauge.h"
-#include "USBSerial.h"
 #include "hardware/gpio.h"
 #include "hardware/timer.h"
 #include "math.h"
 #include "pico/stdlib.h"
 #include "picoDefinitions.h"
-#include <stdio.h>
+#include <cstdio>
 #include <string>
+
+static constexpr int kDbgBufLen = 64;
 
 PfeifferGauge::PfeifferGauge(ISerialDevice *dev) : serialPort(dev), gaugeDef(PFEIFFER_GAUGE_ADDRESS) {}
 
@@ -49,9 +50,9 @@ void PfeifferGauge::update()
         }
 
         {
-            char _dbg[OUTPUT_MSG_TEXT_LEN];
+            char _dbg[kDbgBufLen];
             snprintf(_dbg, sizeof(_dbg), "Gauge RX: %s", response.c_str());
-            USBSerial::log(Source_Core0, _dbg, V_DEBUG);
+            printf("%s\n", _dbg);
         }
 
         bool            valid = false;
@@ -60,9 +61,9 @@ void PfeifferGauge::update()
 
         if (!valid)
         {
-            char _dbg[OUTPUT_MSG_TEXT_LEN];
+            char _dbg[kDbgBufLen];
             snprintf(_dbg, sizeof(_dbg), "Gauge RX parse failed: %s", response.c_str());
-            USBSerial::log(Source_Core0, _dbg, V_DEBUG);
+            printf("%s\n", _dbg);
             continue;
         }
 
@@ -70,9 +71,9 @@ void PfeifferGauge::update()
         if (command.action == ERROR_RESPONSE || (command.action == DATA_RESPONSE && command.data.size() == 6 &&
             (command.data == "NO_DEF" || command.data == "_RANGE" || command.data == "_LOGIC")))
         {
-            char _dbg[OUTPUT_MSG_TEXT_LEN];
+            char _dbg[kDbgBufLen];
             snprintf(_dbg, sizeof(_dbg), "Gauge RX error (param %s): %s", command.paramNum.c_str(), command.data.c_str());
-            USBSerial::log(Source_Core0, _dbg, V_DEBUG);
+            printf("%s\n", _dbg);
             continue;
         }
 
@@ -99,17 +100,17 @@ void PfeifferGauge::update()
                     newDataFlag = true;
 
                     {
-                        char _dbg[OUTPUT_MSG_TEXT_LEN];
+                        char _dbg[kDbgBufLen];
                         snprintf(_dbg, sizeof(_dbg), "Gauge pressure: %.4e hPa", chamberPressure_hPa);
-                        USBSerial::log(Source_Core0, _dbg, V_DEBUG);
+                        printf("%s\n", _dbg);
                     }
                 }
                 else
                 {
                     {
-                        char _dbg[OUTPUT_MSG_TEXT_LEN];
+                        char _dbg[kDbgBufLen];
                         snprintf(_dbg, sizeof(_dbg), "Gauge: Bad pressure data: %s", command.data.c_str());
-                        USBSerial::log(Source_Core0, _dbg, V_DEBUG);
+                        printf("%s\n", _dbg);
                     }
                 }
             }
@@ -137,9 +138,9 @@ void PfeifferGauge::pollDevice()
     std::string formattedCmd = PfeifferLib::formatCommand(&cmd, &valid);
 
     {
-        char _dbg[OUTPUT_MSG_TEXT_LEN];
+        char _dbg[kDbgBufLen];
         snprintf(_dbg, sizeof(_dbg), "PollDevice: cmd valid=%d, formatted='%s'", valid, formattedCmd.c_str());
-        USBSerial::log(Source_Core0, _dbg, V_DEBUG);
+        printf("%s\n", _dbg);
     }
     
     if (valid)
@@ -158,9 +159,9 @@ bool PfeifferGauge::hasNewData()
 void PfeifferGauge::sendMessage(const char *message)
 {
     {
-        char _dbg[OUTPUT_MSG_TEXT_LEN];
+        char _dbg[kDbgBufLen];
         snprintf(_dbg, sizeof(_dbg), "Gauge TX: %s", message);
-        USBSerial::log(Source_Core0, _dbg, V_DEBUG);
+        printf("%s\n", _dbg);
     }
     serialPort->send(message);
 }

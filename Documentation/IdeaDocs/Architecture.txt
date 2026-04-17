@@ -1,104 +1,133 @@
 ================================================================================
-                SputterOS v2 - SCALABLE SYSTEM ARCHITECTURE SPECIFICATION
+        SputterOS v0.5 - IMPLEMENTED SYSTEM ARCHITECTURE
 ================================================================================
-TARGET HARDWARE: Architecture Agnostic (Designed for RP2350 Pico 2 @ 125MHz)
-EXECUTION MODEL: Task-Based N-Core (Scalable from Single-Core to Quad-Core/RTOS)
-DESIGN PATTERN:  Hardware Abstraction Layer (HAL) + OS Abstraction Layer (OSAL)
+TARGET HARDWARE:  RP2350 (Pico 2) @ 150 MHz, dual Cortex-M33 cores
+EXECUTION MODEL:  Deterministic AMP — SputterOS kernel assigns tasks to cores
+FRAMEWORK:        SputterOS v0.5 (lib/SputterOS git submodule)
+BUILD SYSTEM:     CMake + Ninja, Pico SDK 2.2.0, C++17
 ================================================================================
 
-1. CORE ARCHITECTURAL PHILOSOPHY
+1. CORE ARCHITECTURE
 --------------------------------------------------------------------------------
-SputterOS operates on a strictly decoupled design. The core logic of the 
-sputtering machine (vacuum states, interlocks, gas flow) has zero knowledge of 
-the silicon it is running on. 
-- No direct hardware calls in the logic layer.
-- No hardcoded thread/core assignments in the task layer.
-- All hardware and system timing functions are injected as abstract interfaces 
-  via the HAL and OSAL.
+SputterOS provides a `SystemBuilder<Cfg>` pattern that wires tasks, safety
+monitors, and HAL bindings at compile time.  `System<Cfg>::run(coreId)` is the
+blocking scheduler entry point on each core.
 
-2. OS ABSTRACTION LAYER (OSAL)
+    Core 0 — ScheduledControlTask (100 Hz)
+        1. Evaluate ISafetyMonitor array → forceSafeAbort() on first failure.
+        2. Drain up to kMaxCommandsPerTick commands → handleCommand().
+        3. Call IUserApplication::tick() → device polling + process phase logic.
+
+    Core 1 — ScheduledCommsTask
+        Reads USB bytes via IStream, parses text commands into Cfg::Command
+        packets, pushes them to the kernel's lock-free queue.
+
+    Core 1 — BackgroundDiagnosticsTask
+        Drains TelemetryLogger ring buffer to USB, monitors timing budgets,
+        kicks the watchdog.
+
+2. CONFIGURATION (include/config/SputteringCfg.h)
 --------------------------------------------------------------------------------
-Purpose: Abstracts multitasking, memory protection, and inter-task communication.
-* IMessageQueue: Interface for passing `CommandStruct` packets between tasks.
-  -> Implementations: `PicoHardwareFIFO` (Dual-core), `RamQueue` (Single-core), 
-     or `FreeRTOSQueue` (RTOS).
-* IMutex: Interface for protecting shared state variables.
-  -> Implementations: `PicoSpinlock`, `InterruptDisable` (Single-core), or 
-     `FreeRTOSMutex`.
-* ITask: Base interface for all system loops. Requires `init()` and `tick()`.
+Satisfies the SputterOS ConfigTraits contract:
+    State enum:   IDLE(0), PUMP_DOWN(1), PURGE(2), IGNITION(3),
+                  DEPOSITING(4), VENTING(5), FAULT(6)
+    CmdID enum:   SET_STATE(0), ABORT(1), SET_ARGON_FLOW(2),
+                  SET_OXYGEN_FLOW(3), SET_PUMP_SPEED(4), SET_VERBOSITY(5)
+    Command:      { CmdID id; uint8_t targetDevice; float value; }
+    Constants:    kCoreCount=2, kQueueCapacity=16, kControlBudgetUs=10000
 
-3. RUNNABLE TASKS (Replaces Core 0 / Core 1 concept)
+3. USER APPLICATION (src/SputteringApp.cpp)
 --------------------------------------------------------------------------------
-Tasks are independent while-loops that process specific domains. The System 
-Builder (`main.cpp`) assigns these tasks to physical cores or RTOS threads at 
-compile time.
+Implements IUserApplication<SputteringCfg>:
+    init()           — Configures MFC gas types (O2, Ar), gauge, pump.
+    tick()           — Polls all devices, delegates to active IProcessState.
+    handleCommand()  — Routes SET_STATE → transitionTo(), ABORT → forceSafeAbort(),
+                       SET_ARGON_FLOW → mfc2.setSetpoint(), etc.
+    forceSafeAbort() — Gas off, pump off, set FAULT, clear active phase.
+    transitionTo()   — Calls onExit/onEnter on phase objects, updates state.
 
-* CommsTask (External Communications): 
-  Listens to the `IStreamReader` (USB/UART/Network). Parses strings into typed 
-  commands, and pushes them to the shared `IMessageQueue`.
-* ControlTask (Hardware Control & State Machine): 
-  Pops commands from the `IMessageQueue`. Evaluates the Sputtering State 
-  Machine, updates PID loops, and toggles hardware via the HAL.
-* DiagnosticsTask (Watchdog & Logging): 
-  Monitors task execution times, maintains the Ring Buffer of system events, 
-  and handles safe-state defaulting if an unrecoverable error occurs.
-
-4. HARDWARE ABSTRACTION LAYER (HAL)
+4. PROCESS PHASES (src/logic/ProcessPhases.cpp)
 --------------------------------------------------------------------------------
-Purpose: Wraps physical pins, ADCs, and I2C buses into logical interfaces.
-* IVacuumGauge -> Implementations: `AnalogPiraniGauge`, `I2CDigitalGauge`
-* IMassFlowController -> Implementations: `PWMMassFlow`, `SerialMFC`
-* IPowerSupply -> Implementations: `DCPowerSupply`, `RFPulseGenerator`
-* IRelay -> Implementations: `GPIOPneumaticValve`, `SolidStateRelay`
+Each phase implements IProcessState { onEnter(), execute(), onExit() }:
 
-5. SYSTEM LOGIC (State Machine & Interlocks)
+    PumpDownPhase    — signalPumpOn(), wait for pressure ≤ 0.1 hPa or 120s timeout.
+    PurgePhase       — Set argon to 50 sccm, wait 30s.
+    IgnitionPhase    — Set argon to 20 sccm, wait 15s. @todo: RF power.
+    DepositingPhase  — Set argon to 15 sccm, wait 60s. Shuts off gas on exit.
+    VentingPhase     — Gas off, pump off, ventPump(), wait for ≥ 900 hPa or 120s.
+
+    State transitions call SputteringApp::transitionTo().
+    Timeouts cause a FAULT transition (PumpDown) or IDLE (Venting).
+
+5. SAFETY MONITORS (include/safety/SafetyMonitors.h)
 --------------------------------------------------------------------------------
-* InterlockManager [CRITICAL]: 
-  Injected with HAL sensor interfaces. Continuously polls bounds (e.g., Pressure 
-  < 5e-3 Torr). If a soft interlock trips, forces the State Machine to a safe 
-  phase and commands all `IRelay` devices to their fail-safe states.
-* Sputtering State Machine: 
-  A strictly defined phase sequence (IDLE -> ROUGH_PUMPING -> HIGH_VAC_PUMPING 
-  -> GAS_STABILIZATION -> IGNITE_PLASMA -> DEPOSITION -> VENTING). Governed 
-  by an absolute-time task scheduler to remain non-blocking.
+    OverPressureMonitor — isSafe() when gauge.getPressure() ≤ threshold (10 hPa).
+    PumpHealthMonitor   — isSafe() always true; pump driver has no fault pin yet.
+
+    Monitors are evaluated by ControlTask BEFORE every app tick.  First failure
+    triggers IUserApplication::forceSafeAbort().
+
+6. HAL & OSAL BINDINGS
+--------------------------------------------------------------------------------
+    USBStream     (include/hal/)   — IStream wrapping Pico SDK stdio USB.
+    PicoMutex     (include/osal/)  — IMutex wrapping Pico SDK mutex_t.
+
+7. DEVICE DRIVERS (src/core0/, include/core0/)
+--------------------------------------------------------------------------------
+    AlicatMFC      — RS-232 Alicat mass flow controller (PIO UART).
+    PfeifferGauge  — RS-485 Pfeiffer MPT200 pressure gauge (hardware UART).
+    PfeifferPump   — RS-485 Pfeiffer TC110 turbo pump (hardware UART).
+
+    Global instances defined in GlobalDevices.cpp:
+        mfc1 (O2), mfc2 (Ar), gauge, pump.
+
+8. ENTRY POINT (src/core0/main.cpp)
+--------------------------------------------------------------------------------
+    1. stdio_init_all(), wait for USB connection.
+    2. Construct USBStream, SafetyMonitors, SputteringApp, PicoMutex.
+    3. SystemBuilder<SputteringCfg>::build() — wires stream, clock source,
+       telemetry drain, mutex, safety monitors, and application.
+    4. multicore_launch_core1( System::run(1) ).
+    5. System::run(0) — blocks forever on Core 0 scheduler.
 
 ================================================================================
                         PROJECT DIRECTORY STRUCTURE
 ================================================================================
 
-SputterOS/
-├── CMakeLists.txt
+CMU_HackerFab_Sputtering_Control/
+├── CMakeLists.txt                       # Top-level build
+├── lib/SputterOS/                       # SputterOS v0.5 submodule
 ├── include/
-│   ├── config/
-│   │   ├── BoardConfig.h         # Pinouts and hardware limits (Target Specific)
-│   │   └── SystemConfig.h        # Command Enums, Event Structs
-│   │
-│   ├── osal/                     # OS Abstraction Layer
-│   │   ├── IMutex.h
-│   │   ├── IMessageQueue.h
-│   │   ├── ITask.h
-│   │   └── implementations/      # e.g., PicoHardwareFIFO.h, PicoSpinlock.h
-│   │
-│   ├── hal/                      # Hardware Abstraction Layer
-│   │   ├── interfaces/           # IVacuumGauge.h, IRelay.h, etc.
-│   │   └── implementations/      # AnalogPiraniGauge.h, GPIORelay.h
-│   │
-│   ├── tasks/                    # Runnable Task Logic
-│   │   ├── CommsTask.h           
-│   │   ├── ControlTask.h         
-│   │   └── DiagnosticsTask.h     
-│   │
-│   └── logic/                    # Core Sputtering Intelligence
-│       ├── StateMachine.h
-│       ├── InterlockManager.h
-│       └── CommandParser.h
-│
-└── src/
-    ├── main.cpp                  # System Builder: Maps Tasks to physical Cores
-    ├── osal/                     # OSAL implementations
-    ├── hal/                      # HAL implementations
-    ├── tasks/                    # Task implementations
-    └── logic/                    # State Machine and Interlock implementations
+│   ├── config/SputteringCfg.h           # Compile-time configuration
+│   ├── hal/USBStream.h                  # IStream implementation
+│   ├── safety/SafetyMonitors.h          # ISafetyMonitor implementations
+│   ├── osal/PicoMutex.h                 # IMutex implementation
+│   ├── logic/ProcessPhases.h            # IProcessState phase declarations
+│   ├── SputteringApp.h                  # IUserApplication declaration
+│   ├── core0/                           # Device driver headers
+│   │   ├── AlicatMFC.h
+│   │   ├── GlobalDevices.h
+│   │   ├── IDevice.h
+│   │   ├── PfeifferGauge.h
+│   │   └── PfeifferPump.h
+│   └── shared/
+│       └── picoDefinitions.h            # Pin/memory constants
+├── src/
+│   ├── core0/main.cpp                   # SputterOS entry point
+│   ├── core0/GlobalDevices.cpp          # Global device definitions
+│   ├── core0/AlicatMFC.cpp              # MFC driver
+│   ├── core0/PfeifferGauge.cpp          # Gauge driver
+│   ├── core0/PfeifferPump.cpp           # Pump driver
+│   ├── hal/USBStream.cpp                # IStream implementation
+│   ├── logic/ProcessPhases.cpp          # Phase state machines
+│   └── SputteringApp.cpp                # IUserApplication implementation
+├── tests/
+│   ├── CMakeLists.txt                   # Host-native GTest build
+│   ├── mocks/                           # Pico SDK stubs, GMock mocks
+│   └── shared/                          # Unit test suites
+├── DeviceLibraries/                     # AlicatMFClib, Pfeifferlib
+├── SerialDeviceLibrary/                 # RS-232/485 abstractions
+└── UARTLibrary/                         # PIO + hardware UART wrappers
 
 ================================================================================
 END OF SPECIFICATION

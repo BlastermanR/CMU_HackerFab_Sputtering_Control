@@ -108,6 +108,14 @@ class PfeifferGauge : public IDevice
      * @return The latest chamber pressure value
      */
     double getPressure() { return chamberPressure_hPa; }
+
+#ifdef PICO_TESTING
+    /**
+     * @brief Directly set internal pressure for unit testing.
+     * @param hPa Pressure value in hectopascals.
+     */
+    void setPressureForTest(double hPa) { chamberPressure_hPa = hPa; }
+#endif
 };
 
 #endif // PFEIFFER_GAUGE_H

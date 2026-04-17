@@ -36,54 +36,79 @@ project(SputteringACS C CXX ASM)
 # Initialise the Raspberry Pi Pico SDK
 pico_sdk_init()
 
-# Include Libraries
+# ---------------------------------------------------------------------------
+# SputterOS framework (v0.5)
+# ---------------------------------------------------------------------------
+add_subdirectory(lib/SputterOS)
+
+# ---------------------------------------------------------------------------
+# Device and platform libraries
+# ---------------------------------------------------------------------------
 include(${CMAKE_SOURCE_DIR}/DeviceLibraries/AlicatMFClib/AlicatMFClib.cmake)
 include(${CMAKE_SOURCE_DIR}/UARTLibrary/UARTLibrary.cmake)
-include(${CMAKE_SOURCE_DIR}/USBSerialLibrary/USBSerialLibrary.cmake)
 include(${CMAKE_SOURCE_DIR}/DeviceLibraries/Pfeifferlib/PfeifferLibrary.cmake)
 include(${CMAKE_SOURCE_DIR}/SerialDeviceLibrary/SerialDeviceLibrary.cmake)
-include(${CMAKE_SOURCE_DIR}/DisplayLibrary/WaveshareDisplayLibrary.cmake)
 
-# Use GLOB_RECURSE to gather files from subdirectories
-file(GLOB_RECURSE SOURCES "${CMAKE_SOURCE_DIR}/src/*.cpp")
+# ---------------------------------------------------------------------------
+# Source collection
+#
+# Excludes legacy src/core1/ and src/shared/ (replaced by SputterOS).
+# ---------------------------------------------------------------------------
+file(GLOB SOURCES_CORE0  "${CMAKE_SOURCE_DIR}/src/core0/*.cpp")
+file(GLOB SOURCES_HAL    "${CMAKE_SOURCE_DIR}/src/hal/*.cpp")
+file(GLOB SOURCES_LOGIC  "${CMAKE_SOURCE_DIR}/src/logic/*.cpp")
 
-# Add executable.
+set(SOURCES
+    ${SOURCES_CORE0}
+    ${SOURCES_HAL}
+    ${SOURCES_LOGIC}
+    "${CMAKE_SOURCE_DIR}/src/SputteringApp.cpp"
+)
+
+# ---------------------------------------------------------------------------
+# Executable
+# ---------------------------------------------------------------------------
 add_executable(SputteringACS ${SOURCES})
 
-# Set name (Change if desired)
 pico_set_program_name(SputteringACS "SputteringACS")
+pico_set_program_version(SputteringACS "0.2")
 
-# Set version
-pico_set_program_version(SputteringACS "0.1")
-
-# Modify the below lines to enable/disable output over UART/USB
 pico_enable_stdio_uart(SputteringACS 0)
 pico_enable_stdio_usb(SputteringACS 1)
 
-# Add the link libraries to the executable
-target_link_libraries(SputteringACS PRIVATE
-        # Custom Libs
-        USBSerial
-        UARTInterface
-        AlicatMFClib
-        Pfeifferlib
-        SerialDeviceLibrary
-        WaveshareDisplayLibrary
-
-        # Pico Libs
-        pico_stdlib
-        pico_multicore
-        hardware_uart
-        hardware_pio
-        hardware_irq
-    )
-
-# Add the standard include files to the build
+# ---------------------------------------------------------------------------
+# Include directories
+# ---------------------------------------------------------------------------
 target_include_directories(SputteringACS PRIVATE
-        "${CMAKE_SOURCE_DIR}/include"
-        "${CMAKE_SOURCE_DIR}/include/core0"
-        "${CMAKE_SOURCE_DIR}/include/core1"
-        "${CMAKE_SOURCE_DIR}/include/shared"
+    ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_SOURCE_DIR}/include/config
+    ${CMAKE_SOURCE_DIR}/include/hal
+    ${CMAKE_SOURCE_DIR}/include/safety
+    ${CMAKE_SOURCE_DIR}/include/osal
+    ${CMAKE_SOURCE_DIR}/include/logic
+    ${CMAKE_SOURCE_DIR}/include/core0
+    ${CMAKE_SOURCE_DIR}/include/shared
+)
+
+# ---------------------------------------------------------------------------
+# Link libraries
+# ---------------------------------------------------------------------------
+target_link_libraries(SputteringACS PRIVATE
+    # SputterOS framework
+    SputterOS
+
+    # Device drivers
+    UARTInterface
+    AlicatMFClib
+    Pfeifferlib
+    SerialDeviceLibrary
+
+    # Pico SDK
+    pico_stdlib
+    pico_multicore
+    hardware_uart
+    hardware_pio
+    hardware_irq
 )
 
 pico_add_extra_outputs(SputteringACS)

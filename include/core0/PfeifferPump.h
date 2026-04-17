@@ -43,6 +43,9 @@ class PfeifferPump : public IDevice
     // Bool set when pump signal activation
     bool pumpActivated{false};
 
+    // Flag set when the pump reports an error condition
+    bool m_errorFlag{false};
+
     // Flag to indicate new data has arrived
     bool newDataFlag = false;
 
@@ -150,6 +153,20 @@ class PfeifferPump : public IDevice
      * @return Speed in hertz
      */
     double getPumpSpeed() { return actualPumpSpeed_hz; }
+
+    /**
+     * @brief Returns whether the pump is in an error state.
+     * @return true if the pump has reported an error condition.
+     */
+    bool hasError() const { return m_errorFlag; }
+
+#ifdef PICO_TESTING
+    /**
+     * @brief Override the error flag for unit testing.
+     * @param error Desired error state.
+     */
+    void setErrorForTest(bool error) { m_errorFlag = error; }
+#endif
 };
 
 #endif // PFEIFFER_PUMP_H

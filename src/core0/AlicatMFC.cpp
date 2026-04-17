@@ -7,11 +7,12 @@
  */
 
 #include "AlicatMFC.h"
-#include "USBSerial.h"
 #include "pico/stdlib.h"
 #include "picoDefinitions.h"
+#include <cstdio>
 #include <sstream>
-#include <stdio.h>
+
+static constexpr int kDbgBufLen = 64;
 
 AlicatMFC::AlicatMFC(ISerialDevice *dev, char id) : serialPort(dev), deviceId(id) {}
 
@@ -46,9 +47,9 @@ void AlicatMFC::update()
     {
         std::string msg = serialPort->popMessage();
         {
-            char _dbg[OUTPUT_MSG_TEXT_LEN];
+            char _dbg[kDbgBufLen];
             snprintf(_dbg, sizeof(_dbg), "MFC RX: %s", msg.c_str());
-            USBSerial::log(Source_Core0, _dbg, V_DEBUG);
+            printf("%s\n", _dbg);
         }
 
         // Handle message here
@@ -64,10 +65,10 @@ void AlicatMFC::update()
             // Log any status/error codes present in the frame
             for (const std::string &code : frame.statusCodes)
             {
-                char _dbg[OUTPUT_MSG_TEXT_LEN];
+                char _dbg[kDbgBufLen];
                 snprintf(_dbg, sizeof(_dbg), "MFC status: %s - %s", code.c_str(),
                          AlicatLib::getStatusDescription(code.c_str()));
-                USBSerial::log(Source_Core0, _dbg, V_STATUS);
+                printf("%s\n", _dbg);
             }
         }
     }
@@ -84,16 +85,16 @@ void AlicatMFC::sendCommand(const AlicatCommand &cmd)
     }
     else
     {
-        USBSerial::log(Source_Core0, "MFC: Error formatting command", V_DEBUG);
+        printf("MFC: Error formatting command\n");
     }
 }
 
 void AlicatMFC::sendMessage(const char *message)
 {
     {
-        char _dbg[OUTPUT_MSG_TEXT_LEN];
+        char _dbg[kDbgBufLen];
         snprintf(_dbg, sizeof(_dbg), "MFC TX: %s", message);
-        USBSerial::log(Source_Core0, _dbg, V_DEBUG);
+        printf("%s\n", _dbg);
     }
     serialPort->send(message);
 }
@@ -125,17 +126,17 @@ void AlicatMFC::setGas(uint8_t gasId)
 {
     if (!AlicatLib::isValidGasId(gasId))
     {
-        char _dbg[OUTPUT_MSG_TEXT_LEN];
+        char _dbg[kDbgBufLen];
         snprintf(_dbg, sizeof(_dbg), "MFC: Unknown gas ID %u", static_cast<unsigned>(gasId));
-        USBSerial::log(Source_Core0, _dbg, V_STATUS);
+        printf("%s\n", _dbg);
         return;
     }
 
     {
-        char _dbg[OUTPUT_MSG_TEXT_LEN];
+        char _dbg[kDbgBufLen];
         snprintf(_dbg, sizeof(_dbg), "MFC: Setting gas %u - %s (%s)", static_cast<unsigned>(gasId),
                  AlicatLib::getGasShortName(gasId), AlicatLib::getGasLongName(gasId));
-        USBSerial::log(Source_Core0, _dbg, V_STATUS);
+        printf("%s\n", _dbg);
     }
 
     AlicatCommand cmd;
